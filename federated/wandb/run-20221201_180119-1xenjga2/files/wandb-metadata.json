@@ -1,0 +1,28 @@
+{
+    "os": "Linux-4.15.0-197-generic-x86_64-with-glibc2.27",
+    "python": "3.9.12",
+    "heartbeatAt": "2022-12-02T02:01:19.909454",
+    "startedAt": "2022-12-02T02:01:19.500098",
+    "docker": null,
+    "gpu": "NVIDIA TITAN V",
+    "gpu_count": 2,
+    "cpu_count": 12,
+    "cuda": "9.0.176.2",
+    "args": [
+        "--mode",
+        "fedavg",
+        "--log"
+    ],
+    "state": "running",
+    "program": "/home/s.ayromlou/FedBN/federated/fed_Medical.py",
+    "codePath": "federated/fed_Medical.py",
+    "git": {
+        "remote": "https://github.com/med-air/FedBN.git",
+        "commit": "1caf83cf95e6859b712e1e80c8264009a5067162"
+    },
+    "email": null,
+    "root": "/home/s.ayromlou/FedBN",
+    "host": "purang30",
+    "username": "s.ayromlou",
+    "executable": "/home/s.ayromlou/miniconda3/bin/python"
+}
