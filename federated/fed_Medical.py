@@ -39,7 +39,7 @@ def prepare_data(args,c_num):
         test_loaders.append(torch.utils.data.DataLoader(testset, batch_size=args.batch, shuffle=False))
     if args.mode == 'virtual_data':
         anchor_dataset = BloodMNIST(split='val', transform=transform_medical, download=False,as_rgb= True)
-        anchor_loader = torch.utils.data.DataLoader(anchor_dataset, batch_size=args.batch, shuffle=False)
+        anchor_loader = torch.utils.data.DataLoader(torch.utils.data.ConcatDataset([anchor_dataset, anchor_dataset]), batch_size=args.batch, shuffle=False)
     return train_loaders, test_loaders, anchor_loader
 
 
