@@ -16,9 +16,57 @@ import torchvision
 import torchvision.transforms as transforms
 from utils import data_utils
 from medmnist_dataset import Modified_medmnist
+from medmnist import BloodMNIST
 import wandb
 import os
+from torchsummary import summary
 
+def get_cur_features(self, inputs, outputs):
+    global cur_features
+    cur_features = inputs[0]
+
+# def contrastive_loss(anchor_data_loader,model,inputs,targets,device):
+def contrastive_loss(anchor_features,anchor_outputs, outputs,model,device):
+    ro = 0.9
+    s_centroids =  torch.zeros((model.fc.out_features, model.fc.out_features)).to(device)
+    t_centroids =  torch.zeros((model.fc.out_features, model.fc.out_features)).to(device)
+    s_features = torch.zeros((model.fc.out_features, model.fc.out_features)).to(device)
+    for i in range(len(s_features)):
+        indices = torch.where(outputs==i)[0]
+        if len(indices) != 0:
+            s_features[i] = torch.sum(cur_features[indices],dim=0)/len(indices)
+    # print(s_features)
+
+    s_centroids = (1-ro)*s_centroids.detach() + ro*s_features
+    # print(s_centroids)
+
+    t_features = torch.zeros((model.fc.out_features, model.fc.out_features)).to(device)
+
+
+    for i in range(len(t_features)):
+        indices = torch.where(anchor_outputs==i)[0]
+        if len(indices) != 0:
+            t_features[i] = torch.sum(
+                anchor_features[indices],dim=0)/len(indices)
+    # loss4 = torch.sum(t_features)
+#                 print(t_outputs_bs.shape)
+    # loss4 = torch.sum(t_centroids)
+    # t_centroids.requires_grad = False
+    t_centroids = (1-ro)*t_centroids.detach() + ro*t_features
+    # print(t_centroids.requires_grad)
+    # loss4 = torch.sum(t_centroids)
+
+    t_centroids_norm = t_centroids / (t_centroids.norm(dim=1)[:, None]+1e-10)
+    s_centroids_norm = s_centroids / (s_centroids.norm(dim=1)[:, None]+1e-10)
+    res = torch.exp(torch.mm(t_centroids_norm, s_centroids_norm.transpose(0,1))/temprature)
+
+    loss4 = torch.sum(res)
+
+    # print(res,mask,torch.mul(res,mask))
+
+    loss4 = -1* torch.log(torch.sum(torch.diagonal(res,0)))+torch.log(torch.sum(res))
+    
+    return loss4
 
 def prepare_data(args,c_num):
     # Prepare data
@@ -30,14 +78,18 @@ def prepare_data(args,c_num):
 
     train_loaders = []
     test_loaders  = []
+    anchor_loader = None
 
     for i in range(c_num):
         trainset     = Modified_medmnist(data_path="../data/BloodMnist/", split= 'train', chunk = i, transform=transform_medical)
         testset      = Modified_medmnist(data_path="../data/BloodMnist/", split= 'test', chunk = i, transform=transform_medical)
         train_loaders.append(torch.utils.data.DataLoader(trainset, batch_size=args.batch, shuffle=True))
         test_loaders.append(torch.utils.data.DataLoader(testset, batch_size=args.batch, shuffle=False))
+    if args.mode == 'virtual_data':
+        anchor_dataset = BloodMNIST(split='val', transform=transform_medical, download=False,as_rgb= True)
+        anchor_loader = torch.utils.data.DataLoader(trainset, batch_size=args.batch, shuffle=False)
+    return train_loaders, test_loaders, anchor_loader
 
-    return train_loaders, test_loaders
 
 def train(model, train_loader, optimizer, loss_fun, client_num, device):
     model.train()
@@ -62,6 +114,34 @@ def train(model, train_loader, optimizer, loss_fun, client_num, device):
         pred = output.data.max(1)[1]
         correct += pred.eq(y.view(-1)).sum().item()
     return loss_all/len(train_iter), correct/num_data
+
+
+def train_virtual(model, train_loader, anchor_features, anchor_outputs ,optimizer, loss_fun, client_num, device):
+    model.train()
+    num_data = 0
+    correct = 0
+    loss_all = 0
+    train_iter = iter(train_loader)
+    for step in range(len(train_iter)):
+        optimizer.zero_grad()
+        x, y = next(train_iter)
+        num_data += y.size(0)
+        x = x.to(device).float()
+        y = y.to(device).long()
+        output = model(x)
+        # print(output.shape)
+        # print(y.squeeze().shape)
+        loss = loss_fun(output, y.squeeze()) + contrastive_loss(anchor_features,anchor_outputs, output ,model,device)
+        # loss = loss_fun(output, y.squeeze())
+
+        loss.backward()
+        loss_all += loss.item()
+        optimizer.step()
+
+        pred = output.data.max(1)[1]
+        correct += pred.eq(y.view(-1)).sum().item()
+    return loss_all/len(train_iter), correct/num_data
+
 
 def train_fedprox(args, model, train_loader, optimizer, loss_fun, client_num, device):
     model.train()
@@ -115,6 +195,34 @@ def test(model, test_loader, loss_fun, device):
         correct += pred.eq(target.view(-1)).sum().item()
     
     return test_loss/len(test_loader), correct /len(test_loader.dataset)
+
+
+def get_features(model, anchore_loader, device):
+    model.eval()
+    features = []
+    targets = []
+    preds = []
+    first_run = True
+
+    for data, target in anchore_loader:
+        data = data.to(device).float()
+        target = target.to(device).long()
+
+        output = model(data)
+        
+        pred = output.data.max(1)[1]
+
+        if first_run:
+            features = cur_features
+            targets = target
+            preds = pred
+            first_run = False
+            
+        else:
+            features = torch.cat((features, cur_features), 0)
+            targets = torch.cat((targets, target), 0)
+            preds = torch.cat((preds, pred), 0)
+    return features, targets, preds
 
 ################# Key Function ########################
 def communication(args, server_model, models, client_weights):
@@ -203,7 +311,7 @@ if __name__ == '__main__':
     loss_fun = nn.CrossEntropyLoss()
     c_num = 8
     # prepare the data
-    train_loaders, test_loaders = prepare_data(args,c_num = c_num)
+    train_loaders, test_loaders, anchor_loader = prepare_data(args,c_num = c_num)
 
 #     # name of each client dataset
     datasets = [str(i) for i in range(c_num)]
@@ -246,6 +354,12 @@ if __name__ == '__main__':
     # start training
     for a_iter in range(resume_iter, args.iters):
         optimizers = [optim.SGD(params=models[idx].parameters(), lr=args.lr) for idx in range(client_num)]
+        if args.mode.lower() == 'virtual_data':
+            if a_iter > 0:
+                handle_cur_features = server_model.fc.register_forward_hook(get_cur_features)
+                anchor_features,anchor_targets,anchor_outputs = get_features(server_model, anchor_loader,device)
+                handle_cur_features.remove()
+                print(anchor_features.shape,anchor_targets.shape,anchor_outputs.shape)
         for wi in range(args.wk_iters):
             print("============ Train epoch {} ============".format(wi + a_iter * args.wk_iters))
             if args.log: logfile.write("============ Train epoch {} ============\n".format(wi + a_iter * args.wk_iters)) 
@@ -255,6 +369,13 @@ if __name__ == '__main__':
                 if args.mode.lower() == 'fedprox':
                     if a_iter > 0:
                         train_fedprox(args, model, train_loader, optimizer, loss_fun, client_num, device)
+                    else:
+                        train(model, train_loader, optimizer, loss_fun, client_num, device)
+                if args.mode.lower() == 'virtual_data':
+                    if a_iter > 0:
+                        handle_cur_features = model.fc.register_forward_hook(get_cur_features)
+                        train_virtual(model, train_loader, anchor_features, anchor_outputs ,optimizer, loss_fun, client_num, device)
+                        handle_cur_features.remove()
                     else:
                         train(model, train_loader, optimizer, loss_fun, client_num, device)
                 else:
