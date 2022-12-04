@@ -211,7 +211,7 @@ if __name__ == '__main__':
     parser.add_argument('--mu', type=float, default=1e-2, help='The hyper parameter for fedprox')
     parser.add_argument('--save_path', type = str, default='../checkpoint/fedavg', help='path to save the checkpoint')
     parser.add_argument('--resume', action='store_true', help ='resume training from the save path checkpoint')
-    parser.add_argument('--project_name', type=str, default='fedbn', help='name of wandb project')
+    parser.add_argument('--project_name', type=str, default='FedAdv', help='name of wandb project')
     parser.add_argument('--cuda_num', type=int, default=0, help='cuda num')
     parser.add_argument('--attack_mode', type=int, default=0, help='attack mode')
     parser.add_argument('--attack_batch', type = int, default= 500, help ='attack batch size')
@@ -232,8 +232,8 @@ if __name__ == '__main__':
     log = args.log
     if log:
         log_path = os.path.join('../logs/medical/', exp_folder)
-        os.environ["WANDB_API_KEY"] = 'f87c7a64e4a4c89c4f1afc42620ac211ceb0f926'
-        wandb.init(project= args.project_name , entity="sanaayr",config=args)
+        os.environ["WANDB_API_KEY"] = '8c1142f5727d0ec30e534e60fc3702f08f1ab506'
+        wandb.init(project= args.project_name , entity="atrin-arya",config=args)
         wandb.run.name = args.mode
         wandb.run.save() 
         if not os.path.exists(log_path):
