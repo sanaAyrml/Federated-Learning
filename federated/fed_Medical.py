@@ -18,6 +18,7 @@ from utils import data_utils
 from medmnist_dataset import Modified_medmnist
 import wandb
 import os
+from medmnist import BloodMNIST
 
 
 def prepare_data(args,c_num):
