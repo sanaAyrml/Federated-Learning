@@ -54,6 +54,8 @@ def pgd_attack(model, data, labels, loss_fun, device, eps=0.05, alpha=0.003125, 
         outputs = model(data)
 
         model.zero_grad()
+        print(labels.size())
+        print(output.size())
         cost = loss_fun(outputs, labels).to(device)
         cost.backward()
 
@@ -71,7 +73,6 @@ def attack_dataset(attack_fun, model, data_loader, loss_fun, device, args):
     adv_labels = None
     for b in range(len(data_loader.dataset)//args.attack_batch):
         data, labels = next(attack_iter)
-        adv_samples = data
         adv_samples = attack_fun(server_model, data, labels, loss_fun, device)
         if adv_dataset is None:
             adv_dataset = adv_samples
@@ -102,9 +103,7 @@ def virtual_train(model, train_loader, anchor_loader, optimizer, loss_fun, clien
         x1 = x1.to(device).float()
         y1 = y1.to(device).long()
         x = torch.cat((x, x1),dim=0)
-        print(y.size())
         y = torch.cat((y, y1),dim=0)
-        print(y.size())
         output = model(x)
         # print(output.shape)
         # print(y.squeeze().shape)
