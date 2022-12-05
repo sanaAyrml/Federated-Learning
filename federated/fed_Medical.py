@@ -44,7 +44,7 @@ def prepare_data(args,c_num):
             anchor_loader = torch.utils.data.DataLoader(torch.utils.data.ConcatDataset([anchor_dataset, anchor_dataset]), batch_size=args.attack_batch, shuffle=False)
         else:
             anchor_loader = torch.utils.data.DataLoader(torch.utils.data.ConcatDataset([anchor_dataset, anchor_dataset]), batch_size=args.batch, shuffle=False)
-    return train_loaders, test_loaders, anchor_loader
+    return train_loaders, test_loaders, anchor_loader, anchor_dataset
 
 
 def pgd_attack(model, data, labels, loss_fun, device, eps=0.05, alpha=0.003125, iters=40):
@@ -284,7 +284,7 @@ if __name__ == '__main__':
     loss_fun = nn.CrossEntropyLoss()
     c_num = 8
     # prepare the data
-    train_loaders, test_loaders, anchor_loader = prepare_data(args,c_num = c_num)
+    train_loaders, test_loaders, anchor_loader, anchor_dataset = prepare_data(args,c_num = c_num)
 
 #     # name of each client dataset
     datasets = [str(i) for i in range(c_num)]
@@ -327,6 +327,10 @@ if __name__ == '__main__':
     # start training
     for a_iter in range(resume_iter, args.iters):
         optimizers = [optim.SGD(params=models[idx].parameters(), lr=args.lr) for idx in range(client_num)]
+        if args.attack_mode:
+            anchor_loader = torch.utils.data.DataLoader(torch.utils.data.ConcatDataset([anchor_dataset, anchor_dataset]), batch_size=args.attack_batch, shuffle=False)
+        else:
+            anchor_loader = torch.utils.data.DataLoader(torch.utils.data.ConcatDataset([anchor_dataset, anchor_dataset]), batch_size=args.batch, shuffle=False)
         if args.attack_mode:
             anchor_loader = attack_dataset(pgd_attack, server_model, anchor_loader, loss_fun, device, args)
             print(len(anchor_loader.dataset))
