@@ -91,6 +91,7 @@ def virtual_train(model, train_loader, anchor_loader, optimizer, loss_fun, clien
     loss_all = 0
     train_iter = iter(train_loader)
     anchor_iter = iter(anchor_loader)
+    print(len(anchor_loader.dataset))
     for step in range(len(train_iter)):
         optimizer.zero_grad()
         x, y = next(train_iter)
