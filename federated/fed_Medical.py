@@ -73,7 +73,7 @@ def attack_dataset(attack_fun, model, data_loader, loss_fun, device, args):
     attack_iter = iter(data_loader)
     adv_dataset = None
     adv_labels = None
-    for b in range(len(data_loader.dataset)//args.attack_batch):
+    for b in range(len(data_loader.dataset)//args.attack_batch+1):
         data, labels = next(attack_iter)
         adv_samples = attack_fun(server_model, data, labels, loss_fun, device)
         if adv_dataset is None:
