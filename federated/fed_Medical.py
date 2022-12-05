@@ -329,6 +329,7 @@ if __name__ == '__main__':
         optimizers = [optim.SGD(params=models[idx].parameters(), lr=args.lr) for idx in range(client_num)]
         if args.attack_mode:
             anchor_loader = attack_dataset(pgd_attack, server_model, anchor_loader, loss_fun, device, args)
+            print(len(anchor_loader.dataset))
         for wi in range(args.wk_iters):
             print("============ Train epoch {} ============".format(wi + a_iter * args.wk_iters))
             if args.log: logfile.write("============ Train epoch {} ============\n".format(wi + a_iter * args.wk_iters)) 
