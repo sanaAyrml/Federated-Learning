@@ -336,12 +336,12 @@ if __name__ == '__main__':
                     if a_iter > 0:
                         train_fedprox(args, model, train_loader, optimizer, loss_fun, client_num, device)
                     else:
-                        if args.mode.lower() == "virtual_data":
+                        if args.mode.lower() != "virtual_data":
                             train(model, train_loader, optimizer, loss_fun, client_num, device)
                         else:
                             virtual_train(model, train_loader, anchor_loader, optimizer, loss_fun, client_num, device)
                 else:
-                    if args.mode.lower() == "virtual_data":
+                    if args.mode.lower() != "virtual_data":
                         train(model, train_loader, optimizer, loss_fun, client_num, device)
                     else:
                         virtual_train(model, train_loader, anchor_loader, optimizer, loss_fun, client_num, device)
