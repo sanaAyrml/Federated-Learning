@@ -40,7 +40,10 @@ def prepare_data(args,c_num):
         test_loaders.append(torch.utils.data.DataLoader(testset, batch_size=args.batch, shuffle=False))
     if args.mode == 'virtual_data':
         anchor_dataset = BloodMNIST(split='val', transform=transform_medical, download=False,as_rgb= True)
-        anchor_loader = torch.utils.data.DataLoader(torch.utils.data.ConcatDataset([anchor_dataset, anchor_dataset]), batch_size=args.batch, shuffle=False)
+        if args.attack_mode:
+            anchor_loader = torch.utils.data.DataLoader(torch.utils.data.ConcatDataset([anchor_dataset, anchor_dataset]), batch_size=args.attack_batch, shuffle=False)
+        else:
+            anchor_loader = torch.utils.data.DataLoader(torch.utils.data.ConcatDataset([anchor_dataset, anchor_dataset]), batch_size=args.batch, shuffle=False)
     return train_loaders, test_loaders, anchor_loader
 
 
@@ -70,9 +73,7 @@ def attack_dataset(attack_fun, model, data_loader, loss_fun, device, args):
     attack_iter = iter(data_loader)
     adv_dataset = None
     adv_labels = None
-    print(len(data_loader.dataset))
-    print("hey")
-    for b in range(len(data_loader.dataset)//args.batch):
+    for b in range(len(data_loader.dataset)//args.attack_batch):
         data, labels = next(attack_iter)
         adv_samples = attack_fun(server_model, data, labels, loss_fun, device)
         if adv_dataset is None:
@@ -93,7 +94,6 @@ def virtual_train(model, train_loader, anchor_loader, optimizer, loss_fun, clien
     loss_all = 0
     train_iter = iter(train_loader)
     anchor_iter = iter(anchor_loader)
-    print(len(anchor_loader.dataset))
     for step in range(len(train_iter)):
         optimizer.zero_grad()
         x, y = next(train_iter)
