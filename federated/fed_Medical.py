@@ -237,7 +237,7 @@ if __name__ == '__main__':
     parser.add_argument('--resume', action='store_true', help ='resume training from the save path checkpoint')
     parser.add_argument('--project_name', type=str, default='FedAdv', help='name of wandb project')
     parser.add_argument('--cuda_num', type=int, default=0, help='cuda num')
-    parser.add_argument('--attack_mode', type=int, default=0, help='attack mode')
+    parser.add_argument('--attack_mode', type=int, default=1, help='attack mode')
     parser.add_argument('--attack_batch', type = int, default= 500, help ='attack batch size')
     args = parser.parse_args()
     
