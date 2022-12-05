@@ -54,9 +54,7 @@ def pgd_attack(model, data, labels, loss_fun, device, eps=0.05, alpha=0.003125, 
         outputs = model(data)
 
         model.zero_grad()
-        print(labels.size())
-        print(output.size())
-        cost = loss_fun(outputs, labels).to(device)
+        cost = loss_fun(outputs, labels.squeeze()).to(device)
         cost.backward()
 
         adv_data = data - alpha*data.grad.sign()
