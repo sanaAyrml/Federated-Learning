@@ -84,7 +84,7 @@ def attack_dataset(attack_fun, model, data_loader, loss_fun, device, args):
 
     return torch.utils.data.DataLoader(TensorDataset(adv_dataset, adv_labels), batch_size=args.batch,  shuffle=True)
 
-def train(model, train_loader, anchor_loader, optimizer, loss_fun, client_num, device):
+def virtual_train(model, train_loader, anchor_loader, optimizer, loss_fun, client_num, device):
     model.train()
     num_data = 0
     correct = 0
@@ -103,6 +103,30 @@ def train(model, train_loader, anchor_loader, optimizer, loss_fun, client_num, d
         y1 = y1.to(device).long()
         x = torch.cat((x, x1),dim=0)
         y = torch.cat((y, y1),dim=0)
+        output = model(x)
+        # print(output.shape)
+        # print(y.squeeze().shape)
+        loss = loss_fun(output, y.squeeze())
+        loss.backward()
+        loss_all += loss.item()
+        optimizer.step()
+
+        pred = output.data.max(1)[1]
+        correct += pred.eq(y.view(-1)).sum().item()
+    return loss_all/len(train_iter), correct/num_data
+
+def train(model, train_loader, optimizer, loss_fun, client_num, device):
+    model.train()
+    num_data = 0
+    correct = 0
+    loss_all = 0
+    train_iter = iter(train_loader)
+    for step in range(len(train_iter)):
+        optimizer.zero_grad()
+        x, y = next(train_iter)
+        num_data += y.size(0)
+        x = x.to(device).float()
+        y = y.to(device).long()
         output = model(x)
         # print(output.shape)
         # print(y.squeeze().shape)
@@ -312,9 +336,15 @@ if __name__ == '__main__':
                     if a_iter > 0:
                         train_fedprox(args, model, train_loader, optimizer, loss_fun, client_num, device)
                     else:
-                        train(model, train_loader, anchor_loader, optimizer, loss_fun, client_num, device)
+                        if args.mode.lower() == "virtual_data":
+                            train(model, train_loader, optimizer, loss_fun, client_num, device)
+                        else:
+                            virtual_train(model, train_loader, anchor_loader, optimizer, loss_fun, client_num, device)
                 else:
-                    train(model, train_loader, anchor_loader, optimizer, loss_fun, client_num, device)
+                    if args.mode.lower() == "virtual_data":
+                        train(model, train_loader, optimizer, loss_fun, client_num, device)
+                    else:
+                        virual_train(model, train_loader, anchor_loader, optimizer, loss_fun, client_num, device)
                 train_loss, train_acc = test(model, train_loader, loss_fun, device)
                 test_loss, test_acc = test(model, test_loaders[client_idx], loss_fun, device)
                 if args.log:
