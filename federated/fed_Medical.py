@@ -344,7 +344,7 @@ if __name__ == '__main__':
                     if args.mode.lower() == "virtual_data":
                         train(model, train_loader, optimizer, loss_fun, client_num, device)
                     else:
-                        virual_train(model, train_loader, anchor_loader, optimizer, loss_fun, client_num, device)
+                        virtual_train(model, train_loader, anchor_loader, optimizer, loss_fun, client_num, device)
                 train_loss, train_acc = test(model, train_loader, loss_fun, device)
                 test_loss, test_acc = test(model, test_loaders[client_idx], loss_fun, device)
                 if args.log:
