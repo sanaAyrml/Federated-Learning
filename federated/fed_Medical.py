@@ -15,8 +15,8 @@ import numpy as np
 import torchvision
 import torchvision.transforms as transforms
 from utils import data_utils
-from medmnist_dataset import Modified_medmnist
-from medmnist import BloodMNIST
+from chestmnist_dataset import Modified_medmnist
+from medmnist import ChestMNIST,PneumoniaMNIST
 import wandb
 import os
 from torchsummary import summary
@@ -104,12 +104,12 @@ def prepare_data(args,c_num):
     anchor_loader = None
 
     for i in range(c_num):
-        trainset     = Modified_medmnist(data_path="../data/BloodMnist/", split= 'train', chunk = i, transform=transform_medical)
-        testset      = Modified_medmnist(data_path="../data/BloodMnist/", split= 'test', chunk = i, transform=transform_medical)
+        trainset     = Modified_medmnist(data_path="../data/ChestMnist/", split= 'train', chunk = i, transform=transform_medical)
+        testset      = Modified_medmnist(data_path="../data/ChestMnist/", split= 'test', chunk = i, transform=transform_medical)
         train_loaders.append(torch.utils.data.DataLoader(trainset, batch_size=args.batch, shuffle=True))
         test_loaders.append(torch.utils.data.DataLoader(testset, batch_size=args.batch, shuffle=False))
     if args.mode == 'virtual_data':
-        anchor_dataset = BloodMNIST(split='val', transform=transform_medical, download=False,as_rgb= True)
+        anchor_dataset = PneumoniaMNIST(split='train', transform=transform_medical, download=True,as_rgb= True,root = "../data/PneumoniaMNIST/")
         if args.attack_mode:
             anchor_loader = torch.utils.data.DataLoader(anchor_dataset, batch_size=args.attack_batch, shuffle=False)
         else:
@@ -277,26 +277,38 @@ def get_features_anchor(model, anchore_loader, device):
         
         pred = output.data.max(1)[1]
 
-        if first_run:
-            features = cur_features
-            targets = target
-            preds = pred
-            first_run = False
+#         if first_run:
+#             features = cur_features
+#             targets = target
+#             preds = pred
+#             first_run = False
             
-        else:
-            features = torch.cat((features, cur_features), 0)
-            targets = torch.cat((targets, target), 0)
-            preds = torch.cat((preds, pred), 0)
+#         else:
+#             features = torch.cat((features, cur_features), 0)
+#             targets = torch.cat((targets, target), 0)
+#             preds = torch.cat((preds, pred), 0)
             
-    t_features = torch.zeros((model.fc.out_features, model.fc.in_features)).to(device)
+#     t_features = torch.zeros((model.fc.out_features, model.fc.in_features)).to(device)
 
 
+#     for i in range(len(t_features)):
+#         indices = torch.where(preds==i)[0]
+#         if len(indices) != 0:
+#             t_features[i] = torch.sum(
+#                 features[indices],dim=0)/len(indices)
+
+#     t_centroids = t_features.detach()
+#     t_centroids_norm = t_centroids / (t_centroids.norm(dim=1)[:, None]+1e-10)
+        for i in range(len(t_features)):
+            indices = torch.where(pred==i)[0]
+            if len(indices) != 0:
+                num_each[i] += len(indices)
+                t_features[i] += torch.sum(
+                    cur_features[indices],dim=0)
+    
     for i in range(len(t_features)):
-        indices = torch.where(preds==i)[0]
-        if len(indices) != 0:
-            t_features[i] = torch.sum(
-                features[indices],dim=0)/len(indices)
-
+        if num_each[i] != 0:
+            t_features[i] = t_features[i]/num_each[i] 
     t_centroids = t_features.detach()
     t_centroids_norm = t_centroids / (t_centroids.norm(dim=1)[:, None]+1e-10)
     
@@ -389,7 +401,7 @@ if __name__ == '__main__':
     server_model.fc = nn.Linear(512, 8)
     server_model.to(device)
     loss_fun = nn.CrossEntropyLoss()
-    c_num = 8
+    c_num = 5
     # prepare the data
     train_loaders, test_loaders, anchor_loader, anchor_dataset = prepare_data(args,c_num = c_num)
 
