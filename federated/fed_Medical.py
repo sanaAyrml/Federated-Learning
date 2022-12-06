@@ -261,8 +261,48 @@ def test_virtual(model, test_loader, anchor_centroids ,loss_fun, device):
         test_loss += loss
     return loss2s/len(test_loader),loss1s/len(test_loader), correct /len(test_loader.dataset)
 
-
 def get_features_anchor(model, anchore_loader, device):
+    model.eval()
+    features = []
+    targets = []
+    preds = []
+    first_run = True
+
+    for data, target in anchore_loader:
+        data = data.to(device).float()
+        target = target.to(device).long()
+
+        output = model(data)
+        
+        pred = output.data.max(1)[1]
+
+        if first_run:
+            features = cur_features
+            targets = target
+            preds = pred
+            first_run = False
+            
+        else:
+            features = torch.cat((features, cur_features), 0)
+            targets = torch.cat((targets, target), 0)
+            preds = torch.cat((preds, pred), 0)
+            
+    t_features = torch.zeros((model.fc.out_features, model.fc.in_features)).to(device)
+
+
+    for i in range(len(t_features)):
+        indices = torch.where(preds==i)[0]
+        if len(indices) != 0:
+            t_features[i] = torch.sum(
+                features[indices],dim=0)/len(indices)
+
+    t_centroids = t_features.detach()
+    t_centroids_norm = t_centroids / (t_centroids.norm(dim=1)[:, None]+1e-10)
+    
+    return t_centroids_norm
+
+
+def get_features_anchor2(model, anchore_loader, device):
     model.eval()
     features = []
     targets = []
