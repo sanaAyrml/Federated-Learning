@@ -50,6 +50,46 @@ def contrastive_loss(s_centroids,t_centroids_norm,outputs,model,device):
     
     return loss4,s_centroids
 
+def pgd_attack(model, data, labels, loss_fun, device, eps=0.05, alpha=0.003125, iters=40):
+    data = data.to(device)
+    labels = labels.to(device)
+        
+    ori_data = data.data
+        
+    for i in range(iters) :    
+        data.requires_grad = True
+        outputs = model(data)
+
+        model.zero_grad()
+        cost = loss_fun(outputs, labels.squeeze()).to(device)
+        cost.backward()
+
+        adv_data = data - alpha*data.grad.sign()
+        eta = torch.clamp(adv_data - ori_data, min=-eps, max=eps)
+ #       data = torch.clamp(ori_data + eta, min=0, max=1).detach_()
+        data = ori_data + eta
+        data = data.detach_()
+            
+    return data.to(torch.device ("cpu"))
+
+def attack_dataset(attack_fun, model, data_loader, loss_fun, device, args):
+    attack_iter = iter(data_loader)
+    adv_dataset = None
+    adv_labels = None
+    for b in range(len(data_loader.dataset)//args.attack_batch+1):
+        data, labels = next(attack_iter)
+        adv_samples = attack_fun(server_model, data, labels, loss_fun, device)
+        if adv_dataset is None:
+            adv_dataset = adv_samples
+        else:
+            adv_dataset = torch.cat((adv_dataset, adv_samples), dim=0)
+        if adv_labels is None:
+            adv_labels = labels
+        else:
+            adv_labels = torch.cat((adv_labels, labels), dim=0)
+
+    return torch.utils.data.DataLoader(TensorDataset(adv_dataset, adv_labels), batch_size=args.batch,  shuffle=True)
+
 def prepare_data(args,c_num):
     # Prepare data
     transform_medical = transforms.Compose(
@@ -69,8 +109,11 @@ def prepare_data(args,c_num):
         test_loaders.append(torch.utils.data.DataLoader(testset, batch_size=args.batch, shuffle=False))
     if args.mode == 'virtual_data':
         anchor_dataset = BloodMNIST(split='val', transform=transform_medical, download=False,as_rgb= True)
-        anchor_loader = torch.utils.data.DataLoader(trainset, batch_size=args.batch, shuffle=False)
-    return train_loaders, test_loaders, anchor_loader
+        if args.attack_mode:
+            anchor_loader = torch.utils.data.DataLoader(anchor_dataset, batch_size=args.attack_batch, shuffle=False)
+        else:
+            anchor_loader = torch.utils.data.DataLoader(anchor_dataset, batch_size=args.batch, shuffle=False)
+    return train_loaders, test_loaders, anchor_loader, anchor_dataset 
 
 
 def train(model, train_loader, optimizer, loss_fun, client_num, device):
@@ -303,6 +346,8 @@ if __name__ == '__main__':
     parser.add_argument('--resume', action='store_true', help ='resume training from the save path checkpoint')
     parser.add_argument('--project_name', type=str, default='fedbn', help='name of wandb project')
     parser.add_argument('--cuda_num', type=int, default=0, help='cuda num')
+    parser.add_argument('--attack_mode', action='store_true', help ='whether to make a log')
+    parser.add_argument('--attack_batch', type = int, default= 500, help ='attack batch size')
     args = parser.parse_args()
     
     device = torch.device('cuda:'+str(args.cuda_num) if torch.cuda.is_available() else 'cpu')
@@ -345,7 +390,7 @@ if __name__ == '__main__':
     loss_fun = nn.CrossEntropyLoss()
     c_num = 8
     # prepare the data
-    train_loaders, test_loaders, anchor_loader = prepare_data(args,c_num = c_num)
+    train_loaders, test_loaders, anchor_loader, anchor_dataset = prepare_data(args,c_num = c_num)
 
 #     # name of each client dataset
     datasets = [str(i) for i in range(c_num)]
@@ -390,6 +435,9 @@ if __name__ == '__main__':
     for a_iter in range(resume_iter, args.iters):
         optimizers = [optim.SGD(params=models[idx].parameters(), lr=args.lr) for idx in range(client_num)]
         if args.mode.lower() == 'virtual_data':
+            if args.attack_mode:
+                anchor_loader = torch.utils.data.DataLoader(anchor_dataset, batch_size=args.attack_batch, shuffle=False)
+                anchor_loader = attack_dataset(pgd_attack, server_model, anchor_loader, loss_fun, device, args)
             if a_iter > 0:
                 handle_cur_features = server_model.fc.register_forward_hook(get_cur_features)
                 anchor_centroids = get_features_anchor(server_model, anchor_loader,device)
