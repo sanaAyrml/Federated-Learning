@@ -20,6 +20,7 @@ from medmnist import BloodMNIST
 import wandb
 import os
 from torchsummary import summary
+from torch.utils.data import TensorDataset
 
 def get_cur_features(self, inputs, outputs):
     global cur_features
