@@ -5,6 +5,7 @@ import sys, os
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(base_path)
 
+
 import torch
 from torch import nn, optim
 import time
@@ -20,6 +21,7 @@ from medmnist import ChestMNIST
 import wandb
 import os
 from torchsummary import summary
+from torchmetrics.classification import BinaryF1Score
 
 def get_cur_features(self, inputs, outputs):
     global cur_features
@@ -68,7 +70,7 @@ def prepare_data(args,c_num):
         train_loaders.append(torch.utils.data.DataLoader(trainset, batch_size=args.batch, shuffle=True))
         test_loaders.append(torch.utils.data.DataLoader(testset, batch_size=args.batch, shuffle=False))
     if args.mode == 'virtual_data':
-        anchor_dataset = BloodMNIST(split='val', transform=transform_medical, download=False,as_rgb= True)
+        anchor_dataset = ChestMNIST(split='val', transform=transform_medical, download=False,as_rgb= True,root = "../data/ChestMnist/")
         anchor_loader = torch.utils.data.DataLoader(trainset, batch_size=args.batch, shuffle=False)
     return train_loaders, test_loaders, anchor_loader
 
@@ -79,6 +81,9 @@ def train(model, train_loader, optimizer, loss_fun, client_num, device):
     correct = 0
     loss_all = 0
     train_iter = iter(train_loader)
+    preds = []
+    targets = []
+    first_run = True
     for step in range(len(train_iter)):
         optimizer.zero_grad()
         x, y = next(train_iter)
@@ -94,8 +99,19 @@ def train(model, train_loader, optimizer, loss_fun, client_num, device):
         optimizer.step()
 
         pred = output.data.max(1)[1]
-        correct += pred.eq(y.view(-1)).sum().item()
-    return loss_all/len(train_iter), correct/num_data
+        # correct += pred.eq(y.view(-1)).sum().item()
+        
+        if first_run:
+            targets = y
+            preds = pred
+            first_run = False
+            
+        else:
+            targets = torch.cat((targets, y), 0)
+            preds = torch.cat((preds, pred), 0)
+    metric = BinaryF1Score()
+    f1_score = metric(preds, target)
+    return loss_all/len(train_iter), f1_score
 
 
 def train_virtual(model, train_loader, anchor_centroids ,optimizer, loss_fun, client_num, device):
@@ -224,7 +240,8 @@ def get_features_anchor(model, anchore_loader, device):
     targets = []
     preds = []
     first_run = True
-
+    t_features = torch.zeros((model.fc.out_features, model.fc.in_features)).to(device)
+    num_each = torch.zeros((model.fc.out_features))
     for data, target in anchore_loader:
         data = data.to(device).float()
         target = target.to(device).long()
@@ -233,26 +250,40 @@ def get_features_anchor(model, anchore_loader, device):
         
         pred = output.data.max(1)[1]
 
-        if first_run:
-            features = cur_features
-            targets = target
-            preds = pred
-            first_run = False
+#         if first_run:
+#             features = cur_features
+#             targets = target
+#             preds = pred
+#             first_run = False
             
-        else:
-            features = torch.cat((features, cur_features), 0)
-            targets = torch.cat((targets, target), 0)
-            preds = torch.cat((preds, pred), 0)
+#         else:
+#             features = torch.cat((features, cur_features), 0)
+#             targets = torch.cat((targets, target), 0)
+#             preds = torch.cat((preds, pred), 0)
             
-    t_features = torch.zeros((model.fc.out_features, model.fc.in_features)).to(device)
+#     t_features = torch.zeros((model.fc.out_features, model.fc.in_features)).to(device)
 
 
+#     for i in range(len(t_features)):
+#         indices = torch.where(preds==i)[0]
+#         if len(indices) != 0:
+#             t_features[i] = torch.sum(
+#                 features[indices],dim=0)/len(indices)
+
+#     t_centroids = t_features.detach()
+#     t_centroids_norm = t_centroids / (t_centroids.norm(dim=1)[:, None]+1e-10)
+
+
+        for i in range(len(t_features)):
+            indices = torch.where(pred==i)[0]
+            if len(indices) != 0:
+                num_each[i] += len(indices)
+                t_features[i] += torch.sum(
+                    cur_features[indices],dim=0)
+    
     for i in range(len(t_features)):
-        indices = torch.where(preds==i)[0]
-        if len(indices) != 0:
-            t_features[i] = torch.sum(
-                features[indices],dim=0)/len(indices)
-
+        if num_each[i] != 0:
+            t_features[i] = t_features[i]/num_each[i] 
     t_centroids = t_features.detach()
     t_centroids_norm = t_centroids / (t_centroids.norm(dim=1)[:, None]+1e-10)
     
@@ -293,7 +324,7 @@ if __name__ == '__main__':
     parser.add_argument('--log', action='store_true', help ='whether to make a log')
     parser.add_argument('--test', action='store_true', help ='test the pretrained model')
     parser.add_argument('--percent', type = float, default= 0.1, help ='percentage of dataset to train')
-    parser.add_argument('--lr', type=float, default=1e-2, help='learning rate')
+    parser.add_argument('--lr', type=float, default=1e-1, help='learning rate')
     parser.add_argument('--batch', type = int, default= 32, help ='batch size')
     parser.add_argument('--iters', type = int, default=100, help = 'iterations for communication')
     parser.add_argument('--wk_iters', type = int, default=1, help = 'optimization iters in local worker between communication')
