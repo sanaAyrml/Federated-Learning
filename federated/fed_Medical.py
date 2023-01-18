@@ -317,7 +317,6 @@ def test_virtual(model, test_loader, anchor_centroids ,loss_fun, device):
     f1_score = metric(preds.cpu(), targets.cpu())
     return loss2s/len(test_loader),loss1s/len(test_loader), f1_score
 
-
 def get_features_anchor(model, anchore_loader, device):
     model.eval()
     features = []
@@ -326,6 +325,47 @@ def get_features_anchor(model, anchore_loader, device):
     first_run = True
     t_features = torch.zeros((model.fc.out_features, model.fc.in_features)).to(device)
     num_each = torch.zeros((model.fc.out_features))
+    for data, target in anchore_loader:
+        data = data.to(device).float()
+        target = target.to(device).long()
+
+        output = model(data)
+        
+        pred = output.data.max(1)[1]
+
+        if first_run:
+            features = cur_features
+            targets = target
+            preds = pred
+            first_run = False
+            
+        else:
+            features = torch.cat((features, cur_features), 0)
+            targets = torch.cat((targets, target), 0)
+            preds = torch.cat((preds, pred), 0)
+            
+    t_features = torch.zeros((model.fc.out_features, model.fc.in_features)).to(device)
+
+
+    for i in range(len(t_features)):
+        indices = torch.where(preds==i)[0]
+        if len(indices) != 0:
+            t_features[i] = torch.sum(
+                features[indices],dim=0)/len(indices)
+
+    t_centroids = t_features.detach()
+    t_centroids_norm = t_centroids / (t_centroids.norm(dim=1)[:, None]+1e-10)
+    
+    return t_centroids_norm
+
+
+def get_features_anchor2(model, anchore_loader, device):
+    model.eval()
+    features = []
+    targets = []
+    preds = []
+    first_run = True
+
     for data, target in anchore_loader:
         data = data.to(device).float()
         target = target.to(device).long()
@@ -414,7 +454,7 @@ if __name__ == '__main__':
     parser.add_argument('--mu', type=float, default=1e-2, help='The hyper parameter for fedprox')
     parser.add_argument('--save_path', type = str, default='../checkpoint/fedavg', help='path to save the checkpoint')
     parser.add_argument('--resume', action='store_true', help ='resume training from the save path checkpoint')
-    parser.add_argument('--project_name', type=str, default='fed_chest', help='name of wandb project')
+    parser.add_argument('--project_name', type=str, default='chest', help='name of wandb project')
     parser.add_argument('--cuda_num', type=int, default=0, help='cuda num')
     parser.add_argument('--attack_mode', action='store_true', help ='whether to make a log')
     parser.add_argument('--attack_batch', type = int, default= 500, help ='attack batch size')
@@ -441,8 +481,8 @@ if __name__ == '__main__':
     log = args.log
     if log:
         log_path = os.path.join('../logs/medical/', exp_folder)
-        os.environ["WANDB_API_KEY"] = 'f87c7a64e4a4c89c4f1afc42620ac211ceb0f926'
-        wandb.init(project= args.project_name , entity="sanaayr",config=args)
+        os.environ["WANDB_API_KEY"] = '8c1142f5727d0ec30e534e60fc3702f08f1ab506'
+        wandb.init(project= args.project_name , entity="atrin-arya",config=args)
         wandb.run.name = args.mode
         wandb.run.save() 
         if not os.path.exists(log_path):
