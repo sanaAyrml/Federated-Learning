@@ -33,7 +33,6 @@ class Modified_medmnist(Dataset):
         self.targets = npzfile['y']
         print('IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII',self.targets.shape)
         # print('labels', self.targets)
-        self.chunk = chunk
 
         self.view_classes = [0,1]
 
@@ -61,23 +60,3 @@ class Modified_medmnist(Dataset):
 
     def __len__(self):
         return len(self.data)
-    
-    def compute_class_weights(self):
-        
-        arr = self.targets
-        # freq_proto = np.bincount(arr_proto)
-        # print("loooook at meeeee pleaaaaase",freq_proto)
-        # arr = self.targets
-        # print(arr)
-        freq = np.bincount((arr).astype(int))
-        # freq= np.concatenate((freq_proto,freq))
-        # print('freq for ',self.chunk,freq)
-        
-        freq = freq/freq.max()
-        # print('2 freq for ',self.chunk,freq)
-        # print('freeeq',freq)
-        total_samples = len(arr)
-        inv_freq = 1. / freq
-        # print('freeeq',inv_freq)
-        #print(total_samples * inv_freq / len(np.unique(arr)) )
-        return  torch.tensor(inv_freq).float()
