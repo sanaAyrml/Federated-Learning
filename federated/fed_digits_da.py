@@ -346,7 +346,12 @@ if __name__ == '__main__':
                     wandb.log(metrics)
 
         if (a_iter - 1) % 20 == 0 and a_iter > args.pre_iter:
-            visualize_all(models, test_loaders, testsets, axes[0, 0], axes[0, 1], device, 2, a_iter, 'local')
+            testset_vis = testsets[0:2]
+            testset_vis.append(virtualsets[client_num])
+            testloader_vis = test_loaders[0:2]
+            testloader_vis.append(virtual_loaders[client_num])
+            print(len(testloader_vis))
+            visualize_all(models, testloader_vis, testset_vis, axes[0, 0], axes[0, 1], device, 3, a_iter, 'local')
             plt.savefig('/home/s.ayromlou/FedBN/federated/tsne/' + args.mode + '_tsne_map_all_vis_' + str(a_iter) + '.png')
         # aggregation
         server_model, models = communication(args, server_model, models, client_weights)
@@ -370,7 +375,11 @@ if __name__ == '__main__':
             #     visualize(model,test_loaders[client_idx],testsets[client_idx],axes[1,client_idx],axes[3,client_idx],device,client_idx,a_iter,'server')
             #     plt.savefig('/home/s.ayromlou/FedBN/federated/tsne/tsne_map_'+str(a_iter)+'.png')
         if (a_iter - 1) % 20 == 0 and a_iter > args.pre_iter:
-            visualize_all(models, test_loaders, testsets, axes[1, 0], axes[1, 1], device, 2, a_iter, 'server')
+            testset_vis = testsets[0:2]
+            testset_vis.append(virtualsets[client_num])
+            testloader_vis = test_loaders[0:2]
+            testloader_vis.append(virtual_loaders[client_num])
+            visualize_all(models, testloader_vis, testset_vis, axes[1, 0], axes[1, 1], device, 3, a_iter, 'server')
             plt.savefig('/home/s.ayromlou/FedBN/federated/tsne/' + args.mode + '_tsne_map_all_vis_' + str(a_iter) + '.png')
         if max_train_acc < avg_train / client_num:
             max_train_acc = avg_train / client_num
