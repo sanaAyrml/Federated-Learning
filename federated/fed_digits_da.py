@@ -149,7 +149,7 @@ if __name__ == '__main__':
     parser.add_argument('--test', action='store_true', help='test the pretrained model')
     parser.add_argument('--percent', type=float, default=0.1, help='percentage of dataset to train')
     parser.add_argument('--lr', type=float, default=1e-2, help='learning rate')
-    parser.add_argument('--batch', type=int, default=8, help='batch size')
+    parser.add_argument('--batch', type=int, default=128, help='batch size')
     parser.add_argument('--iters', type=int, default=100, help='iterations for communication')
     parser.add_argument('--wk_iters', type=int, default=1,
                         help='optimization iters in local worker between communication')
@@ -171,7 +171,7 @@ if __name__ == '__main__':
     parser.add_argument('--param_mi', default=1., type=float)
 
     parser.add_argument('--synth_method', type=str, default='admm', help='admm | ce')
-    parser.add_argument('-b', '--batch-size', default=8, type=int,
+    parser.add_argument('-b', '--batch-size', default=128, type=int,
                         metavar='N', help='mini-batch size (default: 32)')
     parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
                         help='momentum')

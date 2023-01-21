@@ -31,7 +31,7 @@ def src_img_synth_admm(gen_loader, src_model, args , device):
     gen_dataset = None
     gen_labels = None
     for batch_idx, (images_s, labels_s) in enumerate(gen_loader):
-        if batch_idx == 10:
+        if batch_idx == 100:
             break
         images_s = images_s.to(device)
         y_s,_ = src_model(images_s)
@@ -49,7 +49,7 @@ def src_img_synth_admm(gen_loader, src_model, args , device):
 
         # step1: update imgs
         for batch_idx, (images_s, labels_s) in enumerate(gen_loader):
-            if batch_idx == 10:
+            if batch_idx == 100:
                 break
 
     #        images_s = images_s.to(device)
@@ -86,7 +86,7 @@ def src_img_synth_admm(gen_loader, src_model, args , device):
         # step2: update LAMB
         grad_matrix = torch.zeros_like(LAMB).to(device)
         for batch_idx, (images_s, labels_s) in enumerate(gen_loader):
-            if batch_idx == 10:
+            if batch_idx == 100:
                 break
        #     images_s = images_s.to(device)
        #     labels_s = labels_s.to(device)
