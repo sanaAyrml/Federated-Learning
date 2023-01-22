@@ -105,7 +105,7 @@ def visualize_all(tg_models,test_loaders,testsets,ax1,ax2,device,client_num,iter
     # fig, ax = plt.subplots(figsize=(8,8))
     num_categories = tg_model.head.out_features
     cmap = cm.get_cmap('tab20')
-    markers = ["." , "," , "o" , "v" , "^" , "<", ">"]
+    markers = ["." , "," , "*" , "v" , "^" , "<", ">"]
     for c in range(client_num):
         for lab in range(num_categories):
             indices = test_preds[c]==lab
