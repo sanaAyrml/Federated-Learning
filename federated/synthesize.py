@@ -26,10 +26,12 @@ def labels_to_one_hot(labels, num_class, device):
 
 def src_img_synth_admm(gen_loader, src_model, args , device):
 
-
+    src_model.eval()
     LAMB = torch.zeros_like(src_model.head.weight.data).to(device)
     gen_dataset = None
     gen_labels = None
+    original_dataset = None
+    original_labels = None
     for batch_idx, (images_s, labels_s) in enumerate(gen_loader):
         if batch_idx == 100:
             break
@@ -39,9 +41,13 @@ def src_img_synth_admm(gen_loader, src_model, args , device):
         if gen_dataset == None:
             gen_dataset = images_s
             gen_labels = labels_s
+            original_dataset = images_s
+            original_labels = labels_s
         else:
             gen_dataset = torch.cat((gen_dataset, images_s), 0)
             gen_labels = torch.cat((gen_labels, labels_s), 0)
+            original_dataset = torch.cat((original_dataset, images_s), 0)
+            original_labels = torch.cat((original_labels, labels_s), 0)
 
     for i in range(args.iters_admm):
 
@@ -103,4 +109,4 @@ def src_img_synth_admm(gen_loader, src_model, args , device):
         new_matrix = grad_matrix / len(gen_dataset) + args.param_gamma * src_model.head.weight.data
         LAMB += new_matrix * args.param_admm_rho
 
-    return gen_dataset, gen_labels
+    return gen_dataset, gen_labels, original_dataset ,original_labels

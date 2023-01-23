@@ -30,8 +30,40 @@ from sklearn.manifold import TSNE
 from compute_features import compute_features
 import torch.nn as nn
 
+import umap.umap_ as umap
 
-def visualize(tg_model,test_loader,testset,ax1,ax2,device,client_num,iteration, t):
+def fit_umap(tg_models,test_loaders,testsets,device,client_num):
+    for tg_model in tg_models:
+        tg_model.eval()
+    # num_samples = len(testset.images)
+    num_features = tg_models[0].head.in_features
+    # print(num_samples, num_features)
+    test_embeddings = []
+    test_targets = []
+    test_preds = []
+    # test_clients = torch.zeros((0), dtype=torch.float32)
+    for c in range(client_num):
+        test_embedding = torch.zeros((0, num_features), dtype=torch.float32)
+        test_target = torch.zeros((0), dtype=torch.float32)
+        test_pred = torch.zeros((0), dtype=torch.float32)
+        for i, (images_t, target) in enumerate(test_loaders[c]):
+            y, embeddings = tg_models[c](images_t.to(device))
+            test_embedding = torch.cat((test_embedding, embeddings.detach().cpu()), 0)
+            pred = y.data.max(1)[1]
+            # print(pred.shape)
+            test_target = torch.cat((test_target, target.cpu()), 0)
+            test_pred= torch.cat((test_pred, pred.cpu()), 0)
+        test_embeddings.append(test_embedding)
+        test_targets.append(test_target)
+        test_preds.append(test_pred)
+       
+    
+    # tsne = TSNE(2, verbose=1)
+    trans = umap.UMAP(n_neighbors=5, random_state=42).fit(np.concatenate(test_embeddings))
+    return trans
+
+
+def visualize(tg_model,test_loader,testset,ax1,ax2,device,client_num,trans):
     tg_model.eval()
     num_samples = len(testset.images)
     num_features = tg_model.head.in_features
@@ -47,8 +79,8 @@ def visualize(tg_model,test_loader,testset,ax1,ax2,device,client_num,iteration, 
         test_targets = torch.cat((test_targets, target.cpu()), 0)
         test_preds = torch.cat((test_preds, pred.cpu()), 0)
     
-    tsne = TSNE(2, verbose=1)
-    tsne_proj = tsne.fit_transform(test_embeddings)
+    # tsne = TSNE(2, verbose=1)
+    tsne_proj = trans.transform(test_embeddings)
     # Plot those points as a scatter plot and label them based on the pred labels
     # co_matrix,test_predictions = compute_confusion_matrix(tg_model, test_loader, device=device)
     # fig, ax = plt.subplots(figsize=(8,8))
@@ -62,7 +94,8 @@ def visualize(tg_model,test_loader,testset,ax1,ax2,device,client_num,iteration, 
     ax1.legend(fontsize='large', markerscale=2)
     ax2.legend(fontsize='large', markerscale=2)
     
-def visualize_all(tg_models,test_loaders,testsets,ax1,ax2,device,client_num,iteration, t):
+    
+def visualize_all(tg_models,test_loaders,testsets,ax1,ax2,device,client_num,trans):
     for tg_model in tg_models:
         tg_model.eval()
     # num_samples = len(testset.images)
@@ -90,10 +123,10 @@ def visualize_all(tg_models,test_loaders,testsets,ax1,ax2,device,client_num,iter
     # test_targets= np.array(test_targets)
     # test_preds= np.array(test_preds)
     
-    tsne = TSNE(2, verbose=1)
+    # tsne = TSNE(2, verbose=1)
     # shape = test_embeddings.shape
     # print(shape)
-    tsne_proj = tsne.fit_transform(np.concatenate(test_embeddings))
+    tsne_proj = trans.transform(np.concatenate(test_embeddings))
     devided = []
     start = 0
     for c in range(client_num):
@@ -112,8 +145,8 @@ def visualize_all(tg_models,test_loaders,testsets,ax1,ax2,device,client_num,iter
             ax1.scatter(devided[c][indices,0],devided[c][indices,1], c=np.array(cmap(lab)).reshape(1,4), marker = markers[c],label = lab ,alpha=0.5)
             indices = test_targets[c]==lab
             ax2.scatter(devided[c][indices,0],devided[c][indices,1], c=np.array(cmap(lab)).reshape(1,4), marker = markers[c], label = lab ,alpha=0.5)
-    ax1.legend(fontsize='large', markerscale=2)
-    ax2.legend(fontsize='large', markerscale=2)
+    ax1.legend(fontsize='large', markerscale=2,loc='center left', bbox_to_anchor=(1, 0.5))
+    ax2.legend(fontsize='large', markerscale=2,loc='center left', bbox_to_anchor=(1, 0.5))
     
     # plt.savefig('/home/s.ayromlou/FedBN/federated/tsne/'+t+'_tsne_map_'+str(client_num)+'_'+str(iteration)+'.png')
 
@@ -154,7 +187,9 @@ def train_uda(trg_loader: DataLoader, src_loader: DataLoader, trg_model, domain_
             # print(y_t.shape, f_t.shape,target.shape)
             loss = 0.
             if args.param_cls_s > 0:
-                cls_loss_s = F.cross_entropy(y_t, target)
+                # cls_loss_s = F.cross_entropy(y_t, target)
+                cls_loss_s = F.cross_entropy(y_s, labels_s)
+
                 loss += cls_loss_s * args.param_cls_s
 
             if args.uda_type == 'dann' and  args.param_dann > 0:

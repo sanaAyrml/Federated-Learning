@@ -30,7 +30,7 @@ from matplotlib import cm
 from dalib.modules.domain_discriminator import DomainDiscriminator
 from dalib.adaptation.dann import DomainAdversarialLoss
 from dalib.adaptation.cdan import ConditionalDomainAdversarialLoss
-from train_handler import train_uda, train, train_fedprox, test, communication, visualize, visualize_all
+from train_handler import train_uda, train, train_fedprox, test, communication, visualize, visualize_all,fit_umap
 from synthesize import src_img_synth_admm
 from digit_net import ImageClassifier
 
@@ -183,7 +183,7 @@ if __name__ == '__main__':
     parser.add_argument('--param_admm_rho', default=0.01, type=float)
     parser.add_argument('--iters_admm', default=3, type=int)
     parser.add_argument('--lr_img', default=10., type=float)
-    parser.add_argument('--pre_iter', default= 20 , type=int)
+    parser.add_argument('--pre_iter', default= 0 , type=int)
     args = parser.parse_args()
 
     device = torch.device('cuda:' + str(args.cuda_num) if torch.cuda.is_available() else 'cpu')
@@ -234,7 +234,6 @@ if __name__ == '__main__':
     datasets = ['MNIST', 'SVHN', 'USPS', 'MNIST-M', 'SynthDigits', ]
 
     # fig, axes = plt.subplots(4,len(datasets),figsize=(40,32))
-    fig, axes = plt.subplots(2, 2, figsize=(16, 16))
 
     # federated setting
     client_num = len(datasets) - 1
@@ -304,17 +303,38 @@ if __name__ == '__main__':
             for param in server_model.parameters():
                 param.requires_grad = False
             server_model.eval()
-            if a_iter > args.pre_iter:
-                if args.synth_method == 'ce':
-                    pass
-                elif args.synth_method == 'admm':
-                    vir_dataset, vir_labels = src_img_synth_admm(virtual_loaders[client_num], server_model, args,device)
-                    print(vir_dataset.shape)
-                    virtualsets[client_num].images = np.transpose(vir_dataset.detach().cpu().numpy(),(0,2,3,1))
-                    virtualsets[client_num].labels = vir_labels.detach().cpu().numpy()
-                    virtualsets[client_num].synthesized = True
-                    virtual_loaders[client_num] = torch.utils.data.DataLoader(virtualsets[client_num], batch_size=args.batch, shuffle=True)
-
+            # if a_iter > args.pre_iter:
+                # if args.synth_method == 'ce':
+                #     pass
+                # elif args.synth_method == 'admm':
+                #     vir_dataset, vir_labels, ori_dataset, ori_labels = src_img_synth_admm(virtual_loaders[client_num], server_model, args,device)
+                #     print(vir_dataset.shape)
+                #     virtualsets[client_num].images = np.transpose(ori_dataset.detach().cpu().numpy(),(0,2,3,1))
+                #     virtualsets[client_num].labels = ori_labels.detach().cpu().numpy()
+                #     if (a_iter - 1) % 20 == 0 and a_iter > args.pre_iter:
+                #         plt.clf()
+                #         fig, axes = plt.subplots(3, 2, figsize=(24, 36))
+                #         testset_vis = testsets[0:2]
+                #         # testset_vis.append(virtualsets[client_num])
+                #         testloader_vis = test_loaders[0:2]
+                #         trans = fit_umap(models, testloader_vis, testset_vis, device, 2)
+                #         testset_vis.append(virtualsets[client_num])
+                #         testloader_vis.append(virtual_loaders[client_num])
+                #         print(len(testloader_vis))
+                #         visualize_all(models, testloader_vis, testset_vis, axes[0, 0], axes[0, 1], device, 3, trans)
+                #         plt.savefig('/home/s.ayromlou/FedBN/federated/tsne/' + args.mode + '_umap_all_vis_dif' + str(a_iter) + '.png')
+                #     virtualsets[client_num].images = np.transpose(vir_dataset.detach().cpu().numpy(),(0,2,3,1))
+                #     virtualsets[client_num].labels = vir_labels.detach().cpu().numpy()
+                #     virtualsets[client_num].synthesized = True
+                #     virtual_loaders[client_num] = torch.utils.data.DataLoader(virtualsets[client_num], batch_size=args.batch, shuffle=True)
+                #     if (a_iter - 1) % 20 == 0 and a_iter > args.pre_iter:
+                #         testset_vis = testsets[0:2]
+                #         # testset_vis.append(virtualsets[client_num])
+                #         testloader_vis = test_loaders[0:2]
+                #         testset_vis.append(virtualsets[client_num])
+                #         testloader_vis.append(virtual_loaders[client_num])
+                #         visualize_all(models, testloader_vis, testset_vis, axes[1, 0], axes[1, 1], device, 3, trans)
+                #         plt.savefig('/home/s.ayromlou/FedBN/federated/tsne/' + args.mode + '_umap_all_vis_dif' + str(a_iter) + '.png')
         for wi in range(args.wk_iters):
             print("============ Train epoch {} ============".format(wi + a_iter * args.wk_iters))
             if args.log: logfile.write("============ Train epoch {} ============\n".format(wi + a_iter * args.wk_iters))
@@ -328,7 +348,38 @@ if __name__ == '__main__':
                         train(model, train_loader, optimizer, loss_fun, client_num, device)
                 if args.mode.lower() == 'fedda':
                     if a_iter > args.pre_iter:
-                        train_uda(trg_loader=train_loader, src_loader=virtual_loaders[client_num], trg_model=model,
+                        if args.synth_method == 'ce':
+                            pass
+                        elif args.synth_method == 'admm':
+                            vir_dataset, vir_labels, ori_dataset, ori_labels = src_img_synth_admm(virtual_loaders[client_idx], model, args,device)
+                            print(vir_dataset.shape)
+                            virtualsets[client_idx].images = np.transpose(ori_dataset.detach().cpu().numpy(),(0,2,3,1))
+                            virtualsets[client_idx].labels = ori_labels.detach().cpu().numpy()
+                            # if (a_iter - 1) % 20 == 0 and a_iter > args.pre_iter:
+                            #     plt.clf()
+                            #     fig, axes = plt.subplots(3, 2, figsize=(24, 36))
+                            #     testset_vis = testsets[0:2]
+                            #     # testset_vis.append(virtualsets[client_num])
+                            #     testloader_vis = test_loaders[0:2]
+                            #     trans = fit_umap(models, testloader_vis, testset_vis, device, 2)
+                            #     testset_vis.append(virtualsets[client_num])
+                            #     testloader_vis.append(virtual_loaders[client_num])
+                            #     print(len(testloader_vis))
+                            #     visualize_all(models, testloader_vis, testset_vis, axes[0, 0], axes[0, 1], device, 3, trans)
+                            #     plt.savefig('/home/s.ayromlou/FedBN/federated/tsne/' + args.mode + '_umap_all_vis_dif' + str(a_iter) + '.png')
+                            virtualsets[client_idx].images = np.transpose(vir_dataset.detach().cpu().numpy(),(0,2,3,1))
+                            virtualsets[client_idx].labels = vir_labels.detach().cpu().numpy()
+                            virtualsets[client_idx].synthesized = True
+                            virtual_loaders[client_idx] = torch.utils.data.DataLoader(virtualsets[client_idx], batch_size=args.batch, shuffle=True)
+                            # if (a_iter - 1) % 20 == 0 and a_iter > args.pre_iter:
+                            #     testset_vis = testsets[0:2]
+                            #     # testset_vis.append(virtualsets[client_num])
+                            #     testloader_vis = test_loaders[0:2]
+                            #     testset_vis.append(virtualsets[client_num])
+                            #     testloader_vis.append(virtual_loaders[client_num])
+                            #     visualize_all(models, testloader_vis, testset_vis, axes[1, 0], axes[1, 1], device, 3, trans)
+                            #     plt.savefig('/home/s.ayromlou/FedBN/federated/tsne/' + args.mode + '_umap_all_vis_dif' + str(a_iter) + '.png')
+                        train_uda(trg_loader=train_loader, src_loader=virtual_loaders[client_idx], trg_model=model,
                                   domain_adv=domain_adv[client_idx], optimizer=optimizer, epoch=10, args=args,
                                   device=device)
                     else:
@@ -345,16 +396,29 @@ if __name__ == '__main__':
                                "Test_ACC_Local_" + str(client_idx): test_acc}
                     wandb.log(metrics)
 
-        if (a_iter - 1) % 20 == 0 and a_iter > args.pre_iter:
+        if (a_iter-1) % 20 == 0 and a_iter > args.pre_iter:
+            plt.clf()
+            fig, axes = plt.subplots(2, 2, figsize=(24, 24))
             testset_vis = testsets[0:2]
-            testset_vis.append(virtualsets[client_num])
             testloader_vis = test_loaders[0:2]
-            testloader_vis.append(virtual_loaders[client_num])
+            trans = fit_umap(models, testloader_vis, testset_vis, device, 2)
+            # testset_vis.append(virtualsets[client_num])
+            # testloader_vis.append(virtual_loaders[client_num])
             print(len(testloader_vis))
-            visualize_all(models, testloader_vis, testset_vis, axes[0, 0], axes[0, 1], device, 3, a_iter, 'local')
-            plt.savefig('/home/s.ayromlou/FedBN/federated/tsne/' + args.mode + '_tsne_map_all_vis_' + str(a_iter) + '.png')
+            visualize_all(models, testloader_vis, testset_vis, axes[0, 0], axes[0, 1], device, 2, trans)
+            plt.savefig('/home/s.ayromlou/FedBN/federated/tsne/' + args.mode + '_umap_all_vis_dif' + str(a_iter) + '.png')
         # aggregation
         server_model, models = communication(args, server_model, models, client_weights)
+        if (a_iter-1) % 20 == 0 and a_iter > args.pre_iter:
+            testset_vis = testsets[0:2]
+            testloader_vis = test_loaders[0:2]
+            trans = fit_umap(models, testloader_vis, testset_vis, device, 2)
+            # testset_vis.append(virtualsets[client_num])
+            # testloader_vis.append(virtual_loaders[client_num])
+            # print(len(testloader_vis))
+            visualize_all(models, testloader_vis, testset_vis, axes[1, 0], axes[1, 1], device, 2, trans)
+            plt.savefig('/home/s.ayromlou/FedBN/federated/tsne/' + args.mode + '_umap_all_vis_dif' + str(a_iter) + '.png')
+        
 
         # report after aggregation
         avg_train = 0
@@ -374,13 +438,13 @@ if __name__ == '__main__':
             # if (a_iter-1) % 20 == 0 and a_iter>10:
             #     visualize(model,test_loaders[client_idx],testsets[client_idx],axes[1,client_idx],axes[3,client_idx],device,client_idx,a_iter,'server')
             #     plt.savefig('/home/s.ayromlou/FedBN/federated/tsne/tsne_map_'+str(a_iter)+'.png')
-        if (a_iter - 1) % 20 == 0 and a_iter > args.pre_iter:
-            testset_vis = testsets[0:2]
-            testset_vis.append(virtualsets[client_num])
-            testloader_vis = test_loaders[0:2]
-            testloader_vis.append(virtual_loaders[client_num])
-            visualize_all(models, testloader_vis, testset_vis, axes[1, 0], axes[1, 1], device, 3, a_iter, 'server')
-            plt.savefig('/home/s.ayromlou/FedBN/federated/tsne/' + args.mode + '_tsne_map_all_vis_' + str(a_iter) + '.png')
+        # if (a_iter - 1) % 20 == 0 and a_iter > args.pre_iter:
+        #     testset_vis = testsets[0:2]
+        #     testset_vis.append(virtualsets[client_num])
+        #     testloader_vis = test_loaders[0:2]
+        #     testloader_vis.append(virtual_loaders[client_num])
+        #     visualize_all(models, testloader_vis, testset_vis, axes[1, 0], axes[1, 1], device, 3, a_iter, 'server')
+        #     plt.savefig('/home/s.ayromlou/FedBN/federated/tsne/' + args.mode + '_tsne_map_all_vis_' + str(a_iter) + '.png')
         if max_train_acc < avg_train / client_num:
             max_train_acc = avg_train / client_num
         if args.log:
