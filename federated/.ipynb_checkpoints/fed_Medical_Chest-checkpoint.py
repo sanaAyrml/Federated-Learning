@@ -5,6 +5,7 @@ import sys, os
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(base_path)
 
+
 import torch
 from torch import nn, optim
 import time
@@ -16,13 +17,15 @@ import torchvision
 import torchvision.transforms as transforms
 from utils import data_utils
 from chestmnist_dataset import Modified_medmnist
-from medmnist import ChestMNIST,PneumoniaMNIST
+from medmnist import ChestMNIST
 import wandb
 import os
 from torchsummary import summary
-from torch.utils.data import TensorDataset
+<<<<<<< HEAD
 from torchmetrics.classification import BinaryF1Score
-from torch.optim.lr_scheduler import ReduceLROnPlateau
+=======
+from torch.utils.data import TensorDataset
+>>>>>>> e215044a6f874eb923a51adb9873ef606d84e961
 
 def get_cur_features(self, inputs, outputs):
     global cur_features
@@ -52,6 +55,36 @@ def contrastive_loss(s_centroids,t_centroids_norm,outputs,model,device):
     # loss4 = 100*Loss(t_centroids_norm,s_centroids_norm)
     
     return loss4,s_centroids
+
+def prepare_data(args,c_num):
+    # Prepare data
+    transform_medical = transforms.Compose(
+        [transforms.Pad(4),
+         transforms.CenterCrop(32),
+            transforms.ToTensor()
+        ])
+
+    train_loaders = []
+    test_loaders  = []
+    anchor_loader = None
+
+    for i in range(c_num):
+        trainset     = Modified_medmnist(data_path="../data/ChestMnist/", split= 'train', chunk = i, transform=transform_medical)
+        testset      = Modified_medmnist(data_path="../data/ChestMnist/", split= 'test', chunk = i, transform=transform_medical)
+        train_loaders.append(torch.utils.data.DataLoader(trainset, batch_size=args.batch, shuffle=True))
+        test_loaders.append(torch.utils.data.DataLoader(testset, batch_size=args.batch, shuffle=False))
+    if args.mode == 'virtual_data':
+# <<<<<<< HEAD
+#         anchor_dataset = ChestMNIST(split='val', transform=transform_medical, download=False,as_rgb= True,root = "../data/ChestMnist/")
+#         anchor_loader = torch.utils.data.DataLoader(trainset, batch_size=args.batch, shuffle=False)
+#     return train_loaders, test_loaders, anchor_loader
+# =======
+        anchor_dataset = BloodMNIST(split='val', transform=transform_medical, download=False,as_rgb= True)
+        if args.attack_mode:
+            anchor_loader = torch.utils.data.DataLoader(anchor_dataset, batch_size=args.attack_batch, shuffle=False)
+        else:
+            anchor_loader = torch.utils.data.DataLoader(anchor_dataset, batch_size=args.batch, shuffle=False)
+    return train_loaders, test_loaders, anchor_loader, anchor_dataset 
 
 def pgd_attack(model, data, labels, loss_fun, device, eps=0.05, alpha=0.003125, iters=40):
     data = data.to(device)
@@ -92,30 +125,7 @@ def attack_dataset(attack_fun, model, data_loader, loss_fun, device, args):
             adv_labels = torch.cat((adv_labels, labels), dim=0)
 
     return torch.utils.data.DataLoader(TensorDataset(adv_dataset, adv_labels), batch_size=args.batch,  shuffle=True)
-
-def prepare_data(args,c_num):
-    # Prepare data
-    transform_medical = transforms.Compose(
-        [transforms.Pad(4),
-         transforms.CenterCrop(32),
-            transforms.ToTensor()
-        ])
-
-    train_loaders = []
-    test_loaders  = []
-    anchor_loader = None
-
-    for i in range(c_num):
-        trainset     = Modified_medmnist(data_path="../data/ChestMnist/", split= 'train', chunk = i, transform=transform_medical)
-        testset      = Modified_medmnist(data_path="../data/ChestMnist/", split= 'test', chunk = i, transform=transform_medical)
-        train_loaders.append(torch.utils.data.DataLoader(trainset, batch_size=args.batch, shuffle=True))
-        test_loaders.append(torch.utils.data.DataLoader(testset, batch_size=args.batch, shuffle=False))
-        anchor_dataset = PneumoniaMNIST(split='train', transform=transform_medical, download=False,as_rgb= True,root = "../data/PneumoniaMNIST/")
-        if args.attack_mode:
-            anchor_loader = torch.utils.data.DataLoader(anchor_dataset, batch_size=args.attack_batch, shuffle=False)
-        else:
-            anchor_loader = torch.utils.data.DataLoader(anchor_dataset, batch_size=args.batch, shuffle=False)
-    return train_loaders, test_loaders, anchor_loader, anchor_dataset 
+# >>>>>>> e215044a6f874eb923a51adb9873ef606d84e961
 
 
 def train(model, train_loader, optimizer, loss_fun, client_num, device):
@@ -153,7 +163,7 @@ def train(model, train_loader, optimizer, loss_fun, client_num, device):
             targets = torch.cat((targets, y), 0)
             preds = torch.cat((preds, pred), 0)
     metric = BinaryF1Score()
-    f1_score = metric(preds.cpu(), targets.cpu())
+    f1_score = metric(preds, target)
     return loss_all/len(train_iter), f1_score
 
 
@@ -165,7 +175,6 @@ def train_virtual(model, train_loader, anchor_centroids ,optimizer, loss_fun, cl
     train_iter = iter(train_loader)
     loss1s = 0
     loss2s = 0
-    first_run = True
     s_centroids =  torch.zeros((model.fc.out_features, model.fc.in_features)).to(device)
     for step in range(len(train_iter)):
         optimizer.zero_grad()
@@ -177,7 +186,7 @@ def train_virtual(model, train_loader, anchor_centroids ,optimizer, loss_fun, cl
         # print(output.shape)
         # print(y.squeeze().shape)
         pred = output.data.max(1)[1]
-        # correct += pred.eq(y.view(-1)).sum().item()
+        correct += pred.eq(y.view(-1)).sum().item()
         
         loss1, s_centroids = contrastive_loss(s_centroids, anchor_centroids, pred ,model,device)
         loss2 = loss_fun(output, y.squeeze())
@@ -189,18 +198,8 @@ def train_virtual(model, train_loader, anchor_centroids ,optimizer, loss_fun, cl
         loss.backward()
         loss_all += loss.item()
         optimizer.step()
-        if first_run:
-            targets = y
-            preds = pred
-            first_run = False
-            
-        else:
-            targets = torch.cat((targets, y), 0)
-            preds = torch.cat((preds, pred), 0)
-    metric = BinaryF1Score()
-    f1_score = metric(preds.cpu(), targets.cpu())
     # print(loss1s/len(train_iter),loss2s/len(train_iter))
-    return loss2s/len(train_iter),loss1s/len(train_iter) ,f1_score
+    return loss2s/len(train_iter),loss1s/len(train_iter) ,correct/num_data
 
 
 def train_fedprox(args, model, train_loader, optimizer, loss_fun, client_num, device):
@@ -209,7 +208,6 @@ def train_fedprox(args, model, train_loader, optimizer, loss_fun, client_num, de
     correct = 0
     loss_all = 0
     train_iter = iter(train_loader)
-    first_run = True
     for step in range(len(train_iter)):
         optimizer.zero_grad()
         x, y = next(train_iter)
@@ -234,47 +232,29 @@ def train_fedprox(args, model, train_loader, optimizer, loss_fun, client_num, de
         optimizer.step()
 
         pred = output.data.max(1)[1]
-        if first_run:
-            targets = y
-            preds = pred
-            first_run = False
-            
-        else:
-            targets = torch.cat((targets, y), 0)
-            preds = torch.cat((preds, pred), 0)
-    metric = BinaryF1Score()
-    f1_score = metric(preds.cpu(), targets.cpu())
-    return loss_all/len(train_iter), f1_score
+        correct += pred.eq(y.view(-1)).sum().item()
+    return loss_all/len(train_iter), correct/num_data
 
 def test(model, test_loader, loss_fun, device):
     model.eval()
     test_loss = 0
     correct = 0
     targets = []
-    first_run = True
+
     for data, target in test_loader:
         data = data.to(device).float()
         target = target.to(device).long()
-        # targets.append(target.detach().cpu().numpy())
+        targets.append(target.detach().cpu().numpy())
 
         output = model(data)
         
         test_loss += loss_fun(output, target.squeeze()).item()
         pred = output.data.max(1)[1]
 
-        if first_run:
-            targets = target
-            preds = pred
-            first_run = False
-            
-        else:
-            targets = torch.cat((targets, target), 0)
-            preds = torch.cat((preds, pred), 0)
-    metric = BinaryF1Score()
-    f1_score = metric(preds.cpu(), targets.cpu())
+        correct += pred.eq(target.view(-1)).sum().item()
         
     
-    return test_loss/len(test_loader), f1_score
+    return test_loss/len(test_loader), correct /len(test_loader.dataset)
 
 
 def test_virtual(model, test_loader, anchor_centroids ,loss_fun, device):
@@ -284,18 +264,17 @@ def test_virtual(model, test_loader, anchor_centroids ,loss_fun, device):
     targets = []
     loss1s = 0
     loss2s = 0
-    first_run = True
     s_centroids =  torch.zeros((model.fc.out_features, model.fc.in_features)).to(device)
     for data, target in test_loader:
         data = data.to(device).float()
         target = target.to(device).long()
-        # targets.append(target.detach().cpu().numpy())
+        targets.append(target.detach().cpu().numpy())
 
         output = model(data)
         
         pred = output.data.max(1)[1]
 
-        # correct += pred.eq(target.view(-1)).sum().item()
+        correct += pred.eq(target.view(-1)).sum().item()
         
     
         loss1, s_centroids = contrastive_loss(s_centroids, anchor_centroids, pred ,model,device)
@@ -305,17 +284,8 @@ def test_virtual(model, test_loader, anchor_centroids ,loss_fun, device):
         loss1s += loss1.item() 
         loss2s += loss2
         test_loss += loss
-        if first_run:
-            targets = target
-            preds = pred
-            first_run = False
-            
-        else:
-            targets = torch.cat((targets, target), 0)
-            preds = torch.cat((preds, pred), 0)
-    metric = BinaryF1Score()
-    f1_score = metric(preds.cpu(), targets.cpu())
-    return loss2s/len(test_loader),loss1s/len(test_loader), f1_score
+    return loss2s/len(test_loader),loss1s/len(test_loader), correct /len(test_loader.dataset)
+
 
 def get_features_anchor(model, anchore_loader, device):
     model.eval()
@@ -325,47 +295,6 @@ def get_features_anchor(model, anchore_loader, device):
     first_run = True
     t_features = torch.zeros((model.fc.out_features, model.fc.in_features)).to(device)
     num_each = torch.zeros((model.fc.out_features))
-    for data, target in anchore_loader:
-        data = data.to(device).float()
-        target = target.to(device).long()
-
-        output = model(data)
-        
-        pred = output.data.max(1)[1]
-
-        if first_run:
-            features = cur_features
-            targets = target
-            preds = pred
-            first_run = False
-            
-        else:
-            features = torch.cat((features, cur_features), 0)
-            targets = torch.cat((targets, target), 0)
-            preds = torch.cat((preds, pred), 0)
-            
-    t_features = torch.zeros((model.fc.out_features, model.fc.in_features)).to(device)
-
-
-    for i in range(len(t_features)):
-        indices = torch.where(preds==i)[0]
-        if len(indices) != 0:
-            t_features[i] = torch.sum(
-                features[indices],dim=0)/len(indices)
-
-    t_centroids = t_features.detach()
-    t_centroids_norm = t_centroids / (t_centroids.norm(dim=1)[:, None]+1e-10)
-    
-    return t_centroids_norm
-
-
-def get_features_anchor2(model, anchore_loader, device):
-    model.eval()
-    features = []
-    targets = []
-    preds = []
-    first_run = True
-
     for data, target in anchore_loader:
         data = data.to(device).float()
         target = target.to(device).long()
@@ -396,6 +325,8 @@ def get_features_anchor2(model, anchore_loader, device):
 
 #     t_centroids = t_features.detach()
 #     t_centroids_norm = t_centroids / (t_centroids.norm(dim=1)[:, None]+1e-10)
+
+
         for i in range(len(t_features)):
             indices = torch.where(pred==i)[0]
             if len(indices) != 0:
@@ -446,7 +377,7 @@ if __name__ == '__main__':
     parser.add_argument('--log', action='store_true', help ='whether to make a log')
     parser.add_argument('--test', action='store_true', help ='test the pretrained model')
     parser.add_argument('--percent', type = float, default= 0.1, help ='percentage of dataset to train')
-    parser.add_argument('--lr', type=float, default=1e-2, help='learning rate')
+    parser.add_argument('--lr', type=float, default=1e-1, help='learning rate')
     parser.add_argument('--batch', type = int, default= 32, help ='batch size')
     parser.add_argument('--iters', type = int, default=100, help = 'iterations for communication')
     parser.add_argument('--wk_iters', type = int, default=1, help = 'optimization iters in local worker between communication')
@@ -454,11 +385,10 @@ if __name__ == '__main__':
     parser.add_argument('--mu', type=float, default=1e-2, help='The hyper parameter for fedprox')
     parser.add_argument('--save_path', type = str, default='../checkpoint/fedavg', help='path to save the checkpoint')
     parser.add_argument('--resume', action='store_true', help ='resume training from the save path checkpoint')
-    parser.add_argument('--project_name', type=str, default='chest', help='name of wandb project')
+    parser.add_argument('--project_name', type=str, default='fed_chest', help='name of wandb project')
     parser.add_argument('--cuda_num', type=int, default=0, help='cuda num')
     parser.add_argument('--attack_mode', action='store_true', help ='whether to make a log')
     parser.add_argument('--attack_batch', type = int, default= 500, help ='attack batch size')
-    parser.add_argument('--weighted_loss',action='store_true', help ='whether to compute loss weighted')
     args = parser.parse_args()
     
     device = torch.device('cuda:'+str(args.cuda_num) if torch.cuda.is_available() else 'cpu')
@@ -466,23 +396,18 @@ if __name__ == '__main__':
     np.random.seed(seed)
     torch.manual_seed(seed)     
     torch.cuda.manual_seed_all(seed) 
-    lr_factor              = 0.3            # Learning rate decrease factor
-    lr_patience            = 5
-    lr_threshold           = 0.0001
 
     print('Device:', device)
 
     exp_folder = 'federated_medical'
-    Best_Global_model = None
-    Best_local_models = None
 
     args.save_path = os.path.join(args.save_path, exp_folder)
     
     log = args.log
     if log:
         log_path = os.path.join('../logs/medical/', exp_folder)
-        os.environ["WANDB_API_KEY"] = '8c1142f5727d0ec30e534e60fc3702f08f1ab506'
-        wandb.init(project= args.project_name , entity="atrin-arya",config=args)
+        os.environ["WANDB_API_KEY"] = 'f87c7a64e4a4c89c4f1afc42620ac211ceb0f926'
+        wandb.init(project= args.project_name , entity="sanaayr",config=args)
         wandb.run.name = args.mode
         wandb.run.save() 
         if not os.path.exists(log_path):
@@ -547,18 +472,9 @@ if __name__ == '__main__':
         resume_iter = 0
     max_train_acc = 0
     max_test_acc = 0
-    lr = args.lr
-    # lr_schedulers =  [ReduceLROnPlateau(optimizer, factor=lr_factor, patience=lr_patience, threshold=lr_threshold) for optimizer]
     # start training
-    patience = 0
     for a_iter in range(resume_iter, args.iters):
-        if a_iter > 0:
-            lr = args.lr/a_iter
-            if patience == 8:
-                server_model = Best_Global_model 
-                models = Best_local_models 
-                patience = 0
-        optimizers = [optim.SGD(params=models[idx].parameters(), lr=lr) for idx in range(client_num)]
+        optimizers = [optim.SGD(params=models[idx].parameters(), lr=args.lr) for idx in range(client_num)]
         if args.mode.lower() == 'virtual_data':
             if args.attack_mode:
                 anchor_loader = torch.utils.data.DataLoader(anchor_dataset, batch_size=args.attack_batch, shuffle=False)
@@ -574,8 +490,6 @@ if __name__ == '__main__':
             
             for client_idx in range(client_num):
                 model, train_loader, optimizer = models[client_idx], train_loaders[client_idx], optimizers[client_idx]
-                if args.weighted_loss:
-                    loss_fun =  nn.CrossEntropyLoss(train_loaders[client_idx].dataset.compute_class_weights().to(device))
                 if args.mode.lower() == 'fedprox':
                     if a_iter > 0:
                         train_fedprox(args, model, train_loader, optimizer, loss_fun, client_num, device)
@@ -596,7 +510,6 @@ if __name__ == '__main__':
                 else:
                     train_loss, train_acc = test(model, train_loader, loss_fun, device)
                     test_loss, test_acc = test(model, test_loaders[client_idx], loss_fun, device)
-                # lr_scheduler[client_idx].step(test_acc)
                 if args.log:
                     metrics = {"Train_ACC_Local_"+str(client_idx): train_acc,
                               "Test_ACC_Local_"+str(client_idx): test_acc}
@@ -614,8 +527,6 @@ if __name__ == '__main__':
         avg_train = 0
         for client_idx in range(client_num):
             model, train_loader, optimizer = models[client_idx], train_loaders[client_idx], optimizers[client_idx]
-            if args.weighted_loss:
-                    loss_fun =  nn.CrossEntropyLoss(train_loader.dataset.compute_class_weights().to(device))
             if args.mode.lower() == 'virtual_data':
                 handle_cur_features = model.fc.register_forward_hook(get_cur_features)
                 train_loss, train_loss_CN,train_acc = test_virtual(model, train_loader, anchor_centroids,loss_fun, device)
@@ -633,7 +544,7 @@ if __name__ == '__main__':
                         metrics = {"Train_Loss_CN"+str(client_idx): train_loss_CN}
                         wandb.log(metrics)
         if max_train_acc < avg_train/client_num:
-            max_train_acc = avg_train/client_num
+                max_train_acc = avg_train/client_num
         if args.log:
             metrics = {"Train_AVG": avg_train/client_num}
             wandb.log(metrics)
@@ -641,8 +552,6 @@ if __name__ == '__main__':
         # start testing
         avg_test = 0
         for test_idx, test_loader in enumerate(test_loaders):
-            if args.weighted_loss:
-                    loss_fun =  nn.CrossEntropyLoss(test_loader.dataset.compute_class_weights().to(device))
             if args.mode.lower() == 'virtual_data':
                 handle_cur_features = models[test_idx].fc.register_forward_hook(get_cur_features)
                 test_loss,test_loss_CN, test_acc = test_virtual(models[test_idx], test_loader, anchor_centroids,loss_fun, device)
@@ -660,13 +569,7 @@ if __name__ == '__main__':
                         metrics = {"Test_Loss_CN"+str(test_idx): test_loss_CN}
                         wandb.log(metrics)
         if max_test_acc < avg_test/client_num:
-            max_test_acc = avg_test/client_num
-            Best_Global_model = server_model 
-            Best_local_models = models
-            patience = 0
-        else:
-            patience += 1
-                
+                max_test_acc = avg_test/client_num
         if args.log:
             metrics = {"Test_AVG": avg_test/client_num}
             wandb.log(metrics)

@@ -1,0 +1,13 @@
+#### FedBN
+python fed_digits_da_local.py --log --mode fedbn --project_name fed_digit --cuda_num 0
+
+#### FedAVG
+python fed_digits_da_local.py --log --mode fedavg --project_name fed_digit --cuda_num 0
+
+#### Fedda local synthesized original training
+
+python fed_digits_da_local.py --log --mode fedda --project_name fed_digit --cuda_num 0 --train_mode original --synthesize_mode local --client_num 2 --pre_iter -1 --wk_iters 100 --resume
+
+#### Fedda public synthesized original training
+
+python fed_digits_da_local.py --log --mode fedda --project_name fed_digit --cuda_num 0 --train_mode original --synthesize_mode global --client_num 2 --pre_iter 5 --wk_iters 100 --public_dataset 5
