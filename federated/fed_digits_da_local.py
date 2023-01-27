@@ -58,7 +58,7 @@ if __name__ == '__main__':
     parser.add_argument('--mu', type=float, default=1e-2, help='The hyper parameter for fedprox')
     parser.add_argument('--save_path', type=str, default='checkpoint2/digits', help='path to save the checkpoint')
     parser.add_argument('--resume', action='store_true', help='resume training from the save path checkpoint')
-    parser.add_argument('--project_name', type=str, default='fed_digit', help='name of wandb project')
+    parser.add_argument('--project_name', type=str, default='fed_digit_2', help='name of wandb project')
 
     parser.add_argument('--cuda_num', type=int, default=0, help='cuda num')
     # parser.add_argument('--attack_mode', action='store_true', help='whether to make a log')
@@ -89,10 +89,14 @@ if __name__ == '__main__':
     parser.add_argument('--lr_img', default=10., type=float)
                                    
     
-    parser.add_argument('--pre_iter', default= 20 , type=int)   
-    parser.add_argument('--save_every', default= 20 , type=int)
+    parser.add_argument('--pre_iter', default= 20 , type=int) 
+    parser.add_argument('--save_every', default= 10 , type=int)
+
     parser.add_argument('--client_num', default= 2 , type=int)
     parser.add_argument('--public_dataset', default= 0 , type=int)
+    parser.add_argument('--runid', default= None , type=str)
+    parser.add_argument('--merge', action='store_true', help='merge training for local from servers')
+
      
     
     args = parser.parse_args()
@@ -122,6 +126,10 @@ if __name__ == '__main__':
         NAME = NAME + '_'+ args.train_mode
     if args.synthesize_mode != None:
         NAME = NAME + '_'+ args.synthesize_mode
+    if args.merge:
+        NAME = NAME + '_merged'
+    NAME = NAME + '_wk_iters_' + str(args.wk_iters)
+        
                                    
                                    
     print(NAME)
@@ -130,8 +138,11 @@ if __name__ == '__main__':
     if log:
         # log_path = args.save_path + SAVE_PATH + '_log'
         os.environ["WANDB_API_KEY"] = 'f87c7a64e4a4c89c4f1afc42620ac211ceb0f926'
-        wandb.init(project=args.project_name, entity="sanaayr", config=args)
-        wandb.run.name = NAME
+        if args.runid != None and args.resume:
+            wandb.init(project=args.project_name, entity="sanaayr", id=args.runid , resume="must" ,config=args)
+        else:
+            wandb.init(project=args.project_name, entity="sanaayr", config=args)
+            wandb.run.name = NAME
         wandb.run.save()
 
                                    
@@ -266,7 +277,7 @@ if __name__ == '__main__':
         print("============ Train epoch {} ============".format(a_iter * args.wk_iters))
         # if args.log: logfile.write("============ Train epoch {} ============\n".format(wi + a_iter * args.wk_iters))
         fig, axes = plt.subplots(4, 2, figsize=(24, 48))
-        if args.mode.lower() == 'fedda' and a_iter > args.pre_iter:
+        if args.mode.lower() == 'fedda' and a_iter > args.pre_iter and args.synthesize_mode != None:
             vir_datasets = []
             vir_labels = []
             ori_datasets = []
@@ -325,9 +336,9 @@ if __name__ == '__main__':
             model, train_loader, optimizer = models[client_idx], train_loaders[client_idx], optimizers[client_idx]
             if args.mode.lower() == 'fedprox':
                 if a_iter > 0:
-                    train_fedprox(args, model, train_loader, optimizer, loss_fun, client_num, device,args.wk_iters)
+                    train_fedprox(args, wandb, model, train_loader, optimizer, loss_fun, client_num, device,args.wk_iters)
                 else:
-                    train(model, train_loader, optimizer, loss_fun, client_num, device,args.wk_iters)
+                    train(args, wandb,model, train_loader, optimizer, loss_fun, client_num, device,args.wk_iters)
             if args.mode.lower() == 'fedda':
                 if a_iter > args.pre_iter:
                     if args.synthesize_mode == 'local':
@@ -339,9 +350,9 @@ if __name__ == '__main__':
                                   domain_adv=domain_adv[client_idx], optimizer=optimizer, epoch=args.wk_iters, args=args,
                                   device=device,wandb=wandb,client_idx=client_idx)
                 else:
-                    train(model, train_loader, optimizer, loss_fun, client_num, device,args.wk_iters)
+                    train(args, wandb,model, train_loader, optimizer, loss_fun, client_num, device,args.wk_iters)
             else:
-                train(model, train_loader, optimizer, loss_fun, client_num, device,args.wk_iters)
+                train(args, wandb,model, train_loader, optimizer, loss_fun, client_num, device,args.wk_iters)
             train_loss, train_acc = test(model, train_loader, loss_fun, device)
             test_loss, test_acc = test(model, test_loaders[client_idx], loss_fun, device)
 
@@ -364,7 +375,7 @@ if __name__ == '__main__':
             visualize_all(models, testloader_vis, testset_vis, axes[2, 0], axes[2, 1], device, mult*len(generate_loaders) + client_num, trans)
             plt.savefig(FIG_SAVE_PATH+ '_' + str(a_iter) + '.png')
         # aggregation
-        server_model, models = communication(args, server_model, models, client_weights, client_num)
+        server_model, models = communication(args, server_model, models, client_weights, client_num, a_iter)
         if (a_iter-1) % args.save_every == 0:
             print('making forth row plots')
             testset_vis = trainsets[0:client_num] 

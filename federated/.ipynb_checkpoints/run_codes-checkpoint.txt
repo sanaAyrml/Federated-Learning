@@ -1,13 +1,35 @@
 #### FedBN
-python fed_digits_da_local.py --log --mode fedbn --project_name fed_digit --cuda_num 0
+python federated/fed_digits_da_local.py --log --mode fedbn --project_name fed_digit_2 --cuda_num 0 --wk_iters 10
 
 #### FedAVG
-python fed_digits_da_local.py --log --mode fedavg --project_name fed_digit --cuda_num 0
+python federated/fed_digits_da_local.py --log --mode fedavg --project_name fed_digit_2 --cuda_num 0 --wk_iters 10
+
+python federated/fed_digits_da_local.py --log --mode fedavg --project_name fed_digit_2 --cuda_num 0 --wk_iters 50
+
 
 #### Fedda local synthesized original training
 
-python fed_digits_da_local.py --log --mode fedda --project_name fed_digit --cuda_num 0 --train_mode original --synthesize_mode local --client_num 2 --pre_iter -1 --wk_iters 100 --resume
+python federated/fed_digits_da_local.py --log --mode fedda --project_name fed_digit_2 --cuda_num 1 --train_mode original --synthesize_mode local --client_num 2 --pre_iter 2 --wk_iters 10 --save_every 10 --runid jspzhrur --resume
+
+
+#### Fedda local synthesized synthesized training
+
+python federated/fed_digits_da_local.py --log --mode fedda --project_name fed_digit_2 --cuda_num 1 --train_mode synthesized --synthesize_mode local --client_num 2 --pre_iter 2 --wk_iters 10 --save_every 10
+
+#### Fedda local synthesized original training merged
+
+python federated/fed_digits_da_local.py --log --mode fedda --project_name fed_digit_2 --cuda_num 0 --train_mode original --synthesize_mode local --client_num 2 --pre_iter 2 --wk_iters 10 --save_every 10 --merge --runid 2wra4vwn --resume
+
+python federated/fed_digits_da_local.py --log --mode fedda --project_name fed_digit_2 --cuda_num 1 --train_mode original --synthesize_mode local --client_num 2 --pre_iter 2 --wk_iters 50 --save_every 10  --merge
+
+#### Fedda original training merged
+
+python federated/fed_digits_da_local.py --log --mode fedda --project_name fed_digit_2 --cuda_num 1 --train_mode original --client_num 2 --pre_iter 2 --wk_iters 10 --save_every 10  --merge
 
 #### Fedda public synthesized original training
 
-python fed_digits_da_local.py --log --mode fedda --project_name fed_digit --cuda_num 0 --train_mode original --synthesize_mode global --client_num 2 --pre_iter 5 --wk_iters 100 --public_dataset 5
+python federated/fed_digits_da_local.py --log --mode fedda --project_name fed_digit_2 --cuda_num 0 --train_mode original --synthesize_mode global --client_num 2 --pre_iter 2 --wk_iters 10 --public_dataset 5 --save_every 10
+
+#### FedNorm normal training
+
+python federated/fed_digits_da_local.py --log --mode fednorm --project_name fed_digit_2 --cuda_num 1 --wk_iters 10
