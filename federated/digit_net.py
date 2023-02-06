@@ -627,7 +627,7 @@ class ImageClassifier(nn.Module):
         """
         params = [
             {"params": self.backbone.parameters(), "lr_mult": 0.1},
-            {"params": self.bottleneck.parameters(), "lr_mult": 1.},
+            {"params": self.bottleneck.parameters(), "lr_mult": 0.1},
             {"params": self.head.parameters(), "lr_mult": 1.},
         ]
         return params

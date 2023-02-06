@@ -11,6 +11,7 @@ import os
 
 class DigitsDataset(Dataset):
     def __init__(self, data_path, channels, percent=0.1, filename=None, train=True, transform=None):
+        self.path = data_path
         if filename is None:
             if train:
                 if percent >= 0.1:
@@ -34,23 +35,32 @@ class DigitsDataset(Dataset):
         self.transform = transform
         self.channels = channels
         self.labels = self.labels.astype(np.long).squeeze()
+        self.synthesized = False
 
     def __len__(self):
         return self.images.shape[0]
 
     def __getitem__(self, idx):
+        # if self.synthesized:
+        #     print(self.images[idx].shape,type(self.images[idx]))
         image = self.images[idx]
         label = self.labels[idx]
-        if self.channels == 1:
-            image = Image.fromarray(image, mode='L')
-        elif self.channels == 3:
-            image = Image.fromarray(image, mode='RGB')
+        if not self.synthesized:
+        
+            if self.channels == 3:
+                # print('hereee')
+                image = Image.fromarray(image, mode='RGB')
+            elif self.channels == 1:
+                image = Image.fromarray(image, mode='L')
+            else:
+                raise ValueError("{} channel is not allowed.".format(self.channels))
+            if self.transform is not None:
+                image = self.transform(image)
         else:
-            raise ValueError("{} channel is not allowed.".format(self.channels))
-
-        if self.transform is not None:
-            image = self.transform(image)
-
+            image = torch.tensor(image)
+            label = torch.tensor(label)
+        # if self.synthesized:
+        #     print(image.shape)
         return image, label
 
 

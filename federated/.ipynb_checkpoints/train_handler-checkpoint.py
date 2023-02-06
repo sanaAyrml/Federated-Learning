@@ -177,7 +177,7 @@ def train_uda(trg_loader: DataLoader, src_loader: DataLoader, trg_model, domain_
     first_run = True
     iter_num = 0
     
-    for e in range(epoch):
+    for e in range(10*epoch):
         src_iter = iter(src_loader)
         for i, (images_t, target) in enumerate(trg_loader):
             iter_num += 1
@@ -207,8 +207,11 @@ def train_uda(trg_loader: DataLoader, src_loader: DataLoader, trg_model, domain_
                 elif args.train_mode == 'synthesized':
                     cls_loss_s = F.cross_entropy(y_s, labels_s)
                 # print(cls_loss_s)
+                if e+1 % 10 == 0:
+                    loss += cls_loss_s * args.param_cls_s
+                else:
+                    loss += cls_loss_s * 0
 
-                loss += cls_loss_s * args.param_cls_s
 
             if args.uda_type == 'dann' and  args.param_dann > 0:
                 dann_loss = domain_adv(f_s, f_t)
@@ -218,7 +221,13 @@ def train_uda(trg_loader: DataLoader, src_loader: DataLoader, trg_model, domain_
                 # print('here')
                 cdan_loss = domain_adv(y_s, f_s, y_t, f_t)
                 # print(cdan_loss)
-                loss += cdan_loss * args.param_cdan
+                # args.param_cdan = 0
+                # if e ==0:
+                #     loss += cls_loss_s * 0
+                # else:
+                loss += cdan_loss * args.param_cdan/50
+                # loss += cdan_loss * 0
+
 
             if args.param_mi > 0:
                 p_t = F.softmax(y_t, dim=1)
@@ -234,7 +243,7 @@ def train_uda(trg_loader: DataLoader, src_loader: DataLoader, trg_model, domain_
             loss.backward()
             optimizer.step()
             
-            if e%20 ==0 and args.log:
+            if args.log:
                 metrics = {"Discriminatir_acc" + str(client_idx): domain_adv.domain_discriminator_accuracy,
                            "CE_loss" + str(client_idx): cls_loss_s,
                           "cdan_loss"+ str(client_idx): cdan_loss}

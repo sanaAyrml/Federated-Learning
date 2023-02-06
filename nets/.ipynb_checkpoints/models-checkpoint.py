@@ -41,10 +41,10 @@ class DigitModel(nn.Module):
 
         x = self.fc2(x)
         x = self.bn5(x)
-        x = func.relu(x)
+        x2 = func.relu(x)
 
-        x = self.fc3(x)
-        return x
+        x2 = self.fc3(x2)
+        return x2,x
 
 
 class AlexNet(nn.Module):
