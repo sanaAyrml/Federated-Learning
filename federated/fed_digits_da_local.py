@@ -58,9 +58,10 @@ if __name__ == '__main__':
     parser.add_argument('--mu', type=float, default=1e-2, help='The hyper parameter for fedprox')
     parser.add_argument('--save_path', type=str, default='checkpoint2/digits', help='path to save the checkpoint')
     parser.add_argument('--resume', action='store_true', help='resume training from the save path checkpoint')
-    parser.add_argument('--project_name', type=str, default='fed_digit_2', help='name of wandb project')
+    parser.add_argument('--project_name', type=str, default='fed_digit_5', help='name of wandb project')
 
     parser.add_argument('--cuda_num', type=int, default=0, help='cuda num')
+    parser.add_argument('--model_arch', type=str, default='digitnet', help='trainining model architecture digitnet|convnet|resnet')
     # parser.add_argument('--attack_mode', action='store_true', help='whether to make a log')
     # parser.add_argument('--attack_batch', type=int, default=500, help='attack batch size')
     # parser.add_argument('--weighted_loss', action='store_true', help='whether to compute loss weighted')
@@ -74,6 +75,7 @@ if __name__ == '__main__':
     
     
     parser.add_argument('--synthesize_mode', type=str, default= None , help='local | global')
+    parser.add_argument('--synthesize_label', type=str, default= 'pred' , help='real | pred')
     parser.add_argument('--synth_method', type=str, default='admm', help='admm | ce')
     parser.add_argument('-b', '--batch-size', default=128, type=int,
                         metavar='N', help='mini-batch size (default: 32)')
@@ -85,17 +87,19 @@ if __name__ == '__main__':
                         help='number of total inner epochs to run')
     parser.add_argument('--param_gamma', default=0.01, type=float)
     parser.add_argument('--param_admm_rho', default=0.01, type=float)
-    parser.add_argument('--iters_admm', default=10, type=int)
-    parser.add_argument('--lr_img', default=10., type=float)
+    parser.add_argument('--iters_admm', default=3, type=int)
+    parser.add_argument('--lr_img', default=100., type=float)
                                    
     
     parser.add_argument('--pre_iter', default= 20 , type=int) 
+    parser.add_argument('--pre_merge', default= None , type=int) 
     parser.add_argument('--save_every', default= 10 , type=int)
 
     parser.add_argument('--client_num', default= 2 , type=int)
     parser.add_argument('--public_dataset', default= 0 , type=int)
     parser.add_argument('--runid', default= None , type=str)
     parser.add_argument('--merge', action='store_true', help='merge training for local from servers')
+    parser.add_argument('--synthesize_test', action='store_true', help='make a virtual test data and report according')
 
      
     
@@ -116,7 +120,11 @@ if __name__ == '__main__':
     Best_Global_model = None
     Best_local_models = None
 
-
+    if args.pre_merge == None:
+        if args.merge:
+            args.pre_merge = args.pre_iter
+        else:
+            args.pre_merge = args.iters
 
     NAME = args.mode + '_'
     NAME = NAME + 'over_' + str(args.client_num) 
@@ -129,9 +137,16 @@ if __name__ == '__main__':
     if args.merge:
         NAME = NAME + '_merged'
     NAME = NAME + '_wk_iters_' + str(args.wk_iters)
+    NAME = NAME +'_param_cdan' + str(args.param_cdan)
         
-                                   
-                                   
+    NAME = NAME +'_pre_merge_' + str(args.pre_merge)
+    NAME = NAME +'_synthesize_label_' + str(args.synthesize_label)
+    
+    if args.synthesize_test:
+        NAME = NAME + '_synthesize_test'
+    NAME = NAME + '_model_arch_'+args.model_arch
+                                                                      
+
     print(NAME)
     
     log = args.log
@@ -149,14 +164,19 @@ if __name__ == '__main__':
     if not os.path.exists(args.save_path):
         os.makedirs(args.save_path)
     FIG_SAVE_PATH = os.path.join(args.save_path, '{}'.format('FIG'))
+    Synth_SAVE_PATH = os.path.join(args.save_path, '{}'.format('Synth'))
     if not os.path.exists(FIG_SAVE_PATH):
         os.makedirs(FIG_SAVE_PATH)
+    if not os.path.exists(Synth_SAVE_PATH):
+        os.makedirs(Synth_SAVE_PATH)
     FIG_SAVE_PATH = os.path.join(FIG_SAVE_PATH, '{}'.format(NAME))
+    Synth_SAVE_PATH = os.path.join(Synth_SAVE_PATH, '{}'.format(NAME))
     SAVE_PATH = os.path.join(args.save_path, '{}'.format(NAME))
 
 
 
-    server_model = ImageClassifier(10, 512).to(device)
+    server_model = ImageClassifier(args.model_arch,10, 512).to(device)
+    print(server_model)
     loss_fun = nn.CrossEntropyLoss()
 
 
@@ -184,6 +204,7 @@ if __name__ == '__main__':
     test_loaders = []
     virtual_loaders = []
     generate_loaders = []
+    adapt_test_loaders = []
     for sets in trainsets:
         train_loaders.append(torch.utils.data.DataLoader(sets, batch_size=args.batch, shuffle=False))
     for sets in testsets:
@@ -192,6 +213,9 @@ if __name__ == '__main__':
         virtual_loaders.append(torch.utils.data.DataLoader(sets, batch_size=args.batch, shuffle=False))
     for sets in generatsets:
         generate_loaders.append(torch.utils.data.DataLoader(sets, batch_size=args.batch, shuffle=False))
+    if args.synthesize_test:
+        for sets in testsets:
+            adapt_test_loaders.append(torch.utils.data.DataLoader(sets, batch_size=args.batch, shuffle=False))
     
     
 
@@ -262,10 +286,11 @@ if __name__ == '__main__':
     for a_iter in range(resume_iter, args.iters):
         if a_iter > 0:
             lr = args.lr / a_iter
-            if patience == 8:
+            if patience == 4:
                 server_model = Best_Global_model
                 models = Best_local_models
                 patience = 0
+                args.param_cdan /= 5
         if args.mode.lower() == 'fedda' and a_iter > args.pre_iter:
             optimizers = [optim.SGD(params=models[idx].get_parameters() + domain_discri[idx].get_parameters() , lr=lr) for idx in range(client_num)]
             for param in server_model.parameters():
@@ -276,18 +301,18 @@ if __name__ == '__main__':
 
         print("============ Train epoch {} ============".format(a_iter * args.wk_iters))
         # if args.log: logfile.write("============ Train epoch {} ============\n".format(wi + a_iter * args.wk_iters))
-        fig, axes = plt.subplots(4, 2, figsize=(24, 48))
+        # fig, axes = plt.subplots(4, 2, figsize=(24, 48))
         if args.mode.lower() == 'fedda' and a_iter > args.pre_iter and args.synthesize_mode != None:
             vir_datasets = []
             vir_labels = []
             ori_datasets = []
             ori_labels = []
-            for generate_loader in generate_loaders:
+            for client_idx,generate_loader in enumerate(generate_loaders):
                 if args.synth_method == 'ce':
                     pass
                 elif args.synth_method == 'admm':
                     print('generating data for client', client_idx)
-                    vir_dataset, vir_label, ori_dataset, ori_label = src_img_synth_admm(generate_loader, server_model, args,device)
+                    vir_dataset, vir_label, ori_dataset, ori_label = src_img_synth_admm(generate_loader, server_model, args,device, 'train', Synth_SAVE_PATH+'_train_' +datasets[client_idx]+'_'+ str(a_iter) + '.png',a_iter)
                     vir_datasets.append(vir_dataset) 
                     vir_labels.append(vir_label) 
                     ori_datasets.append(ori_dataset) 
@@ -299,19 +324,19 @@ if __name__ == '__main__':
                 virtualsets[client_idx].synthesized = True
                 virtual_loaders[client_idx] = torch.utils.data.DataLoader(virtualsets[client_idx], batch_size=args.batch, shuffle=True)
 
-            if (a_iter - 1) % args.save_every == 0:
-                print('making first row plots')
-                testset_vis = trainsets[0:client_num] 
-                testloader_vis = train_loaders[0:client_num]
-                for i in range(len(generate_loaders)):
-                    testset_vis.append(virtualsets[i])
-                    if (testset_vis[i].labels == testset_vis[i+client_num].labels).all():
-                        print('trueeee')
-                    testloader_vis.append(virtual_loaders[i])
-                trans = fit_umap(models, testloader_vis, testset_vis, device, client_num+len(generate_loaders))
-                print(len(testloader_vis))
-                visualize_all(models, testloader_vis, testset_vis, axes[0, 0], axes[0, 1], device, client_num+len(generate_loaders), trans)
-                plt.savefig(FIG_SAVE_PATH+ '_' + str(a_iter) + '.png')
+            # if (a_iter - 1) % args.save_every == 0:
+            #     print('making first row plots')
+            #     testset_vis = trainsets[0:client_num] 
+            #     testloader_vis = train_loaders[0:client_num]
+            #     for i in range(len(generate_loaders)):
+            #         testset_vis.append(virtualsets[i])
+            #         if (testset_vis[i].labels == testset_vis[i+client_num].labels).all():
+            #             print('trueeee')
+            #         testloader_vis.append(virtual_loaders[i])
+            #     trans = fit_umap(models, testloader_vis, testset_vis, device, client_num+len(generate_loaders))
+            #     print(len(testloader_vis))
+            #     visualize_all(models, testloader_vis, testset_vis, axes[0, 0], axes[0, 1], device, client_num+len(generate_loaders), trans)
+            #     plt.savefig(FIG_SAVE_PATH+ '_' + str(a_iter) + '.png')
 
             for client_idx in range(len(generate_loaders)):
                 virtualsets[client_idx].images = vir_datasets[client_idx].detach().cpu().numpy()
@@ -319,26 +344,26 @@ if __name__ == '__main__':
                 virtualsets[client_idx].synthesized = True
                 virtual_loaders[client_idx] = torch.utils.data.DataLoader(virtualsets[client_idx], batch_size=args.batch, shuffle=True)
 
-            if (a_iter - 1) % args.save_every == 0:
-                print('making second row plots')
-                testset_vis = trainsets[0:client_num] 
-                testloader_vis = train_loaders[0:client_num]
-                for i in range(len(generate_loaders)):
-                    testset_vis.append(virtualsets[i])
-                    testloader_vis.append(virtual_loaders[i])
-                trans = fit_umap(models, testloader_vis, testset_vis, device, client_num+len(generate_loaders))
+#             if (a_iter - 1) % args.save_every == 0:
+#                 print('making second row plots')
+#                 testset_vis = trainsets[0:client_num] 
+#                 testloader_vis = train_loaders[0:client_num]
+#                 for i in range(len(generate_loaders)):
+#                     testset_vis.append(virtualsets[i])
+#                     testloader_vis.append(virtual_loaders[i])
+#                 trans = fit_umap(models, testloader_vis, testset_vis, device, client_num+len(generate_loaders))
 
-                print(len(testloader_vis))
-                visualize_all(models, testloader_vis, testset_vis, axes[1, 0], axes[1, 1], device, client_num+len(generate_loaders), trans)
-                plt.savefig(FIG_SAVE_PATH+ '_' + str(a_iter) + '.png')
+#                 print(len(testloader_vis))
+#                 visualize_all(models, testloader_vis, testset_vis, axes[1, 0], axes[1, 1], device, client_num+len(generate_loaders), trans)
+#                 plt.savefig(FIG_SAVE_PATH+ '_' + str(a_iter) + '.png')
 
         for client_idx in range(client_num):
             model, train_loader, optimizer = models[client_idx], train_loaders[client_idx], optimizers[client_idx]
             if args.mode.lower() == 'fedprox':
                 if a_iter > 0:
-                    train_fedprox(args, wandb, model, train_loader, optimizer, loss_fun, client_num, device,args.wk_iters)
+                    train_fedprox(args, wandb, model, train_loader, optimizer, loss_fun, client_num, device,client_idx,args.wk_iters)
                 else:
-                    train(args, wandb,model, train_loader, optimizer, loss_fun, client_num, device,args.wk_iters)
+                    train(args, wandb,model, train_loader, optimizer, loss_fun, client_num, device,client_idx,args.wk_iters)
             if args.mode.lower() == 'fedda':
                 if a_iter > args.pre_iter:
                     if args.synthesize_mode == 'local':
@@ -350,52 +375,70 @@ if __name__ == '__main__':
                                   domain_adv=domain_adv[client_idx], optimizer=optimizer, epoch=args.wk_iters, args=args,
                                   device=device,wandb=wandb,client_idx=client_idx)
                 else:
-                    train(args, wandb,model, train_loader, optimizer, loss_fun, client_num, device,args.wk_iters)
+                    train(args, wandb,model, train_loader, optimizer, loss_fun, client_num, device,client_idx,args.wk_iters)
             else:
-                train(args, wandb,model, train_loader, optimizer, loss_fun, client_num, device,args.wk_iters)
-            train_loss, train_acc = test(model, train_loader, loss_fun, device)
-            test_loss, test_acc = test(model, test_loaders[client_idx], loss_fun, device)
+                train(args, wandb,model, train_loader, optimizer, loss_fun, client_num, device,client_idx,args.wk_iters)
+
+            if args.synthesize_test:
+                test_loss, test_acc = test(model, adapt_test_loaders[client_idx], loss_fun, device)
+            else:
+                test_loss, test_acc = test(model, test_loaders[client_idx], loss_fun, device)
 
             if args.log:
-                metrics = {"Train_ACC_Local_" + str(client_idx): train_acc,
-                           "Test_ACC_Local_" + str(client_idx): test_acc}
+                metrics = {"Test_ACC_Local_" + str(client_idx): test_acc}
                 wandb.log(metrics)
 
-        if (a_iter-1) % args.save_every == 0:
-            print('making third row plots')
-            testset_vis = trainsets[0:client_num] 
-            testloader_vis = train_loaders[0:client_num]
-            mult = 0
-            if args.mode == 'fedda' and a_iter > args.pre_iter:
-                for i in range(len(generate_loaders)):
-                    testset_vis.append(virtualsets[i])
-                    testloader_vis.append(virtual_loaders[i])
-                mult = 1
-            trans = fit_umap(models, testloader_vis, testset_vis, device, mult*len(generate_loaders) + client_num)
-            visualize_all(models, testloader_vis, testset_vis, axes[2, 0], axes[2, 1], device, mult*len(generate_loaders) + client_num, trans)
-            plt.savefig(FIG_SAVE_PATH+ '_' + str(a_iter) + '.png')
+        # if (a_iter-1) % args.save_every == 0:
+        #     print('making third row plots')
+        #     testset_vis = trainsets[0:client_num] 
+        #     testloader_vis = train_loaders[0:client_num]
+        #     mult = 0
+        #     if args.mode == 'fedda' and a_iter > args.pre_iter:
+        #         for i in range(len(generate_loaders)):
+        #             testset_vis.append(virtualsets[i])
+        #             testloader_vis.append(virtual_loaders[i])
+        #         mult = 1
+        #     trans = fit_umap(models, testloader_vis, testset_vis, device, mult*len(generate_loaders) + client_num)
+        #     visualize_all(models, testloader_vis, testset_vis, axes[2, 0], axes[2, 1], device, mult*len(generate_loaders) + client_num, trans)
+        #     plt.savefig(FIG_SAVE_PATH+ '_' + str(a_iter) + '.png')
         # aggregation
         server_model, models = communication(args, server_model, models, client_weights, client_num, a_iter)
-        if (a_iter-1) % args.save_every == 0:
-            print('making forth row plots')
-            testset_vis = trainsets[0:client_num] 
-            testloader_vis = train_loaders[0:client_num]
-            mult = 0
-            if args.mode == 'fedda' and a_iter > args.pre_iter:
-                for i in range(len(generate_loaders)):
-                    testset_vis.append(virtualsets[i])
-                    testloader_vis.append(virtual_loaders[i])
-                mult = 1
-            trans = fit_umap(models, testloader_vis, testset_vis, device, mult*len(generate_loaders) + client_num)
-            visualize_all(models, testloader_vis, testset_vis, axes[3, 0], axes[3, 1], device, mult*len(generate_loaders) + client_num, trans)
-            plt.savefig(FIG_SAVE_PATH+ '_' + str(a_iter) + '.png')
+        
+        
+        if args.mode.lower() == 'fedda' and a_iter > args.pre_iter and args.synthesize_mode != None:
+            for client_idx,generate_loader in enumerate(generate_loaders):
+                if args.synth_method == 'ce':
+                    pass
+                elif args.synth_method == 'admm':
+                    if args.synthesize_test:
+                        vir_test_dataset, vir_test_label, ori_test_dataset, ori_test_label = src_img_synth_admm(test_loader, server_model, args,device, 'test', Synth_SAVE_PATH++'_test_' + datasets[client_idx]+'_'+ str(a_iter) + '.png',a_iter)
+                        adapt_test_loaders[client_idx].images = vir_test_dataset.detach().cpu().numpy()
+                        adapt_test_loaders[client_idx].labels = ori_test_label.detach().cpu().numpy()
+                        adapt_test_loaders[client_idx].synthesized = True
+        
+        # if (a_iter-1) % args.save_every == 0:
+        #     print('making forth row plots')
+        #     testset_vis = trainsets[0:client_num] 
+        #     testloader_vis = train_loaders[0:client_num]
+        #     mult = 0
+        #     if args.mode == 'fedda' and a_iter > args.pre_iter:
+        #         for i in range(len(generate_loaders)):
+        #             testset_vis.append(virtualsets[i])
+        #             testloader_vis.append(virtual_loaders[i])
+        #         mult = 1
+        #     trans = fit_umap(models, testloader_vis, testset_vis, device, mult*len(generate_loaders) + client_num)
+        #     visualize_all(models, testloader_vis, testset_vis, axes[3, 0], axes[3, 1], device, mult*len(generate_loaders) + client_num, trans)
+        #     plt.savefig(FIG_SAVE_PATH+ '_' + str(a_iter) + '.png')
         
 
         # report after aggregation
         avg_train = 0
         for client_idx in range(client_num):
             model, train_loader, optimizer = models[client_idx], train_loaders[client_idx], optimizers[client_idx]
-            train_loss, train_acc = test(model, train_loader, loss_fun, device)
+            if args.synthesize_test:
+                train_loss, train_acc = test(model, virtual_loaders[client_idx], loss_fun, device)
+            else:
+                train_loss, train_acc = test(model, train_loader, loss_fun, device)
             avg_train += train_acc
             print(
                 ' {:<11s}| Train Loss: {:.4f} | Train Acc: {:.4f}'.format(datasets[client_idx], train_loss, train_acc))
@@ -416,7 +459,11 @@ if __name__ == '__main__':
         # start testing
         avg_test = 0
         for test_idx, test_loader in enumerate(test_loaders[0:client_num]):
-            test_loss, test_acc = test(models[test_idx], test_loader, loss_fun, device)
+            if args.synthesize_test:
+                test_loss, test_acc = test(models[test_idx], adapt_test_loaders[test_idx], loss_fun, device)
+            else:
+                test_loss, test_acc = test(models[test_idx], test_loader, loss_fun, device)
+           
             avg_test += test_acc
             print(' {:<11s}| Test  Loss: {:.4f} | Test  Acc: {:.4f}'.format(datasets[test_idx], test_loss, test_acc))
             if args.log:
@@ -452,7 +499,7 @@ if __name__ == '__main__':
         else:
             torch.save(save, SAVE_PATH)
             
-        plt.close()
+        # plt.close()
 
     # if log:
     #     logfile.flush()

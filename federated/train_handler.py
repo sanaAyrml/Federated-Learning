@@ -234,7 +234,7 @@ def train_uda(trg_loader: DataLoader, src_loader: DataLoader, trg_model, domain_
             loss.backward()
             optimizer.step()
             
-            if args.log:
+            if e%20 ==0 and args.log:
                 metrics = {"Discriminatir_acc" + str(client_idx): domain_adv.domain_discriminator_accuracy,
                            "CE_loss" + str(client_idx): cls_loss_s,
                           "cdan_loss"+ str(client_idx): cdan_loss}
@@ -251,7 +251,7 @@ def train_uda(trg_loader: DataLoader, src_loader: DataLoader, trg_model, domain_
 
             
             
-def train(args, wandb,model, train_loader, optimizer, loss_fun, client_num, device,epoch = 1):
+def train(args, wandb,model, train_loader, optimizer, loss_fun, client_num, device,client_idx,epoch = 1):
     model.train()
     num_data = 0
     correct = 0
@@ -278,13 +278,13 @@ def train(args, wandb,model, train_loader, optimizer, loss_fun, client_num, devi
 
             pred = output.data.max(1)[1]
             correct += pred.eq(y.view(-1)).sum().item()
-            if args.log:
-                metrics = {"CE_loss" + str(client_num): loss}
+            if step%20 ==0 and args.log:
+                metrics = {"CE_loss" + str(client_idx): loss}
                 wandb.log(metrics)
     return loss_all / iter_num, correct / num_data
 
 
-def train_fedprox(args, wandb, model, train_loader, optimizer, loss_fun, client_num, device, epoch = 1):
+def train_fedprox(args, wandb, model, train_loader, optimizer, loss_fun, client_num, device,client_idx, epoch = 1):
     model.train()
     num_data = 0
     correct = 0
@@ -316,8 +316,8 @@ def train_fedprox(args, wandb, model, train_loader, optimizer, loss_fun, client_
             loss.backward()
             loss_all += loss.item()
             optimizer.step()
-            if args.log:
-                metrics = {"CE_loss" + str(client_num): loss}
+            if step%20 ==0 and args.log:
+                metrics = {"CE_loss" + str(client_idx): loss}
                 wandb.log(metrics)
             pred = output.data.max(1)[1]
             correct += pred.eq(y.view(-1)).sum().item()
@@ -371,10 +371,10 @@ def communication(args, server_model, models, client_weights,client_num,iteratio
                     for client_idx in range(len(client_weights)):
                         temp += client_weights[client_idx] * models[client_idx].state_dict()[key]
                     server_model.state_dict()[key].data.copy_(temp)
-                    if (args.mode.lower() == 'fedda' and iteration >args.pre_iter and not args.merge ) or args.mode.lower() == 'fednorm':
+                    if (args.mode.lower() == 'fedda' and iteration >args.pre_iter and ((iteration < args.pre_merge and args.merge) or not args.merge )) or args.mode.lower() == 'fednorm':
                         pass
                     else:
-                        print('merging')
+                        # print('merging')
                         for client_idx in range(len(client_weights)):
                             models[client_idx].state_dict()[key].data.copy_(server_model.state_dict()[key])
     return server_model, models

@@ -16,6 +16,13 @@ from utils import data_utils
 import torch.nn.utils.weight_norm as weightNorm
 import torch.nn.functional as func
 from torch.optim import SGD
+import torchvision.utils as vutils
+import matplotlib.image as image
+import matplotlib.pyplot as plt
+from matplotlib.pyplot import figure
+from PIL import Image
+
+
 
 def labels_to_one_hot(labels, num_class, device):
     # convert labels to one-hot
@@ -24,7 +31,7 @@ def labels_to_one_hot(labels, num_class, device):
     labels_one_hot.scatter_(1, labels.unsqueeze(1), 1)
     return labels_one_hot
 
-def src_img_synth_admm(gen_loader, src_model, args , device):
+def src_img_synth_admm(gen_loader, src_model, args , device, mode, save_dir,a_iter):
 
     src_model.eval()
     LAMB = torch.zeros_like(src_model.head.weight.data).to(device)
@@ -41,12 +48,19 @@ def src_img_synth_admm(gen_loader, src_model, args , device):
         labels_s = y_s.argmax(dim=1)
         if gen_dataset == None:
             gen_dataset = images_s
-            gen_labels = labels_s
+            if args.synthesize_label == 'pred' or mode == 'test':
+                gen_labels = labels_s
+            else:
+                print('hereee')
+                gen_labels = labels_real
             original_dataset = images_s
             original_labels = labels_real
         else:
             gen_dataset = torch.cat((gen_dataset, images_s), 0)
-            gen_labels = torch.cat((gen_labels, labels_s), 0)
+            if args.synthesize_label == 'pred' or mode == 'test':
+                gen_labels = torch.cat((gen_labels, labels_s), 0)
+            else:
+                gen_labels = torch.cat((gen_labels, labels_real), 0)
             original_dataset = torch.cat((original_dataset, images_s), 0)
             original_labels = torch.cat((original_labels, labels_real), 0)
 
@@ -109,5 +123,20 @@ def src_img_synth_admm(gen_loader, src_model, args , device):
 
         new_matrix = grad_matrix / len(gen_dataset) + args.param_gamma * src_model.head.weight.data
         LAMB += new_matrix * args.param_admm_rho
+        
+    if (a_iter-1) % args.save_every == 0:
+        print("saving image dir to", save_dir)
+        vutils.save_image(torch.cat((original_dataset[0:20],gen_dataset[0:20]),0), save_dir ,
+                          normalize=True, scale_each=True, nrow=int(10))
+        # plt.style.use('dark_background')
+        # # fig = plt.figure()
+        # # ax = fig.add_subplot()
+        # image = plt.imread(save_dir)
+        # ax.imshow(image)
+        # ax.axis('off')
+        # fig.set_size_inches(10 * 5, 10*10 )
+        # plt.title("ori_labels= "+str(original_labels[0:20])+"\n gen_labels="+str(gen_labels[0:20]), fontweight="bold")
+        # plt.savefig(save_dir)
+        # plt.close()
 
     return gen_dataset, gen_labels, original_dataset ,original_labels
