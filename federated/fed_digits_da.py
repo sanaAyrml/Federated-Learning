@@ -188,8 +188,8 @@ if __name__ == '__main__':
                         help='number of total inner epochs to run')
     parser.add_argument('--param_gamma', default=0.01, type=float)
     parser.add_argument('--param_admm_rho', default=0.01, type=float)
-    parser.add_argument('--iters_admm', default=3, type=int)
-    parser.add_argument('--lr_img', default=10., type=float)
+    parser.add_argument('--iters_admm', default=4, type=int)
+    parser.add_argument('--lr_img', default=20., type=float)
     parser.add_argument('--pre_iter', default= 20 , type=int)
     args = parser.parse_args()
 
