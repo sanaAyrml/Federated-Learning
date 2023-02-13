@@ -100,6 +100,7 @@ if __name__ == '__main__':
     parser.add_argument('--runid', default= None , type=str)
     parser.add_argument('--merge', action='store_true', help='merge training for local from servers')
     parser.add_argument('--synthesize_test', action='store_true', help='make a virtual test data and report according')
+    parser.add_argument('--fix', action='store_true', help='fixes embeddings for virtual dataset')
 
      
     

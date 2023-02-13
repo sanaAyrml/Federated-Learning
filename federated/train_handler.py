@@ -17,6 +17,7 @@ from torch.utils.data import DataLoader
 import torch.utils.data.distributed
 import torch.nn.functional as F
 from sklearn.metrics import confusion_matrix
+import copy
 
 from dalib.adaptation.sfda import mut_info_loss
 
@@ -176,6 +177,12 @@ def train_uda(trg_loader: DataLoader, src_loader: DataLoader, trg_model, domain_
     targets = []
     first_run = True
     iter_num = 0
+
+    if args.fix:
+        fixed_model = copy.deepcopy(trg_model)
+        for param in fixed_model.parameters():
+            param.requires_grad = False
+        fixed_model.eval()
     
     for e in range(10*epoch):
         src_iter = iter(src_loader)
@@ -197,7 +204,10 @@ def train_uda(trg_loader: DataLoader, src_loader: DataLoader, trg_model, domain_
             
             y_t, f_t = trg_model(images_t)
             # print('here2')
-            y_s, f_s = trg_model(images_s)
+            if args.fix:
+                y_s, f_s = fixed_model(images_s)
+            else:
+                y_s, f_s = trg_model(images_s)
 
             # print(y_t.shape, f_t.shape,target.shape)
             loss = 0.
