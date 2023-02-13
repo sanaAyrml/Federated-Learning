@@ -191,6 +191,7 @@ if __name__ == '__main__':
     parser.add_argument('--iters_admm', default=4, type=int)
     parser.add_argument('--lr_img', default=20., type=float)
     parser.add_argument('--pre_iter', default= 20 , type=int)
+    parser.add_argument('--fix_anchor', action='store_true', help='fix the virtual dataset embeddings')
     args = parser.parse_args()
 
     device = torch.device('cuda:' + str(args.cuda_num) if torch.cuda.is_available() else 'cpu')
