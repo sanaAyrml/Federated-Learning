@@ -30,7 +30,7 @@ from matplotlib import cm
 from dalib.modules.domain_discriminator import DomainDiscriminator
 from dalib.adaptation.dann import DomainAdversarialLoss
 from dalib.adaptation.cdan import ConditionalDomainAdversarialLoss
-from train_handler import train_uda, train, train_fedprox, test, communication, visualize, visualize_all,fit_umap
+from train_handler import train_uda, train, train_fedprox, test, communication, visualize, visualize_all,fit_umap, train_normal
 from synthesize import src_img_synth_admm
 from digit_net import ImageClassifier
 from prepare_data import prepare_data
@@ -372,9 +372,10 @@ if __name__ == '__main__':
                                   domain_adv=domain_adv[client_idx], optimizer=optimizer, epoch=args.wk_iters, args=args,
                                   device=device,wandb=wandb,client_idx=client_idx)
                     elif args.synthesize_mode == 'global':
-                        train_uda(trg_loader=train_loader, src_loader=virtual_loaders[0], trg_model=model,
-                                  domain_adv=domain_adv[client_idx], optimizer=optimizer, epoch=args.wk_iters, args=args,
-                                  device=device,wandb=wandb,client_idx=client_idx)
+                        train(args, wandb,model, virtual_loaders[0], optimizer, loss_fun, client_num, device,client_idx,args.wk_iters)
+                        # train_uda(trg_loader=train_loader, src_loader=virtual_loaders[0], trg_model=model,
+                        #           domain_adv=domain_adv[client_idx], optimizer=optimizer, epoch=args.wk_iters, args=args,
+                        #           device=device,wandb=wandb,client_idx=client_idx)
                 else:
                     train(args, wandb,model, train_loader, optimizer, loss_fun, client_num, device,client_idx,args.wk_iters)
             else:
