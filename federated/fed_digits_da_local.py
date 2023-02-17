@@ -30,7 +30,7 @@ from matplotlib import cm
 from dalib.modules.domain_discriminator import DomainDiscriminator
 from dalib.adaptation.dann import DomainAdversarialLoss
 from dalib.adaptation.cdan import ConditionalDomainAdversarialLoss
-from train_handler import train_uda, train, train_fedprox, test, communication, visualize, visualize_all,fit_umap, train_normal
+from train_handler import train_uda, train, train_fedprox, test, communication, visualize, visualize_all,fit_umap
 from synthesize import src_img_synth_admm
 from digit_net import ImageClassifier
 from prepare_data import prepare_data
