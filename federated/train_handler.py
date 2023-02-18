@@ -303,6 +303,49 @@ def train(args, wandb,model, train_loader, optimizer, loss_fun, client_num, devi
     return loss_all / iter_num, correct / num_data
 
 
+def train_multi_datasets(args, wandb,model, train_loaders, optimizer, loss_fun, client_num, device,client_idx,epoch = 1):
+    model.train()
+    num_data = 0
+    correct = 0
+    loss_all = 0
+    preds = []
+    targets = []
+    first_run = True
+    iter_num = 0
+    for e in range(epoch):
+        train_iters = []
+        for train_loader in train_loaders:
+            train_iters.append(iter(train_loader))
+        for step in range(len(train_iter)):
+            iter_num += 1
+            optimizer.zero_grad()
+            x = None
+            y = None
+            for train_iter in train_iters:
+                if x is None:
+                    x, y = next(train_iter)
+                else:
+                    x_temp, y_temp = next(train_iter)
+                    x = torch.cat((x, x_temp))
+                    y = torch.cat((y, y_temp))
+            num_data += y.size(0)
+            x = x.to(device).float()
+            y = y.to(device).long()
+            output,_ = model(x)
+
+            loss = loss_fun(output, y)
+            loss.backward()
+            loss_all += loss.item()
+            optimizer.step()
+
+            pred = output.data.max(1)[1]
+            correct += pred.eq(y.view(-1)).sum().item()
+            if step%20 ==0 and args.log:
+                metrics = {"CE_loss" + str(client_idx): loss}
+                wandb.log(metrics)
+    return loss_all / iter_num, correct / num_data
+
+
 def train_fedprox(args, wandb, model, train_loader, optimizer, loss_fun, client_num, device,client_idx, epoch = 1):
     model.train()
     num_data = 0

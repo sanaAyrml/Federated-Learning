@@ -30,7 +30,7 @@ from matplotlib import cm
 from dalib.modules.domain_discriminator import DomainDiscriminator
 from dalib.adaptation.dann import DomainAdversarialLoss
 from dalib.adaptation.cdan import ConditionalDomainAdversarialLoss
-from train_handler import train_uda, train, train_fedprox, test, communication, visualize, visualize_all,fit_umap
+from train_handler import train_uda, train, train_fedprox, test, communication, visualize, visualize_all,fit_umap, train_multi_dataset
 from synthesize import src_img_synth_admm
 from digit_net import ImageClassifier
 from prepare_data import prepare_data
@@ -343,7 +343,7 @@ if __name__ == '__main__':
                 virtualsets[client_idx].images = vir_datasets[client_idx].detach().cpu().numpy()
                 virtualsets[client_idx].labels = vir_labels[client_idx].detach().cpu().numpy()
                 virtualsets[client_idx].synthesized = True
-                virtual_loaders[client_idx] = torch.utils.data.DataLoader(torch.utils.data.ConcatDataset([virtualsets[client_idx], trainsets[client_idx]]), batch_size=args.batch, shuffle=True)
+                virtual_loaders[client_idx] = torch.utils.data.DataLoader(virtualsets[client_idx], batch_size=args.batch, shuffle=True)
 
 #             if (a_iter - 1) % args.save_every == 0:
 #                 print('making second row plots')
@@ -375,7 +375,7 @@ if __name__ == '__main__':
                         # train(args, wandb, model, generate_loaders[0], optimizer, loss_fun, client_num, device,
                         #       client_idx, args.wk_iters)
 
-                        train(args, wandb,model, virtual_loaders[0], optimizer, loss_fun, client_num, device,client_idx,args.wk_iters)
+                        train_multi_dataset(args, wandb,model, [virtual_loaders[0], train_loader], optimizer, loss_fun, client_num, device,client_idx,args.wk_iters)
 
                         # train_uda(trg_loader=train_loader, src_loader=virtual_loaders[0], trg_model=model,
                         #           domain_adv=domain_adv[client_idx], optimizer=optimizer, epoch=args.wk_iters, args=args,
