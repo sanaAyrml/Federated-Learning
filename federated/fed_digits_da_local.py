@@ -372,7 +372,11 @@ if __name__ == '__main__':
                                   domain_adv=domain_adv[client_idx], optimizer=optimizer, epoch=args.wk_iters, args=args,
                                   device=device,wandb=wandb,client_idx=client_idx)
                     elif args.synthesize_mode == 'global':
-                        train(args, wandb,model, virtual_loaders[0], optimizer, loss_fun, client_num, device,client_idx,args.wk_iters)
+                        train(args, wandb, model, generate_loaders[0], optimizer, loss_fun, client_num, device,
+                              client_idx, args.wk_iters)
+
+                        # train(args, wandb,model, virtual_loaders[0], optimizer, loss_fun, client_num, device,client_idx,args.wk_iters)
+
                         # train_uda(trg_loader=train_loader, src_loader=virtual_loaders[0], trg_model=model,
                         #           domain_adv=domain_adv[client_idx], optimizer=optimizer, epoch=args.wk_iters, args=args,
                         #           device=device,wandb=wandb,client_idx=client_idx)
