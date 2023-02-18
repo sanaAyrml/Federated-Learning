@@ -316,7 +316,7 @@ def train_multi_datasets(args, wandb,model, train_loaders, optimizer, loss_fun, 
         train_iters = []
         for train_loader in train_loaders:
             train_iters.append(iter(train_loader))
-        for step in range(len(train_iter)):
+        for step in range(len(train_iters[0])):
             iter_num += 1
             optimizer.zero_grad()
             x = None
