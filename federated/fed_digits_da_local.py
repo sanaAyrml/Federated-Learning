@@ -285,7 +285,7 @@ if __name__ == '__main__':
                                                                num_classes=trainset_num_classes,
                                                                features_dim=features_dim, randomized=False).to(device))
     for a_iter in range(resume_iter, args.iters):
-        if a_iter > 0:
+        if a_iter < 0:
             lr = args.lr / a_iter
             if patience == 4:
                 server_model = Best_Global_model
