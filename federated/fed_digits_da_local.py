@@ -176,8 +176,8 @@ if __name__ == '__main__':
 
 
 
-    server_model = ImageClassifier(args.model_arch,10, 512).to(device)
-    # server_model = DigitModel().to(device)
+    # server_model = ImageClassifier(args.model_arch,10, 512).to(device)
+    server_model = DigitModel().to(device)
     print(server_model)
     loss_fun = nn.CrossEntropyLoss()
 
