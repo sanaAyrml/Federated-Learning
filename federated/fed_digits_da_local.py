@@ -227,6 +227,7 @@ if __name__ == '__main__':
     # federated setting
     client_num = args.client_num
     client_weights = [1 / client_num for i in range(client_num)]
+    print(client_weights)
     models = [copy.deepcopy(server_model).to(device) for idx in range(client_num)]
 
     if args.test:

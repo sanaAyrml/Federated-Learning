@@ -434,7 +434,6 @@ def communication(args, server_model, models, client_weights,client_num,iteratio
                         temp += client_weights[client_idx] * models[client_idx].state_dict()[key]
                     server_model.state_dict()[key].data.copy_(temp)
                     if (args.mode.lower() == 'fedda' and iteration >args.pre_iter and ((iteration < args.pre_merge and args.merge) or not args.merge )) or args.mode.lower() == 'fednorm':
-                        print('what')
                         pass
                     else:
                         # print('merging')
