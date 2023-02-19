@@ -50,7 +50,7 @@ if __name__ == '__main__':
     parser.add_argument('--test', action='store_true', help='test the pretrained model')
     parser.add_argument('--percent', type=float, default=0.1, help='percentage of dataset to train')
     parser.add_argument('--lr', type=float, default=1e-1, help='learning rate')
-    parser.add_argument('--batch', type=int, default=256, help='batch size')
+    parser.add_argument('--batch', type=int, default=32, help='batch size')
     parser.add_argument('--iters', type=int, default=100, help='iterations for communication')
     parser.add_argument('--wk_iters', type=int, default=1,
                         help='optimization iters in local worker between communication')
