@@ -370,9 +370,11 @@ if __name__ == '__main__':
             if args.mode.lower() == 'fedda':
                 if a_iter > args.pre_iter:
                     if args.synthesize_mode == 'local':
-                        train_uda(trg_loader=train_loader, src_loader=virtual_loaders[client_idx], trg_model=model,
-                                  domain_adv=domain_adv[client_idx], optimizer=optimizer, epoch=args.wk_iters, args=args,
-                                  device=device,wandb=wandb,client_idx=client_idx)
+                        # train_uda(trg_loader=train_loader, src_loader=virtual_loaders[client_idx], trg_model=model,
+                        #           domain_adv=domain_adv[client_idx], optimizer=optimizer, epoch=args.wk_iters, args=args,
+                        #           device=device,wandb=wandb,client_idx=client_idx)
+                        train_multi_datasets(args, wandb, model, [train_loader, virtual_loaders[client_idx]], optimizer,
+                                             loss_fun, client_num, device, client_idx, args.wk_iters)
                     elif args.synthesize_mode == 'global':
                         # train(args, wandb, model, train_loader, optimizer, loss_fun, client_num, device,
                         #       client_idx, args.wk_iters)
