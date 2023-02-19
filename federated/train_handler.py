@@ -406,7 +406,7 @@ def test(model, test_loader, loss_fun, device):
 
         correct += pred.eq(target.view(-1)).sum().item()
 
-    return test_loss / iter_num , correct / len(test_loader.dataset)
+    return test_loss / len(test_loader) , correct / len(test_loader.dataset)
 
 
 ################# Key Function ########################
