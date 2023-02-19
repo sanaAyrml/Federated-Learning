@@ -310,22 +310,22 @@ if __name__ == '__main__':
             vir_labels = []
             ori_datasets = []
             ori_labels = []
-            # for client_idx,generate_loader in enumerate(generate_loaders):
-            #     if args.synth_method == 'ce':
-            #         pass
-            #     elif args.synth_method == 'admm':
-            #         print('generating data for client', client_idx)
-            #         vir_dataset, vir_label, ori_dataset, ori_label = src_img_synth_admm(generate_loader, server_model, args,device, 'train', Synth_SAVE_PATH+'_train_' +datasets[client_idx]+'_'+ str(a_iter) + '.png',a_iter)
-            #         vir_datasets.append(vir_dataset)
-            #         vir_labels.append(vir_label)
-            #         ori_datasets.append(ori_dataset)
-            #         ori_labels.append(ori_label)
+            for client_idx,generate_loader in enumerate(generate_loaders):
+                if args.synth_method == 'ce':
+                    pass
+                elif args.synth_method == 'admm':
+                    print('generating data for client', client_idx)
+                    vir_dataset, vir_label, ori_dataset, ori_label = src_img_synth_admm(generate_loader, server_model, args,device, 'train', Synth_SAVE_PATH+'_train_' +datasets[client_idx]+'_'+ str(a_iter) + '.png',a_iter)
+                    vir_datasets.append(vir_dataset)
+                    vir_labels.append(vir_label)
+                    ori_datasets.append(ori_dataset)
+                    ori_labels.append(ori_label)
 
-            # for client_idx in range(len(generate_loaders)):
-            #     virtualsets[client_idx].images = ori_datasets[client_idx].detach().cpu().numpy()
-            #     virtualsets[client_idx].labels = ori_labels[client_idx].detach().cpu().numpy()
-            #     virtualsets[client_idx].synthesized = True
-            #     virtual_loaders[client_idx] = torch.utils.data.DataLoader(virtualsets[client_idx], batch_size=args.batch, shuffle=True)
+            for client_idx in range(len(generate_loaders)):
+                virtualsets[client_idx].images = ori_datasets[client_idx].detach().cpu().numpy()
+                virtualsets[client_idx].labels = ori_labels[client_idx].detach().cpu().numpy()
+                virtualsets[client_idx].synthesized = True
+                virtual_loaders[client_idx] = torch.utils.data.DataLoader(virtualsets[client_idx], batch_size=args.batch, shuffle=True)
 
             # if (a_iter - 1) % args.save_every == 0:
             #     print('making first row plots')
@@ -341,11 +341,11 @@ if __name__ == '__main__':
             #     visualize_all(models, testloader_vis, testset_vis, axes[0, 0], axes[0, 1], device, client_num+len(generate_loaders), trans)
             #     plt.savefig(FIG_SAVE_PATH+ '_' + str(a_iter) + '.png')
 
-            # for client_idx in range(len(generate_loaders)):
-            #     virtualsets[client_idx].images = vir_datasets[client_idx].detach().cpu().numpy()
-            #     virtualsets[client_idx].labels = vir_labels[client_idx].detach().cpu().numpy()
-            #     virtualsets[client_idx].synthesized = True
-            #     virtual_loaders[client_idx] = torch.utils.data.DataLoader(virtualsets[client_idx], batch_size=args.batch, shuffle=True)
+            for client_idx in range(len(generate_loaders)):
+                virtualsets[client_idx].images = vir_datasets[client_idx].detach().cpu().numpy()
+                virtualsets[client_idx].labels = vir_labels[client_idx].detach().cpu().numpy()
+                virtualsets[client_idx].synthesized = True
+                virtual_loaders[client_idx] = torch.utils.data.DataLoader(virtualsets[client_idx], batch_size=args.batch, shuffle=True)
 
 #             if (a_iter - 1) % args.save_every == 0:
 #                 print('making second row plots')
