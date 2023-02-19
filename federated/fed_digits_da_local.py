@@ -227,7 +227,6 @@ if __name__ == '__main__':
     # federated setting
     client_num = args.client_num
     client_weights = [1 / client_num for i in range(client_num)]
-    print(client_weights)
     models = [copy.deepcopy(server_model).to(device) for idx in range(client_num)]
 
     if args.test:
@@ -300,6 +299,7 @@ if __name__ == '__main__':
                 param.requires_grad = False
             server_model.eval()
         else:
+            print(lr)
             optimizers = [optim.SGD(params=models[idx].parameters(), lr=lr*0.1) for idx in range(client_num)]
 
         print("============ Train epoch {} ============".format(a_iter * args.wk_iters))
