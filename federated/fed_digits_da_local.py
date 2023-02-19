@@ -410,11 +410,6 @@ if __name__ == '__main__':
         #     plt.savefig(FIG_SAVE_PATH+ '_' + str(a_iter) + '.png')
         # aggregation
         server_model, models = communication(args, server_model, models, client_weights, client_num, a_iter)
-
-        for client_idx in range(client_num):
-                model, train_loader, optimizer = models[client_idx], train_loaders[client_idx], optimizers[client_idx]
-                train_loss, train_acc = test(model, train_loader, loss_fun, device)
-                print(' {:<11s}| Train Loss: {:.4f} | Train Acc: {:.4f}'.format(datasets[client_idx] ,train_loss, train_acc))
                 
         
         
