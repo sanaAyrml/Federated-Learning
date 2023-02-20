@@ -304,7 +304,7 @@ if __name__ == '__main__':
                 param.requires_grad = False
             server_model.eval()
         else:
-            optimizers = [optim.SGD(params=models[idx].parameters(), lr=args.lr) for idx in range(client_num)]
+            optimizers = [optim.SGD(params=models[idx].get_parameters(), lr=args.lr) for idx in range(client_num)]
 
         print("============ Train epoch {} ============".format(a_iter * args.wk_iters))
         # if args.log: logfile.write("============ Train epoch {} ============\n".format(wi + a_iter * args.wk_iters))
