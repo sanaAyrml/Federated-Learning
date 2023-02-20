@@ -185,15 +185,19 @@ if __name__ == '__main__':
     # name of each client dataset
     datasets = ['MNIST', 'SVHN', 'USPS', 'MNIST-M', 'SynthDigits']
     public_dataset = None
-    if args.mode == 'fedda':
-        if args.public_dataset > 0 and args.synthesize_mode == 'global':
-            public_dataset = datasets[args.public_dataset-1]
-            datasets.pop(args.public_dataset-1)
-            print('public_dataset', public_dataset)
-        elif args.public_dataset == 0 and args.synthesize_mode == 'local':
-            pass
-        else:
-            print('There is a problem in synthesize mode')
+    if args.public_dataset > 0 and args.synthesize_mode == 'global':
+        public_dataset = datasets[args.public_dataset - 1]
+        datasets.pop(args.public_dataset - 1)
+        print('public_dataset', public_dataset)
+    # if args.mode == 'fedda':
+    #     if args.public_dataset > 0 and args.synthesize_mode == 'global':
+    #         public_dataset = datasets[args.public_dataset-1]
+    #         datasets.pop(args.public_dataset-1)
+    #         print('public_dataset', public_dataset)
+    #     elif args.public_dataset == 0 and args.synthesize_mode == 'local':
+    #         pass
+    #     else:
+    #         print('There is a problem in synthesize mode')
     datasets = datasets[0:args.client_num]
     print('datasets', datasets)
     
@@ -321,11 +325,11 @@ if __name__ == '__main__':
                     ori_datasets.append(ori_dataset)
                     ori_labels.append(ori_label)
 
-            for client_idx in range(len(generate_loaders)):
-                virtualsets[client_idx].images = ori_datasets[client_idx].detach().cpu().numpy()
-                virtualsets[client_idx].labels = ori_labels[client_idx].detach().cpu().numpy()
-                virtualsets[client_idx].synthesized = True
-                virtual_loaders[client_idx] = torch.utils.data.DataLoader(virtualsets[client_idx], batch_size=args.batch, shuffle=True)
+            # for client_idx in range(len(generate_loaders)):
+            #     virtualsets[client_idx].images = ori_datasets[client_idx].detach().cpu().numpy()
+            #     virtualsets[client_idx].labels = ori_labels[client_idx].detach().cpu().numpy()
+            #     virtualsets[client_idx].synthesized = True
+            #     virtual_loaders[client_idx] = torch.utils.data.DataLoader(virtualsets[client_idx], batch_size=args.batch, shuffle=True)
 
             # if (a_iter - 1) % args.save_every == 0:
             #     print('making first row plots')
