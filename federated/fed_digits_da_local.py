@@ -49,7 +49,7 @@ if __name__ == '__main__':
     parser.add_argument('--log', action='store_true', help='whether to make a log')
     parser.add_argument('--test', action='store_true', help='test the pretrained model')
     parser.add_argument('--percent', type=float, default=0.1, help='percentage of dataset to train')
-    parser.add_argument('--lr', type=float, default=1e-2, help='learning rate')
+    parser.add_argument('--lr', type=float, default=1e-1, help='learning rate')
     parser.add_argument('--batch', type=int, default=32, help='batch size')
     parser.add_argument('--iters', type=int, default=100, help='iterations for communication')
     parser.add_argument('--wk_iters', type=int, default=1,
