@@ -87,7 +87,7 @@ def prepare_data(args,datasets,public_dataset):
     synth_trainset = data_utils.DigitsDataset(data_path='data/SynthDigits/', channels=3, percent=args.percent,
                                               train=True, transform=transform_synth)
     synth_testset = data_utils.DigitsDataset(data_path='data/SynthDigits/', channels=3, percent=args.percent,
-                                             train=True, transform=transform_synth)
+                                             train=False, transform=transform_synth)
     # synth_virtualset = torch.utils.data.ConcatDataset([synth_trainset, synth_testset])
     synth_virtualset = data_utils.DigitsDataset(data_path='data/SynthDigits/', channels=3, percent=args.percent,
                                               train=True, transform=transform_synth)
