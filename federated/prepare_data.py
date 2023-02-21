@@ -163,3 +163,141 @@ def prepare_data(args,datasets,public_dataset):
         
 
     return trainsets, virtualsets, testsets, generatsets
+
+
+def prepare_domainnet(args, datasets, public_dataset):
+    # Prepare data
+    transform_train = transforms.Compose([
+        transforms.Resize([256, 256]),
+        transforms.RandomHorizontalFlip(),
+        transforms.RandomRotation((-30, 30)),
+        transforms.ToTensor(),
+    ])
+
+    transform_test = transforms.Compose([
+        transforms.Resize([256, 256]),
+        transforms.ToTensor(),
+    ])
+
+    data_base_path = '../data'
+
+    clipart_trainset = DomainNetDataset(data_base_path, 'clipart', transform=transform_train)
+    clipart_virtualset = DomainNetDataset(data_base_path, 'clipart', transform=transform_train)
+    clipart_testset = DomainNetDataset(data_base_path, 'clipart', transform=transform_test, train=False)
+    # infograph
+    infograph_trainset = DomainNetDataset(data_base_path, 'infograph', transform=transform_train)
+    infograph_virtualset = DomainNetDataset(data_base_path, 'infograph', transform=transform_train)
+    infograph_testset = DomainNetDataset(data_base_path, 'infograph', transform=transform_test, train=False)
+    # painting
+    painting_trainset = DomainNetDataset(data_base_path, 'painting', transform=transform_train)
+    painting_virtualset = DomainNetDataset(data_base_path, 'painting', transform=transform_train)
+    painting_testset = DomainNetDataset(data_base_path, 'painting', transform=transform_test, train=False)
+    # quickdraw
+    quickdraw_trainset = DomainNetDataset(data_base_path, 'quickdraw', transform=transform_train)
+    quickdraw_virtualset = DomainNetDataset(data_base_path, 'quickdraw', transform=transform_train)
+    quickdraw_testset = DomainNetDataset(data_base_path, 'quickdraw', transform=transform_test, train=False)
+    # real
+    real_trainset = DomainNetDataset(data_base_path, 'real', transform=transform_train)
+    real_virtualset = DomainNetDataset(data_base_path, 'real', transform=transform_train)
+    real_testset = DomainNetDataset(data_base_path, 'real', transform=transform_test, train=False)
+    # sketch
+    sketch_trainset = DomainNetDataset(data_base_path, 'sketch', transform=transform_train)
+    sketch_virtualset = DomainNetDataset(data_base_path, 'sketch', transform=transform_train)
+    sketch_testset = DomainNetDataset(data_base_path, 'sketch', transform=transform_test, train=False)
+
+    min_data_len = min(len(clipart_trainset), len(infograph_trainset), len(painting_trainset), len(quickdraw_trainset),
+                       len(real_trainset), len(sketch_trainset))
+    min_data_len = int(min_data_len * 0.05)
+
+    # clipart_valset = torch.utils.data.Subset(clipart_trainset, list(range(len(clipart_trainset)))[-val_len:])
+    clipart_trainset = torch.utils.data.Subset(clipart_trainset, list(range(min_data_len)))
+
+    # infograph_valset = torch.utils.data.Subset(infograph_trainset, list(range(len(infograph_trainset)))[-val_len:])
+    infograph_trainset = torch.utils.data.Subset(infograph_trainset, list(range(min_data_len)))
+
+    # painting_valset = torch.utils.data.Subset(painting_trainset, list(range(len(painting_trainset)))[-val_len:])
+    painting_trainset = torch.utils.data.Subset(painting_trainset, list(range(min_data_len)))
+
+    # quickdraw_valset = torch.utils.data.Subset(quickdraw_trainset, list(range(len(quickdraw_trainset)))[-val_len:])
+    quickdraw_trainset = torch.utils.data.Subset(quickdraw_trainset, list(range(min_data_len)))
+
+    # real_valset = torch.utils.data.Subset(real_trainset, list(range(len(real_trainset)))[-val_len:])
+    real_trainset = torch.utils.data.Subset(real_trainset, list(range(min_data_len)))
+
+    # sketch_valset = torch.utils.data.Subset(sketch_trainset, list(range(len(sketch_trainset)))[-val_len:])
+    sketch_trainset = torch.utils.data.Subset(sketch_trainset, list(range(min_data_len)))
+
+
+    trainsets = []
+    virtualsets = []
+    testsets = []
+    generatsets = []
+    for dataset in datasets:
+        if dataset == 'clipart':
+            trainsets.append(mnist_trainset)
+            testsets.append(mnist_testset)
+            if public_dataset == None:
+                generatsets.append(mnist_trainset)
+                virtualsets.append(mnist_virtualset)
+
+        elif dataset == 'infograph':
+            trainsets.append(svhn_trainset)
+            testsets.append(svhn_testset)
+            if public_dataset == None:
+                generatsets.append(svhn_trainset)
+                virtualsets.append(svhn_virtualset)
+
+        elif dataset == 'painting':
+            trainsets.append(usps_trainset)
+            testsets.append(usps_testset)
+            if public_dataset == None:
+                generatsets.append(usps_trainset)
+                virtualsets.append(usps_virtualset)
+
+        elif dataset == 'quickdraw':
+            trainsets.append(mnistm_trainset)
+            testsets.append(mnistm_testset)
+            if public_dataset == None:
+                generatsets.append(mnistm_trainset)
+                virtualsets.append(mnistm_virtualset)
+
+        elif dataset == 'real':
+            trainsets.append(synth_trainset)
+            testsets.append(synth_testset)
+            if public_dataset == None:
+                generatsets.append(synth_trainset)
+                virtualsets.append(synth_virtualset)
+
+        elif dataset == 'sketch':
+            trainsets.append(synth_trainset)
+            testsets.append(synth_testset)
+            if public_dataset == None:
+                generatsets.append(synth_trainset)
+                virtualsets.append(synth_virtualset)
+
+    if public_dataset != None:
+        if public_dataset == 'clipart':
+            generatsets.append(mnist_trainset)
+            virtualsets.append(mnist_virtualset)
+
+        elif public_dataset == 'infograph':
+            generatsets.append(svhn_trainset)
+            virtualsets.append(svhn_virtualset)
+
+        elif public_dataset == 'painting':
+            generatsets.append(usps_trainset)
+            virtualsets.append(usps_virtualset)
+
+        elif public_dataset == 'quickdraw':
+            generatsets.append(mnistm_trainset)
+            virtualsets.append(mnistm_virtualset)
+
+        elif public_dataset == 'real':
+            generatsets.append(synth_trainset)
+            virtualsets.append(synth_virtualset)
+
+        elif public_dataset == 'sketch':
+            generatsets.append(synth_trainset)
+            virtualsets.append(synth_virtualset)
+
+    return trainsets, virtualsets, testsets, generatsets
