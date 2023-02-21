@@ -96,9 +96,9 @@ class OfficeDataset(Dataset):
 class DomainNetDataset(Dataset):
     def __init__(self, base_path, site, train=True, transform=None):
         if train:
-            self.paths, self.text_labels = np.load('./data/DomainNet/{}_train.pkl'.format(site), allow_pickle=True)
+            self.paths, self.text_labels = np.load('../data/DomainNet/{}_train.pkl'.format(site), allow_pickle=True)
         else:
-            self.paths, self.text_labels = np.load('./data/DomainNet/{}_test.pkl'.format(site), allow_pickle=True)
+            self.paths, self.text_labels = np.load('../data/DomainNet/{}_test.pkl'.format(site), allow_pickle=True)
             
         label_dict = {'bird':0, 'feather':1, 'headphones':2, 'ice_cream':3, 'teapot':4, 'tiger':5, 'whale':6, 'windmill':7, 'wine_glass':8, 'zebra':9}     
         
