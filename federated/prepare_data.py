@@ -180,7 +180,7 @@ def prepare_domainnet(args, datasets, public_dataset):
         transforms.ToTensor(),
     ])
 
-    data_base_path = './data'
+    data_base_path = 'data'
 
     clipart_trainset = DomainNetDataset(data_base_path, 'clipart', transform=transform_train)
     clipart_virtualset = DomainNetDataset(data_base_path, 'clipart', transform=transform_train)
