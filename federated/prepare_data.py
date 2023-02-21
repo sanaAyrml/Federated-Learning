@@ -235,70 +235,70 @@ def prepare_domainnet(args, datasets, public_dataset):
     generatsets = []
     for dataset in datasets:
         if dataset == 'clipart':
-            trainsets.append(mnist_trainset)
-            testsets.append(mnist_testset)
+            trainsets.append(clipart_trainset)
+            testsets.append(clipart_testset)
             if public_dataset == None:
-                generatsets.append(mnist_trainset)
-                virtualsets.append(mnist_virtualset)
+                generatsets.append(clipart_trainset)
+                virtualsets.append(clipart_virtualset)
 
         elif dataset == 'infograph':
-            trainsets.append(svhn_trainset)
-            testsets.append(svhn_testset)
+            trainsets.append(infograph_trainset)
+            testsets.append(infograph_testset)
             if public_dataset == None:
-                generatsets.append(svhn_trainset)
-                virtualsets.append(svhn_virtualset)
+                generatsets.append(infograph_trainset)
+                virtualsets.append(infograph_virtualset)
 
         elif dataset == 'painting':
-            trainsets.append(usps_trainset)
-            testsets.append(usps_testset)
+            trainsets.append(painting_trainset)
+            testsets.append(painting_testset)
             if public_dataset == None:
-                generatsets.append(usps_trainset)
-                virtualsets.append(usps_virtualset)
+                generatsets.append(painting_trainset)
+                virtualsets.append(painting_virtualset)
 
         elif dataset == 'quickdraw':
-            trainsets.append(mnistm_trainset)
-            testsets.append(mnistm_testset)
+            trainsets.append(quickdraw_trainset)
+            testsets.append(quickdraw_testset)
             if public_dataset == None:
-                generatsets.append(mnistm_trainset)
-                virtualsets.append(mnistm_virtualset)
+                generatsets.append(quickdraw_trainset)
+                virtualsets.append(quickdraw_virtualset)
 
         elif dataset == 'real':
-            trainsets.append(synth_trainset)
-            testsets.append(synth_testset)
+            trainsets.append(real_trainset)
+            testsets.append(real_testset)
             if public_dataset == None:
-                generatsets.append(synth_trainset)
-                virtualsets.append(synth_virtualset)
+                generatsets.append(real_trainset)
+                virtualsets.append(real_virtualset)
 
         elif dataset == 'sketch':
-            trainsets.append(synth_trainset)
-            testsets.append(synth_testset)
+            trainsets.append(sketch_trainset)
+            testsets.append(sketch_testset)
             if public_dataset == None:
-                generatsets.append(synth_trainset)
-                virtualsets.append(synth_virtualset)
+                generatsets.append(sketch_trainset)
+                virtualsets.append(sketch_virtualset)
 
     if public_dataset != None:
         if public_dataset == 'clipart':
-            generatsets.append(mnist_trainset)
-            virtualsets.append(mnist_virtualset)
+            generatsets.append(clipart_trainset)
+            virtualsets.append(clipart_virtualset)
 
         elif public_dataset == 'infograph':
-            generatsets.append(svhn_trainset)
-            virtualsets.append(svhn_virtualset)
+            generatsets.append(infograph_trainset)
+            virtualsets.append(infograph_virtualset)
 
         elif public_dataset == 'painting':
-            generatsets.append(usps_trainset)
-            virtualsets.append(usps_virtualset)
+            generatsets.append(painting_trainset)
+            virtualsets.append(painting_virtualset)
 
         elif public_dataset == 'quickdraw':
-            generatsets.append(mnistm_trainset)
-            virtualsets.append(mnistm_virtualset)
+            generatsets.append(quickdraw_trainset)
+            virtualsets.append(quickdraw_virtualset)
 
         elif public_dataset == 'real':
-            generatsets.append(synth_trainset)
-            virtualsets.append(synth_virtualset)
+            generatsets.append(real_trainset)
+            virtualsets.append(real_virtualset)
 
         elif public_dataset == 'sketch':
-            generatsets.append(synth_trainset)
-            virtualsets.append(synth_virtualset)
+            generatsets.append(sketch_trainset)
+            virtualsets.append(sketch_virtualset)
 
     return trainsets, virtualsets, testsets, generatsets
