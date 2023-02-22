@@ -99,5 +99,5 @@ class AlexNet(nn.Module):
         x = self.features(x)
         x = self.avgpool(x)
         x = torch.flatten(x, 1)
-        x = self.classifier(x)
-        return x
+        x2 = self.classifier(x)
+        return x2, x
