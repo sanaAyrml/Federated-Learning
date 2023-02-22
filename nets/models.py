@@ -95,7 +95,7 @@ class AlexNet(nn.Module):
         )
 
         self.head = nn.Linear(4096, num_classes)
-        )
+        
 
     def forward(self, x):
         x = self.backbone(x)
