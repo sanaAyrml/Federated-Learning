@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as func
 from collections import OrderedDict
-
+from typing import Tuple, Optional, List, Dict
 
 class DigitModel(nn.Module):
     """
