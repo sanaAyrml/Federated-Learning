@@ -94,10 +94,7 @@ class AlexNet(nn.Module):
             ])
         )
 
-        self.head = nn.Sequential(
-            OrderedDict([
-                ('fc3', nn.Linear(4096, num_classes)),
-            ])
+        self.head = nn.Linear(4096, num_classes)
         )
 
     def forward(self, x):
