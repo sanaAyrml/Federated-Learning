@@ -301,7 +301,7 @@ if __name__ == '__main__':
         #         patience = 0
         #         args.param_cdan /= 5
         if args.mode.lower() == 'fedda' and a_iter > args.pre_iter:
-            optimizers = [optim.SGD(params=models[idx].get_parameters() + domain_discri[idx].get_parameters() , lr=lr) for idx in range(client_num)]
+            optimizers = [optim.SGD(params=models[idx].parameters() + domain_discri[idx].parameters() , lr=lr) for idx in range(client_num)]
             for param in server_model.parameters():
                 param.requires_grad = False
             server_model.eval()
