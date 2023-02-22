@@ -177,7 +177,7 @@ if __name__ == '__main__':
 
 
 
-    server_model = ImageClassifier(args.model_arch,10, 512).to(device)
+    server_model = ImageClassifier(args.model_arch,31, 512).to(device)
     # server_model = DigitModel().to(device)
     print(server_model)
     loss_fun = nn.CrossEntropyLoss()
@@ -271,7 +271,7 @@ if __name__ == '__main__':
     # lr_schedulers =  [ReduceLROnPlateau(optimizer, factor=lr_factor, patience=lr_patience, threshold=lr_threshold) for optimizer]
     # start training
     patience = 0
-    trainset_num_classes = 10
+    trainset_num_classes = 31
     domain_discri = []
     domain_adv = []
     # print(models[0])
