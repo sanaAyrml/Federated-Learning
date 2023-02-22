@@ -50,7 +50,7 @@ if __name__ == '__main__':
     parser.add_argument('--log', action='store_true', help='whether to make a log')
     parser.add_argument('--test', action='store_true', help='test the pretrained model')
     parser.add_argument('--percent', type=float, default=0.1, help='percentage of dataset to train')
-    parser.add_argument('--lr', type=float, default=1e-1, help='learning rate')
+    parser.add_argument('--lr', type=float, default=1e-2, help='learning rate')
     parser.add_argument('--batch', type=int, default=32, help='batch size')
     parser.add_argument('--iters', type=int, default=100, help='iterations for communication')
     parser.add_argument('--wk_iters', type=int, default=1,
@@ -301,13 +301,13 @@ if __name__ == '__main__':
         #         patience = 0
         #         args.param_cdan /= 5
         if args.mode.lower() == 'fedda' and a_iter > args.pre_iter:
-            optimizers = [optim.SGD(params=models[idx].get_parameters() + domain_discri[idx].get_parameters() , lr=lr) for idx in range(client_num)]
+            optimizers = [optim.SGD(params=models[idx].parameters() + domain_discri[idx].parameters() , lr=lr) for idx in range(client_num)]
             # optimizers = [optim.SGD(params=models[idx].parameters(), lr=args.lr) for idx in range(client_num)]
             for param in server_model.parameters():
                 param.requires_grad = False
             server_model.eval()
         else:
-            optimizers = [optim.SGD(params=models[idx].get_parameters(), lr=args.lr) for idx in range(client_num)]
+            optimizers = [optim.SGD(params=models[idx].parameters(), lr=args.lr) for idx in range(client_num)]
 
         print("============ Train epoch {} ============".format(a_iter * args.wk_iters))
         # if args.log: logfile.write("============ Train epoch {} ============\n".format(wi + a_iter * args.wk_iters))
