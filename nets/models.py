@@ -53,7 +53,7 @@ class AlexNet(nn.Module):
     """
     def __init__(self, num_classes=10):
         super(AlexNet, self).__init__()
-        self.features = nn.Sequential(
+        self.backbone = nn.Sequential(
             OrderedDict([
                 ('conv1', nn.Conv2d(3, 64, kernel_size=11, stride=4, padding=2)),
                 ('bn1', nn.BatchNorm2d(64)),
@@ -81,7 +81,7 @@ class AlexNet(nn.Module):
         )
         self.avgpool = nn.AdaptiveAvgPool2d((6, 6))
 
-        self.classifier = nn.Sequential(
+        self.bottleneck = nn.Sequential(
             OrderedDict([
                 ('fc1', nn.Linear(256 * 6 * 6, 4096)),
                 ('bn6', nn.BatchNorm1d(4096)),
@@ -90,14 +90,32 @@ class AlexNet(nn.Module):
                 ('fc2', nn.Linear(4096, 4096)),
                 ('bn7', nn.BatchNorm1d(4096)),
                 ('relu7', nn.ReLU(inplace=True)),
-            
+
+            ])
+        )
+
+        self.head = nn.Sequential(
+            OrderedDict([
                 ('fc3', nn.Linear(4096, num_classes)),
             ])
         )
 
     def forward(self, x):
-        x = self.features(x)
+        x = self.backbone(x)
         x = self.avgpool(x)
         x = torch.flatten(x, 1)
-        x2 = self.classifier(x)
+        x = self.bottleneck(x)
+        x2 = self.head(x)
         return x2, x
+
+
+    def get_parameters(self) -> List[Dict]:
+        """A parameter list which decides optimization hyper-parameters,
+            such as the relative learning rate of each layer
+        """
+        params = [
+            {"params": self.backbone.parameters(), "lr_mult": 0.1},
+            {"params": self.bottleneck.parameters(), "lr_mult": 0.1},
+            {"params": self.head.parameters(), "lr_mult": 1.},
+        ]
+        return params
