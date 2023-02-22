@@ -272,7 +272,7 @@ if __name__ == '__main__':
     # lr_schedulers =  [ReduceLROnPlateau(optimizer, factor=lr_factor, patience=lr_patience, threshold=lr_threshold) for optimizer]
     # start training
     patience = 0
-    trainset_num_classes = 31
+    trainset_num_classes = 10
     domain_discri = []
     domain_adv = []
     # print(models[0])
@@ -301,7 +301,8 @@ if __name__ == '__main__':
         #         patience = 0
         #         args.param_cdan /= 5
         if args.mode.lower() == 'fedda' and a_iter > args.pre_iter:
-            optimizers = [optim.SGD(params=models[idx].parameters() + domain_discri[idx].parameters() , lr=lr) for idx in range(client_num)]
+            # optimizers = [optim.SGD(params=models[idx].parameters() + domain_discri[idx].parameters() , lr=lr) for idx in range(client_num)]
+            optimizers = [optim.SGD(params=models[idx].parameters(), lr=args.lr) for idx in range(client_num)]
             for param in server_model.parameters():
                 param.requires_grad = False
             server_model.eval()
