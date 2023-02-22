@@ -302,3 +302,107 @@ def prepare_domainnet(args, datasets, public_dataset):
             virtualsets.append(sketch_virtualset)
 
     return trainsets, virtualsets, testsets, generatsets
+
+
+def prepare_office(args, datasets, public_dataset):
+    # Prepare data
+    data_base_path = '../data'
+    transform_office = transforms.Compose([
+        transforms.Resize([256, 256]),
+        transforms.RandomHorizontalFlip(),
+        transforms.RandomRotation((-30, 30)),
+        transforms.ToTensor(),
+    ])
+
+    transform_test = transforms.Compose([
+        transforms.Resize([256, 256]),
+        transforms.ToTensor(),
+    ])
+
+    # amazon
+    amazon_trainset = OfficeDataset(data_base_path, 'amazon', transform=transform_office)
+    amazon_virtualset = OfficeDataset(data_base_path, 'amazon', transform=transform_office)
+    amazon_testset = OfficeDataset(data_base_path, 'amazon', transform=transform_test, train=False)
+    # caltech
+    caltech_trainset = OfficeDataset(data_base_path, 'caltech', transform=transform_office)
+    caltech_virtualset = OfficeDataset(data_base_path, 'caltech', transform=transform_office)
+    caltech_testset = OfficeDataset(data_base_path, 'caltech', transform=transform_test, train=False)
+    # dslr
+    dslr_trainset = OfficeDataset(data_base_path, 'dslr', transform=transform_office)
+    dslr_virtualset = OfficeDataset(data_base_path, 'dslr', transform=transform_office)
+    dslr_testset = OfficeDataset(data_base_path, 'dslr', transform=transform_test, train=False)
+    # webcam
+    webcam_trainset = OfficeDataset(data_base_path, 'webcam', transform=transform_office)
+    webcam_virtualset = OfficeDataset(data_base_path, 'webcam', transform=transform_office)
+    webcam_testset = OfficeDataset(data_base_path, 'webcam', transform=transform_test, train=False)
+
+    min_data_len = min(len(amazon_trainset), len(caltech_trainset), len(dslr_trainset), len(webcam_trainset))
+    # val_len = int(min_data_len * 0.4)
+    min_data_len = int(min_data_len * 0.5)
+
+    # amazon_valset = torch.utils.data.Subset(amazon_trainset, list(range(len(amazon_trainset)))[-val_len:])
+    amazon_trainset = torch.utils.data.Subset(amazon_trainset, list(range(min_data_len)))
+
+    # caltech_valset = torch.utils.data.Subset(caltech_trainset, list(range(len(caltech_trainset)))[-val_len:])
+    caltech_trainset = torch.utils.data.Subset(caltech_trainset, list(range(min_data_len)))
+
+    # dslr_valset = torch.utils.data.Subset(dslr_trainset, list(range(len(dslr_trainset)))[-val_len:])
+    dslr_trainset = torch.utils.data.Subset(dslr_trainset, list(range(min_data_len)))
+
+    # webcam_valset = torch.utils.data.Subset(webcam_trainset, list(range(len(webcam_trainset)))[-val_len:])
+    webcam_trainset = torch.utils.data.Subset(webcam_trainset, list(range(min_data_len)))
+
+
+    trainsets = []
+    virtualsets = []
+    testsets = []
+    generatsets = []
+    for dataset in datasets:
+        if dataset == 'amazon':
+            trainsets.append(amazon_trainset)
+            testsets.append(amazon_testset)
+            if public_dataset == None:
+                generatsets.append(amazon_trainset)
+                virtualsets.append(amazon_virtualset)
+
+        elif dataset == 'caltech':
+            trainsets.append(caltech_trainset)
+            testsets.append(caltech_testset)
+            if public_dataset == None:
+                generatsets.append(caltech_trainset)
+                virtualsets.append(caltech_virtualset)
+
+        elif dataset == 'dslr':
+            trainsets.append(dslr_trainset)
+            testsets.append(dslr_testset)
+            if public_dataset == None:
+                generatsets.append(dslr_trainset)
+                virtualsets.append(dslr_virtualset)
+
+        elif dataset == 'webcam':
+            trainsets.append(webcam_trainset)
+            testsets.append(webcam_testset)
+            if public_dataset == None:
+                generatsets.append(webcam_trainset)
+                virtualsets.append(webcam_virtualset)
+
+
+    if public_dataset != None:
+        if public_dataset == 'amazon':
+            generatsets.append(amazon_trainset)
+            virtualsets.append(amazon_virtualset)
+
+        elif public_dataset == 'caltech':
+            generatsets.append(caltech_trainset)
+            virtualsets.append(caltech_virtualset)
+
+        elif public_dataset == 'dslr':
+            generatsets.append(dslr_trainset)
+            virtualsets.append(dslr_virtualset)
+
+        elif public_dataset == 'webcam':
+            generatsets.append(webcam_trainset)
+            virtualsets.append(webcam_virtualset)
+
+
+    return trainsets, virtualsets, testsets, generatsets
