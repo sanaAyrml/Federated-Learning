@@ -44,7 +44,7 @@ def src_img_synth_admm(gen_loader, src_model, args , device, mode, save_dir,a_it
         # if batch_idx == 10:
         #     break
         images_s = images_s.to(device)
-        print(images_s[0])
+        print(torch.max(images_s[0]))
         y_s,_ = src_model(images_s)
         labels_s = y_s.argmax(dim=1)
         if gen_dataset == None:
