@@ -66,7 +66,7 @@ def src_img_synth_admm(gen_loader, src_model, args , device, mode, save_dir,a_it
             original_labels = torch.cat((original_labels, labels_real), 0)
 
     for i in range(args.iters_admm):
-        
+        torch.cuda.empty_cache()
         gc.collect()
 
         print(f'admm iter: {i}/{args.iters_admm}')
