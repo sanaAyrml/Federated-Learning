@@ -44,7 +44,6 @@ def src_img_synth_admm(gen_loader, src_model, args , device, mode, save_dir,a_it
         # if batch_idx == 10:
         #     break
         images_s = images_s.to(device)
-        print(torch.max(images_s[0]))
         y_s,_ = src_model(images_s)
         labels_s = y_s.argmax(dim=1)
         if gen_dataset == None:
@@ -101,6 +100,7 @@ def src_img_synth_admm(gen_loader, src_model, args , device, mode, save_dir,a_it
                 optimizer_s.step()
 
                 images_s = torch.clip(images_s, 0.0, 1.0)
+
 
             # update src imgs
             gen_dataset[batch_idx*args.batch:(batch_idx+1)*args.batch] = images_s
