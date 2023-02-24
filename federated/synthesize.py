@@ -99,6 +99,8 @@ def src_img_synth_admm(gen_loader, src_model, args , device, mode, save_dir,a_it
                 loss.backward()
                 optimizer_s.step()
 
+                print(images_s[0])
+
             # update src imgs
             gen_dataset[batch_idx*args.batch:(batch_idx+1)*args.batch] = images_s
        #     for img, path in zip(images_s.detach_().cpu(), paths):
