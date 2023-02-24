@@ -21,6 +21,7 @@ import matplotlib.image as image
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
 from PIL import Image
+import gc
 
 
 
@@ -65,6 +66,8 @@ def src_img_synth_admm(gen_loader, src_model, args , device, mode, save_dir,a_it
             original_labels = torch.cat((original_labels, labels_real), 0)
 
     for i in range(args.iters_admm):
+        
+        gc.collect()
 
         print(f'admm iter: {i}/{args.iters_admm}')
 
