@@ -343,7 +343,7 @@ def prepare_office(args, datasets, public_dataset):
     webcam_testset = OfficeDataset(data_base_path, 'webcam', transform=transform_test, train=False)
     # cifar
     cifar_trainset = torchvision.datasets.CIFAR10(root='./data', train=True,
-                                            download=True, transform=transform)
+                                            download=True, transform=transform_cifar)
     cifar_virtualset = torchvision.datasets.CIFAR10(root='./data', train=True,
                                                   download=True, transform=transform_cifar)
     cifar_testset = torchvision.datasets.CIFAR10(root='./data', train=False,
