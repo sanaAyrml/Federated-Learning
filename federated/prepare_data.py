@@ -365,6 +365,8 @@ def prepare_office(args, datasets, public_dataset):
     # webcam_valset = torch.utils.data.Subset(webcam_trainset, list(range(len(webcam_trainset)))[-val_len:])
     webcam_trainset = torch.utils.data.Subset(webcam_trainset, list(range(min_data_len)))
 
+    cifar_trainset = torch.utils.data.Subset(cifar_trainset, list(range(min_data_len)))
+
 
     trainsets = []
     virtualsets = []
