@@ -380,13 +380,13 @@ if __name__ == '__main__':
                         # train_uda(trg_loader=train_loader, src_loader=virtual_loaders[client_idx], trg_model=model,
                         #           domain_adv=domain_adv[client_idx], optimizer=optimizer, epoch=args.wk_iters, args=args,
                         #           device=device,wandb=wandb,client_idx=client_idx)
-                        train_multi_datasets(args, wandb, model, [virtual_loaders[client_idx], virtual_loaders[client_idx]], optimizer,
+                        train_multi_datasets(args, wandb, model, [train_loader, virtual_loaders[client_idx]], optimizer,
                                              loss_fun, client_num, device, client_idx, args.wk_iters)
                     elif args.synthesize_mode == 'global':
                         # train(args, wandb, model, train_loader, optimizer, loss_fun, client_num, device,
                         #       client_idx, args.wk_iters)
 
-                        train_multi_datasets(args, wandb,model, [virtual_loaders[0], virtual_loaders[0]], optimizer, loss_fun, client_num, device,client_idx,args.wk_iters)
+                        train_multi_datasets(args, wandb,model, [train_loader, virtual_loaders[0]], optimizer, loss_fun, client_num, device,client_idx,args.wk_iters)
 
                         # train_uda(trg_loader=train_loader, src_loader=virtual_loaders[0], trg_model=model,
                         #           domain_adv=domain_adv[client_idx], optimizer=optimizer, epoch=args.wk_iters, args=args,
