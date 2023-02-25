@@ -345,9 +345,9 @@ def prepare_office(args, datasets, public_dataset):
     cifar_trainset = torchvision.datasets.CIFAR10(root='./data', train=True,
                                             download=True, transform=transform)
     cifar_virtualset = torchvision.datasets.CIFAR10(root='./data', train=True,
-                                                  download=True, transform=transform)
+                                                  download=True, transform=transform_cifar)
     cifar_testset = torchvision.datasets.CIFAR10(root='./data', train=False,
-                                           download=True, transform=transform)
+                                           download=True, transform=transform_cifar)
 
     min_data_len = min(len(amazon_trainset), len(caltech_trainset), len(dslr_trainset), len(webcam_trainset))
     # val_len = int(min_data_len * 0.4)
