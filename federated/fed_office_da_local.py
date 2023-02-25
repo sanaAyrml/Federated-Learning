@@ -352,7 +352,7 @@ if __name__ == '__main__':
                 virtualsets[client_idx].images = vir_datasets[client_idx].detach().cpu().numpy()
                 virtualsets[client_idx].labels = vir_labels[client_idx].detach().cpu().numpy()
                 virtualsets[client_idx].synthesized = True
-                virtual_loaders[client_idx] = torch.utils.data.DataLoader(virtualsets[client_idx], batch_size=args.batch, shuffle=True)
+                virtual_loaders[client_idx] = torch.utils.data.DataLoader(virtualsets[client_idx], batch_size=4*args.batch, shuffle=True)
 
 #             if (a_iter - 1) % args.save_every == 0:
 #                 print('making second row plots')
