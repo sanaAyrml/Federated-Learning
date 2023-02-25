@@ -320,6 +320,11 @@ def prepare_office(args, datasets, public_dataset):
         transforms.ToTensor(),
     ])
 
+    transform_cifar = transforms.Compose(
+        [transforms.Resize([256, 256]),
+         transforms.ToTensor(),
+         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+
     # amazon
     amazon_trainset = OfficeDataset(data_base_path, 'amazon', transform=transform_office)
     amazon_virtualset = OfficeDataset(data_base_path, 'amazon', transform=transform_office)
@@ -336,6 +341,13 @@ def prepare_office(args, datasets, public_dataset):
     webcam_trainset = OfficeDataset(data_base_path, 'webcam', transform=transform_office)
     webcam_virtualset = OfficeDataset(data_base_path, 'webcam', transform=transform_office)
     webcam_testset = OfficeDataset(data_base_path, 'webcam', transform=transform_test, train=False)
+    # cifar
+    cifar_trainset = torchvision.datasets.CIFAR10(root='./data', train=True,
+                                            download=True, transform=transform)
+    cifar_virtualset = torchvision.datasets.CIFAR10(root='./data', train=True,
+                                                  download=True, transform=transform)
+    cifar_testset = torchvision.datasets.CIFAR10(root='./data', train=False,
+                                           download=True, transform=transform)
 
     min_data_len = min(len(amazon_trainset), len(caltech_trainset), len(dslr_trainset), len(webcam_trainset))
     # val_len = int(min_data_len * 0.4)
@@ -387,6 +399,13 @@ def prepare_office(args, datasets, public_dataset):
                 generatsets.append(webcam_trainset)
                 virtualsets.append(webcam_virtualset)
 
+        elif dataset == 'cifar':
+            trainsets.append(cifar_trainset)
+            testsets.append(cifar_testset)
+            if public_dataset == None:
+                generatsets.append(cifar_trainset)
+                virtualsets.append(cifar_virtualset)
+
 
     if public_dataset != None:
         if public_dataset == 'amazon':
@@ -404,6 +423,10 @@ def prepare_office(args, datasets, public_dataset):
         elif public_dataset == 'webcam':
             generatsets.append(webcam_trainset)
             virtualsets.append(webcam_virtualset)
+
+        elif public_dataset == 'cifar':
+            generatsets.append(cifar_trainset)
+            virtualsets.append(cifar_virtualset)
 
 
     return trainsets, virtualsets, testsets, generatsets

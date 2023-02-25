@@ -185,7 +185,7 @@ if __name__ == '__main__':
 
 
     # name of each client dataset
-    datasets = ['amazon', 'caltech', 'dslr', 'webcam']
+    datasets = ['amazon', 'caltech', 'dslr', 'webcam', 'cifar']
     public_dataset = None
     if args.public_dataset > 0 and args.synthesize_mode == 'global':
         public_dataset = datasets[args.public_dataset - 1]
