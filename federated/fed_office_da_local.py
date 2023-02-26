@@ -374,7 +374,7 @@ if __name__ == '__main__':
                     train_fedprox(args, wandb, model, train_loader, optimizer, loss_fun, client_num, device,client_idx,args.wk_iters)
                 else:
                     train(args, wandb,model, train_loader, optimizer, loss_fun, client_num, device,client_idx,args.wk_iters)
-            if args.mode.lower() == 'fedda':
+            elif args.mode.lower() == 'fedda':
                 if a_iter > args.pre_iter:
                     if args.synthesize_mode == 'local':
                         # train_uda(trg_loader=train_loader, src_loader=virtual_loaders[client_idx], trg_model=model,
@@ -393,6 +393,10 @@ if __name__ == '__main__':
                         #           device=device,wandb=wandb,client_idx=client_idx)
                 else:
                     train(args, wandb,model, train_loader, optimizer, loss_fun, client_num, device,client_idx,args.wk_iters)
+            elif args.mode.lower() == 'fedbn':
+                if a_iter > args.pre_iter:
+                    train_multi_datasets(args, wandb, model, [train_loader, virtual_loaders[0]], optimizer, loss_fun,
+                                         client_num, device, client_idx, args.wk_iters)
             else:
                 train(args, wandb,model, train_loader, optimizer, loss_fun, client_num, device,client_idx,args.wk_iters)
 
