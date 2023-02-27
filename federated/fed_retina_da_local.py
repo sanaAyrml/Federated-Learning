@@ -117,6 +117,7 @@ if __name__ == '__main__':
     lr_factor = 0.3  # Learning rate decrease factor
     lr_patience = 5
     lr_threshold = 0.0001
+    trainset_num_classes = 64
 
     print('Device:', device)
 
@@ -180,7 +181,7 @@ if __name__ == '__main__':
 
     # server_model = ImageClassifier(args.model_arch,31, 512).to(device)
     # server_model = DigitModel().to(device)
-    server_model = AlexNet().to(device)
+    server_model = AlexNet(trainset_num_classes).to(device)
     print(server_model)
     loss_fun = nn.CrossEntropyLoss()
 
@@ -281,7 +282,6 @@ if __name__ == '__main__':
     # lr_schedulers =  [ReduceLROnPlateau(optimizer, factor=lr_factor, patience=lr_patience, threshold=lr_threshold) for optimizer]
     # start training
     patience = 0
-    trainset_num_classes = 10
     domain_discri = []
     domain_adv = []
     # print(models[0])
