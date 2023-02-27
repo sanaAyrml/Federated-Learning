@@ -413,7 +413,7 @@ def test(model, test_loader, loss_fun, device):
 def communication(args, server_model, models, client_weights,client_num,iteration):
     with torch.no_grad():
         # aggregate params
-        if args.mode.lower() == 'fedbn' or args.mode.lower() == 'fedda':
+        if args.mode.lower() == 'fedbn':
             for key in server_model.state_dict().keys():
                 if 'bn' not in key:
                     temp = torch.zeros_like(server_model.state_dict()[key], dtype=torch.float32)
