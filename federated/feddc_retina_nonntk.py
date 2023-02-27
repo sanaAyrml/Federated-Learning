@@ -116,7 +116,7 @@ class RefugeDataset(torch.utils.data.Dataset):
 
         return image_tensor
 
-def prepare_data(args, im_size):
+def prepare_data(args, datasets, public_dataset, im_size):
     # data_base_path = './data/segmented_retina'
     data_base_path = '../data/retina_balanced'
     # transform_train = transforms.Compose([
