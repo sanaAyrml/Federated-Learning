@@ -35,6 +35,7 @@ from train_handler import train_uda, train, train_fedprox, test, communication, 
 from synthesize import src_img_synth_admm
 from digit_net import ImageClassifier
 from prepare_data import prepare_office
+from feddc_retina_nonntk import prepare_data
 
 
 if __name__ == '__main__':
@@ -185,7 +186,7 @@ if __name__ == '__main__':
 
 
     # name of each client dataset
-    datasets = ['amazon', 'caltech', 'dslr', 'webcam', 'cifar']
+    datasets = ['drishti', 'kaggle', 'rim', 'refuge', 'cifar']
     public_dataset = None
     if args.public_dataset > 0 and args.synthesize_mode == 'global':
         public_dataset = datasets[args.public_dataset - 1]
@@ -205,7 +206,7 @@ if __name__ == '__main__':
     
     # prepare the data
     # trainsets, virtualsets, testsets, train_loaders, virtual_loaders, test_loaders = prepare_data(args,datasets,public_dataset)
-    trainsets, virtualsets, testsets, generatsets =  prepare_office(args,datasets,public_dataset)
+    trainsets, virtualsets, testsets, generatsets =  prepare_data(args,datasets,public_dataset)
     print(len(trainsets),len(virtualsets),len(testsets),len(generatsets))
                                    
     train_loaders = []
@@ -224,6 +225,12 @@ if __name__ == '__main__':
     if args.synthesize_test:
         for sets in testsets:
             adapt_test_loaders.append(torch.utils.data.DataLoader(sets, batch_size=args.batch, shuffle=False))
+
+    for client_idx, train_loader in enumerate(train_loaders):
+        iter_img = iter(train_loader)
+        x, y = next(iter_img)
+        for i in range(10):
+            plt.savefig(x[i].numpy(), '../images/' + str(datasets[client_idx]) + '_class_'+ + str(y.numpy()) + '_' + str(i))
     
     
 

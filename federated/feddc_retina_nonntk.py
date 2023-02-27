@@ -140,12 +140,18 @@ def prepare_data(args, im_size):
             transforms.ToTensor(),
             transforms.Normalize(MEANS[0], STDS[0])
     ])
+
+    transform_cifar = transforms.Compose(
+        [transforms.Resize([256, 256]),
+         transforms.ToTensor(),
+         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
     # drishti_trainset = DrishtiDataset(dataset_path=data_base_path,transform=transform_drishti)
     # drishti_testset = DrishtiDataset(dataset_path=data_base_path,transform=transform_drishti, train=False)
     drishti_train_path = os.path.join(data_base_path, 'Drishti', 'Training')
     drishti_test_path = os.path.join(data_base_path, 'Drishti', 'Testing')
-    unnormalized_drishti_trainset = ImageFolder(drishti_train_path, transform=transform_unnormalized)
+    # unnormalized_drishti_trainset = ImageFolder(drishti_train_path, transform=transform_unnormalized)
     drishti_trainset = ImageFolder(drishti_train_path, transform=transform_drishti)
+    rishti_virtualset = ImageFolder(drishti_train_path, transform=transform_drishti)
     drishti_testset = ImageFolder(drishti_test_path, transform=transform_drishti)
     # drishti_concated = torch.utils.data.ConcatDataset([drishti_trainset, drishti_testset])
     
@@ -159,8 +165,9 @@ def prepare_data(args, im_size):
     ])
     kaggle_train_path = os.path.join(data_base_path, 'kaggle_arima', 'Training')
     kaggle_test_path = os.path.join(data_base_path, 'kaggle_arima', 'Testing')
-    unnormalized_kaggle_trainset = ImageFolder(kaggle_train_path, transform=transform_unnormalized)
+    # unnormalized_kaggle_trainset = ImageFolder(kaggle_train_path, transform=transform_unnormalized)
     kaggle_trainset = ImageFolder(kaggle_train_path, transform=transform_kaggle)
+    kaggle_virtualset = ImageFolder(kaggle_train_path, transform=transform_kaggle)
     kaggle_testset = ImageFolder(kaggle_test_path, transform=transform_kaggle)
     # kaggle_concated = ImageFolder(kaggle_train_path, transform=transform_kaggle, target_transform=torch.tensor)
     # print(kaggle_concated.class_to_idx)
@@ -177,8 +184,9 @@ def prepare_data(args, im_size):
     # rim_test_path = os.path.join(data_base_path, 'RIM-ONE_DL_images', 'partitioned_by_hospital', 'test_set')
     rim_train_path = os.path.join(data_base_path, 'RIM', 'Training')
     rim_test_path = os.path.join(data_base_path, 'RIM', 'Testing')
-    unnormalized_rim_trainset = ImageFolder(rim_train_path, transform=transform_unnormalized)
+    # unnormalized_rim_trainset = ImageFolder(rim_train_path, transform=transform_unnormalized)
     rim_trainset = ImageFolder(rim_train_path, transform=transform_rim)
+    rim_virtualset = ImageFolder(rim_train_path, transform=transform_rim)
     rim_testset = ImageFolder(rim_test_path, transform=transform_rim)
     # rim_concated = torch.utils.data.ConcatDataset([rim_trainset,rim_testset])
     # print(rim_trainset.class_to_idx)
@@ -194,14 +202,37 @@ def prepare_data(args, im_size):
     ])
     refuge_train_path = os.path.join(data_base_path, 'REFUGE', 'Training')
     refuge_test_path = os.path.join(data_base_path, 'REFUGE', 'Testing')
-    unnormalized_refuge_trainset = ImageFolder(refuge_train_path, transform=transform_unnormalized)
+    # unnormalized_refuge_trainset = ImageFolder(refuge_train_path, transform=transform_unnormalized)
     refuge_trainset = ImageFolder(refuge_train_path, transform=transform_refuge)
+    refuge_virtualset = ImageFolder(refuge_train_path, transform=transform_refuge)
     refuge_testset = ImageFolder(refuge_test_path, transform=transform_refuge)
     # print(refuge_trainset.class_to_idx)
     # refuge_valset = RefugeDataset(data_base_path, transform=transform_refuge, test=False)
     # refuge_testset = RefugeDataset(data_base_path, transform=transform_refuge)
     # refuge_concated = torch.utils.data.ConcatDataset([refuge_trainset,refuge_valset,refuge_testset])
 
+    cifar_trainset = torchvision.datasets.CIFAR10(root='./data', train=True,
+                                                  download=True, transform=transform_cifar)
+    cifar_virtualset = torchvision.datasets.CIFAR10(root='./data', train=True,
+                                                    download=True, transform=transform_cifar)
+    cifar_testset = torchvision.datasets.CIFAR10(root='./data', train=False,
+                                                 download=True, transform=transform_cifar)
+
+    min_data_len = min(len(drishti_trainset), len(kaggle_trainset), len(rim_trainset), len(refuge_trainset))
+
+    # amazon_valset = torch.utils.data.Subset(amazon_trainset, list(range(len(amazon_trainset)))[-val_len:])
+    drishti_trainset = torch.utils.data.Subset(drishti_trainset, list(range(min_data_len)))
+
+    # caltech_valset = torch.utils.data.Subset(caltech_trainset, list(range(len(caltech_trainset)))[-val_len:])
+    kaggle_trainset = torch.utils.data.Subset(kaggle_trainset, list(range(min_data_len)))
+
+    # dslr_valset = torch.utils.data.Subset(dslr_trainset, list(range(len(dslr_trainset)))[-val_len:])
+    rim_trainset = torch.utils.data.Subset(rim_trainset, list(range(min_data_len)))
+
+    # webcam_valset = torch.utils.data.Subset(webcam_trainset, list(range(len(webcam_trainset)))[-val_len:])
+    refuge_trainset = torch.utils.data.Subset(refuge_trainset, list(range(min_data_len)))
+
+    cifar_trainset = torch.utils.data.Subset(cifar_trainset, list(range(min_data_len)))
 
 
     # dataset_length = len(drishti_concated)
@@ -241,36 +272,100 @@ def prepare_data(args, im_size):
     # )
 
     #####################################
-    Drishti_train_loader = torch.utils.data.DataLoader(drishti_trainset, batch_size=args.batch, shuffle=True)
-    Drishti_test_loader = torch.utils.data.DataLoader(drishti_testset, batch_size=args.batch, shuffle=False)
+    # Drishti_train_loader = torch.utils.data.DataLoader(drishti_trainset, batch_size=args.batch, shuffle=True)
+    # Drishti_test_loader = torch.utils.data.DataLoader(drishti_testset, batch_size=args.batch, shuffle=False)
+    # 
+    # kaggle_train_loader = torch.utils.data.DataLoader(kaggle_trainset, batch_size=args.batch, shuffle=True)
+    # kaggle_test_loader = torch.utils.data.DataLoader(kaggle_testset, batch_size=args.batch, shuffle=False)
+    # 
+    # rim_train_loader = torch.utils.data.DataLoader(rim_trainset, batch_size=args.batch, shuffle=True)
+    # rim_test_loader = torch.utils.data.DataLoader(rim_testset, batch_size=args.batch, shuffle=False)
+    # 
+    # refuge_train_loader = torch.utils.data.DataLoader(refuge_trainset, batch_size=args.batch, shuffle=True)
+    # refuge_test_loader = torch.utils.data.DataLoader(refuge_testset, batch_size=args.batch, shuffle=False)
+    # 
+    # train_loaders = [Drishti_train_loader, kaggle_train_loader, rim_train_loader, refuge_train_loader]
+    # test_loaders = [Drishti_test_loader, kaggle_test_loader, rim_test_loader, refuge_test_loader]
 
-    kaggle_train_loader = torch.utils.data.DataLoader(kaggle_trainset, batch_size=args.batch, shuffle=True)
-    kaggle_test_loader = torch.utils.data.DataLoader(kaggle_testset, batch_size=args.batch, shuffle=False)
+    trainsets = []
+    virtualsets = []
+    testsets = []
+    generatsets = []
+    for dataset in datasets:
+        if dataset == 'drishti':
+            trainsets.append(drishti_trainset)
+            testsets.append(drishti_testset)
+            if public_dataset == None:
+                generatsets.append(drishti_trainset)
+                virtualsets.append(drishti_virtualset)
 
-    rim_train_loader = torch.utils.data.DataLoader(rim_trainset, batch_size=args.batch, shuffle=True)
-    rim_test_loader = torch.utils.data.DataLoader(rim_testset, batch_size=args.batch, shuffle=False)
+        elif dataset == 'kaggle':
+            trainsets.append(kaggle_trainset)
+            testsets.append(kaggle_testset)
+            if public_dataset == None:
+                generatsets.append(kaggle_trainset)
+                virtualsets.append(kaggle_virtualset)
 
-    refuge_train_loader = torch.utils.data.DataLoader(refuge_trainset, batch_size=args.batch, shuffle=True)
-    refuge_test_loader = torch.utils.data.DataLoader(refuge_testset, batch_size=args.batch, shuffle=False)
+        elif dataset == 'rim':
+            trainsets.append(rim_trainset)
+            testsets.append(rim_testset)
+            if public_dataset == None:
+                generatsets.append(rim_trainset)
+                virtualsets.append(rim_virtualset)
+
+        elif dataset == 'refuge':
+            trainsets.append(refuge_trainset)
+            testsets.append(refuge_testset)
+            if public_dataset == None:
+                generatsets.append(refuge_trainset)
+                virtualsets.append(refuge_virtualset)
+
+        elif dataset == 'cifar':
+            trainsets.append(cifar_trainset)
+            testsets.append(cifar_testset)
+            if public_dataset == None:
+                generatsets.append(cifar_trainset)
+                virtualsets.append(cifar_virtualset)
+
+    if public_dataset != None:
+        if public_dataset == 'drishti':
+            generatsets.append(drishti_trainset)
+            virtualsets.append(drishti_virtualset)
+
+        elif public_dataset == 'kaggle':
+            generatsets.append(kaggle_trainset)
+            virtualsets.append(kaggle_virtualset)
+
+        elif public_dataset == 'rim':
+            generatsets.append(rim_trainset)
+            virtualsets.append(rim_virtualset)
+
+        elif public_dataset == 'refuge':
+            generatsets.append(refuge_trainset)
+            virtualsets.append(refuge_virtualset)
+
+        elif public_dataset == 'cifar':
+            generatsets.append(cifar_trainset)
+            virtualsets.append(cifar_virtualset)
     
-    train_loaders = [Drishti_train_loader, kaggle_train_loader, rim_train_loader, refuge_train_loader]
-    test_loaders = [Drishti_test_loader, kaggle_test_loader, rim_test_loader, refuge_test_loader]
-    unnormalized_train_datasets = [unnormalized_drishti_trainset, unnormalized_kaggle_trainset, unnormalized_rim_trainset, unnormalized_refuge_trainset]
-    train_datasets = [drishti_trainset, kaggle_trainset, rim_trainset, refuge_trainset]
-    test_datasets = [drishti_testset, kaggle_testset, rim_testset, refuge_testset]
+    
+    # unnormalized_train_datasets = [unnormalized_drishti_trainset, unnormalized_kaggle_trainset, unnormalized_rim_trainset, unnormalized_refuge_trainset]
+    # train_datasets = [drishti_trainset, kaggle_trainset, rim_trainset, refuge_trainset]
+    # test_datasets = [drishti_testset, kaggle_testset, rim_testset, refuge_testset]
+    #
+    # min_data_len = min(len(drishti_testset), len(kaggle_testset), len(rim_testset), len(refuge_testset))
+    # # min_data_len = min(len(kaggle_testset), len(rim_testset), len(refuge_testset))
+    #
+    # shuffled_idxes = [list(range(0, len(test_datasets[idx]))) for idx in range(len(test_datasets))]
+    # for idx in range(len(shuffled_idxes)):
+    #     random.shuffle(shuffled_idxes[idx])
+    # concated_test_set = [torch.utils.data.Subset(test_datasets[idx], shuffled_idxes[idx][:min_data_len]) for idx in range(len(test_datasets))]
+    # concated_test_set = torch.utils.data.ConcatDataset(concated_test_set)
+    # print(len(drishti_testset), len(kaggle_testset), len(rim_testset), len(refuge_testset), len(concated_test_set))
+    # concated_test_loader = torch.utils.data.DataLoader(concated_test_set, batch_size=args.batch, shuffle=False)
 
-    min_data_len = min(len(drishti_testset), len(kaggle_testset), len(rim_testset), len(refuge_testset))
-    # min_data_len = min(len(kaggle_testset), len(rim_testset), len(refuge_testset))
-
-    shuffled_idxes = [list(range(0, len(test_datasets[idx]))) for idx in range(len(test_datasets))]
-    for idx in range(len(shuffled_idxes)):
-        random.shuffle(shuffled_idxes[idx])
-    concated_test_set = [torch.utils.data.Subset(test_datasets[idx], shuffled_idxes[idx][:min_data_len]) for idx in range(len(test_datasets))]
-    concated_test_set = torch.utils.data.ConcatDataset(concated_test_set)
-    print(len(drishti_testset), len(kaggle_testset), len(rim_testset), len(refuge_testset), len(concated_test_set))
-    concated_test_loader = torch.utils.data.DataLoader(concated_test_set, batch_size=args.batch, shuffle=False)
-
-    return train_datasets, test_datasets, train_loaders, test_loaders, concated_test_loader, unnormalized_train_datasets
+    # return train_datasets, test_datasets, train_loaders, test_loaders, concated_test_loader, unnormalized_train_datasets
+    return trainsets, virtualsets, testsets, generatsets
 
 def train(model, train_loader, optimizer, loss_fun, client_num, device):
     model.train()
