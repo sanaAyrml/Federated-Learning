@@ -230,7 +230,7 @@ if __name__ == '__main__':
         iter_img = iter(train_loader)
         x, y = next(iter_img)
         for i in range(10):
-            plt.imshow(x[i].numpy())
+            plt.imshow(np.moveaxis(x[i].numpy(), 0, -1))
             plt.savefig('../images/' + str(datasets[client_idx]) + '_class_'+ str(y.numpy()) + '_' + str(i))
     
     
