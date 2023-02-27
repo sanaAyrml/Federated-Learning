@@ -322,8 +322,14 @@ if __name__ == '__main__':
                     pass
                 elif args.synth_method == 'admm':
                     print('generating data for client', client_idx)
+                    for param in models[client_idx].parameters():
+                        param.requires_grad = False
+                    models[client_idx].eval()
                     # vir_dataset, vir_label, ori_dataset, ori_label = src_img_synth_admm(generate_loader, server_model, args,device, 'train', Synth_SAVE_PATH+'_train_' +datasets[client_idx]+'_'+ str(a_iter) + '.png',a_iter)
                     vir_dataset, vir_label, ori_dataset, ori_label = src_img_synth_admm(generate_loader, models[client_idx], args,device, 'train', Synth_SAVE_PATH+'_train_' +datasets[client_idx]+'_'+ str(a_iter) + '.png',a_iter)
+                    for param in models[client_idx].parameters():
+                        param.requires_grad = True
+                    models[client_idx].eval()
                     vir_datasets.append(vir_dataset)
                     vir_labels.append(vir_label)
                     ori_datasets.append(ori_dataset)
