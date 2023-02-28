@@ -202,8 +202,11 @@ if __name__ == '__main__':
     trainsets, virtualsets, testsets, generatsets =  prepare_data(args,datasets,public_dataset, (256, 256))
     print(len(trainsets),len(virtualsets),len(testsets),len(generatsets))
 
-    print('labels')
-    print(np.bincount(np.argmax((trainsets[0].targets).numpy(),-1), minlength=64))
+    for idx in range(len(trainsets)):
+        train_iter = iter(trainsets[idx])
+        for i in range(len(train_iter)):
+            x, y = next(train_iter)
+            print(np.argmax(y.numpy(), -1))
                                    
     train_loaders = []
     test_loaders = []
