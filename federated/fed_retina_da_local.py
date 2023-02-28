@@ -331,7 +331,7 @@ if __name__ == '__main__':
                     pass
                 elif args.synth_method == 'admm':
                     print('generating data for client', client_idx)
-                    vir_dataset, vir_label, ori_dataset, ori_label = src_img_synth_admm(generate_loader, server_model, args,device, 'train', Synth_SAVE_PATH+'_train_' +datasets[client_idx]+'_'+ str(a_iter) + '.png',a_iter)
+                    vir_dataset, vir_label, ori_dataset, ori_label = src_img_synth_admm(generate_loader, server_model, args,device, 'train', Synth_SAVE_PATH+'_train_' +datasets[client_idx]+'_'+ str(a_iter) + '.png',a_iter, trainset_num_classes)
                     vir_datasets.append(vir_dataset)
                     vir_labels.append(vir_label)
                     ori_datasets.append(ori_dataset)
