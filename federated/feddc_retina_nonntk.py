@@ -151,7 +151,7 @@ def prepare_data(args, datasets, public_dataset, im_size):
     drishti_test_path = os.path.join(data_base_path, 'Drishti', 'Testing')
     # unnormalized_drishti_trainset = ImageFolder(drishti_train_path, transform=transform_unnormalized)
     drishti_trainset = ImageFolder(drishti_train_path, transform=transform_drishti)
-    rishti_virtualset = ImageFolder(drishti_train_path, transform=transform_drishti)
+    drishti_virtualset = ImageFolder(drishti_train_path, transform=transform_drishti)
     drishti_testset = ImageFolder(drishti_test_path, transform=transform_drishti)
     # drishti_concated = torch.utils.data.ConcatDataset([drishti_trainset, drishti_testset])
     
@@ -226,18 +226,18 @@ def prepare_data(args, datasets, public_dataset, im_size):
     shuffled_idxes = [list(range(0, len_datasets[idx])) for idx in range(5)]
     for idx in range(len(shuffled_idxes)):
         random.shuffle(shuffled_idxes[idx])
-    drishti_trainset = torch.utils.data.Subset(drishti_trainset, shuffled_idxes[0][:len(shuffled_idxes[0])-1])
+    drishti_trainset = torch.utils.data.Subset(drishti_trainset, shuffled_idxes[0][:len(shuffled_idxes[0])-len(shuffled_idxes[0])%4])
 
     # caltech_valset = torch.utils.data.Subset(caltech_trainset, list(range(len(caltech_trainset)))[-val_len:])
-    kaggle_trainset = torch.utils.data.Subset(kaggle_trainset, shuffled_idxes[1][:len(shuffled_idxes[1])-1])
+    kaggle_trainset = torch.utils.data.Subset(kaggle_trainset, shuffled_idxes[1][:len(shuffled_idxes[1])-len(shuffled_idxes[1])%4])
 
     # dslr_valset = torch.utils.data.Subset(dslr_trainset, list(range(len(dslr_trainset)))[-val_len:])
-    rim_trainset = torch.utils.data.Subset(rim_trainset, shuffled_idxes[2][:len(shuffled_idxes[2])-1])
+    rim_trainset = torch.utils.data.Subset(rim_trainset, shuffled_idxes[2][:len(shuffled_idxes[2])-len(shuffled_idxes[2])%4])
 
     # webcam_valset = torch.utils.data.Subset(webcam_trainset, list(range(len(webcam_trainset)))[-val_len:])
-    refuge_trainset = torch.utils.data.Subset(refuge_trainset, shuffled_idxes[3][:len(shuffled_idxes[3])-2])
+    refuge_trainset = torch.utils.data.Subset(refuge_trainset, shuffled_idxes[3][:len(shuffled_idxes[3])-len(shuffled_idxes[3])%4])
 
-    cifar_trainset = torch.utils.data.Subset(cifar_trainset, shuffled_idxes[4][:len(shuffled_idxes[4])-1])
+    cifar_trainset = torch.utils.data.Subset(cifar_trainset, shuffled_idxes[4][:len(shuffled_idxes[4])-len(shuffled_idxes[4])%4])
 
 
     # dataset_length = len(drishti_concated)
