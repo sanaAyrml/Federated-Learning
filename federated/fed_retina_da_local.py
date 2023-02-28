@@ -231,6 +231,7 @@ if __name__ == '__main__':
 
     for idx in range(len(train_loaders)):
         num = [0 for j in range(64)]
+        print(datasets[idx])
         train_iter = iter(train_loaders[idx])
         for i in range(len(train_loaders)):
             x, y = next(train_iter)
