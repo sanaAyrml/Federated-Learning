@@ -230,14 +230,17 @@ if __name__ == '__main__':
     #         plt.savefig('../images/' + str(datasets[client_idx]) + '_class_'+ str(class_idx) + '_' + str(i))\
 
 
-    # for idx in range(len(train_loaders)):
-    #     num = [0 for j in range(64)]
-    #     print(datasets[idx])
-    #     train_iter = iter(train_loaders[idx])
-    #     for i in range(len(train_loaders[idx])):
-    #         x, y = next(train_iter)
-    #         print(y.numpy())
-    #         print(np.argmax(y.numpy(), -1))
+    for idx in range(len(train_loaders)):
+        num = [0, 0]
+        print(datasets[idx])
+        train_iter = iter(train_loaders[idx])
+        for i in range(len(train_loaders[idx])):
+            x, y = next(train_iter)
+            num[1] += np.sum(y.numpy())
+            num[0] += len(y.numpy()) - np.sum(y.numpy())
+            # print(y.numpy())
+            # print(np.argmax(y.numpy(), -1))
+        print(num)
     
     # fig, axes = plt.subplots(4,len(datasets),figsize=(40,32))
 
