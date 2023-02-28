@@ -30,7 +30,7 @@ from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 from compute_features import compute_features
 import torch.nn as nn
-
+from loss import DistillationLoss,contrastive_loss, get_features_anchor
 import umap.umap_ as umap
 
 def fit_umap(tg_models,test_loaders,testsets,device,client_num):

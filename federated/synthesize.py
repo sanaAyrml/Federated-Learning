@@ -24,6 +24,67 @@ from PIL import Image
 import gc
 
 
+class DeepInversionFeatureHook():
+    '''
+    Implementation of the forward hook to track feature statistics and compute a loss on them.
+    Will compute mean and variance, and will use l2 as a loss
+    '''
+    def __init__(self, module):
+        self.hook = module.register_forward_hook(self.hook_fn)
+
+    def hook_fn(self, module, input, output):
+        # hook co compute deepinversion's feature distribution regularization
+        nch = input[0].shape[1]
+        mean = input[0].mean([0, 2, 3])
+        var = input[0].permute(1, 0, 2, 3).contiguous().view([nch, -1]).var(1, unbiased=False)
+
+        #forcing mean and variance to match between two distributions
+        #other ways might work better, i.g. KL divergence
+        r_feature = torch.norm(module.running_var.data - var, 2) + torch.norm(
+            module.running_mean.data - mean, 2)
+
+        self.r_feature = r_feature
+        # must have no output
+
+    def close(self):
+        self.hook.remove()
+
+
+
+
+
+
+def clip(image_tensor,mean,std, dim = 1,use_fp16=False):
+    '''
+    adjust the input based on mean and variance
+    '''
+    for c in range(dim):
+        m, s = mean[c], std[c]
+        image_tensor[:, c] = torch.clamp(image_tensor[:, c], -m / s, (1 - m) / s)
+    return image_tensor
+
+def lr_policy(lr_fn):
+    def _alr(optimizer, iteration, epoch):
+        lr = lr_fn(iteration, epoch)
+        for param_group in optimizer.param_groups:
+            param_group['lr'] = lr
+        return lr
+
+    return _alr
+
+
+def lr_cosine_policy(base_lr, warmup_length, epochs):
+    def _lr_fn(iteration, epoch):
+        if epoch < warmup_length:
+            lr = base_lr * (epoch + 1) / warmup_length
+        else:
+            e = epoch - warmup_length
+            es = epochs - warmup_length
+            lr = 0.2 * (1 + np.cos(np.pi * e / es)) * base_lr
+        return lr
+
+    return lr_policy(_lr_fn)
+
 
 def labels_to_one_hot(labels, num_class, device):
     # convert labels to one-hot
@@ -32,7 +93,7 @@ def labels_to_one_hot(labels, num_class, device):
     labels_one_hot.scatter_(1, labels.unsqueeze(1), 1)
     return labels_one_hot
 
-def src_img_synth_admm(gen_loader, src_model, args , device, mode, save_dir,a_iter, class_num):
+def src_img_synth_admm(gen_loader, src_model, args , device, mode, save_dir,a_iter, class_num, wandb):
 
     src_model.eval()
     LAMB = torch.zeros_like(src_model.head.weight.data).to(device)
@@ -40,6 +101,17 @@ def src_img_synth_admm(gen_loader, src_model, args , device, mode, save_dir,a_it
     gen_labels = None
     original_dataset = None
     original_labels = None
+    if args.add_bn_normalization:
+        loss_r_feature_layers = []
+        for module in src_model.modules():
+            if isinstance(module, nn.BatchNorm2d):
+                loss_r_feature_layers.append(DeepInversionFeatureHook(module))
+
+    # metrics = {"Train_ACC_" + str(client_idx): train_acc,
+    #                        "Train_Loss_" + str(client_idx): train_loss}
+    #             if args.report_f1:
+    #                 metrics["Train_F1_" + str(client_idx)] =train_f1
+    #             wandb.log(metrics)
     for batch_idx, (images_s, labels_real) in enumerate(gen_loader):
         print(batch_idx,len(images_s))
         # if batch_idx == 10:
@@ -86,6 +158,7 @@ def src_img_synth_admm(gen_loader, src_model, args , device, mode, save_dir,a_it
             # init src img
             images_s.requires_grad_()
             optimizer_s = SGD([images_s], args.lr_img, momentum=args.momentum_img)
+            first_run = True
             
             for iter_i in range(args.iters_img):
                 y_s, f_s = src_model(images_s)
@@ -96,7 +169,20 @@ def src_img_synth_admm(gen_loader, src_model, args , device, mode, save_dir,a_it
                 grad_loss = torch.norm(new_matrix, p='fro') ** 2
                 loss += grad_loss * args.param_admm_rho / 2
                 loss += torch.trace(LAMB.t() @ new_matrix)
-                
+#                 if args.add_bn_normalization:
+#                     rescale = [10] + [1. for _ in range(len(loss_r_feature_layers)-1)]
+#                     # if iteration_loc == 0:
+#                     #     print("rescale",rescale)
+#                     loss_r_feature = sum([mod.r_feature * rescale[idx] for (idx, mod) in enumerate(loss_r_feature_layers)])
+
+#                     loss += 0.01 * loss_r_feature
+
+
+                if batch_idx==0:
+                    metrics = {"Loss_Genration"+str(i): loss}
+                    wandb.log(metrics)
+                first_run = False
+
                 optimizer_s.zero_grad()
                 loss.backward()
                 optimizer_s.step()
@@ -131,6 +217,11 @@ def src_img_synth_admm(gen_loader, src_model, args , device, mode, save_dir,a_it
         new_matrix = grad_matrix / len(gen_dataset) + args.param_gamma * src_model.head.weight.data
         LAMB += new_matrix * args.param_admm_rho
         
+    if args.add_bn_normalization:
+        for hook in loss_r_feature_layers:
+            hook.close()
+
+
     if (a_iter-1) % args.save_every == 0:
         print("saving image dir to", save_dir)
         vutils.save_image(torch.cat((original_dataset[0:20],gen_dataset[0:20]),0), save_dir ,

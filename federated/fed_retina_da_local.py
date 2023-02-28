@@ -27,11 +27,12 @@ import numpy as np
 import torch
 from matplotlib import cm
 
+
 ### Domain adaptation modules import
 from dalib.modules.domain_discriminator import DomainDiscriminator
 from dalib.adaptation.dann import DomainAdversarialLoss
 from dalib.adaptation.cdan import ConditionalDomainAdversarialLoss
-from train_handler import train_uda, train, train_fedprox, test, communication, visualize, visualize_all,fit_umap, train_multi_datasets
+from train_handler import train_uda, train, train_fedprox, test, communication, visualize, visualize_all,fit_umap, train_multi_datasets,train_new
 from synthesize import src_img_synth_admm
 from digit_net import ImageClassifier
 from prepare_data import prepare_office
@@ -39,15 +40,9 @@ from feddc_retina_nonntk import prepare_data
 
 
 if __name__ == '__main__':
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    seed = 1
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
 
-    print('Device:', device)
     parser = argparse.ArgumentParser()
-                            
+
     parser.add_argument('--log', action='store_true', help='whether to make a log')
     parser.add_argument('--test', action='store_true', help='test the pretrained model')
     parser.add_argument('--percent', type=float, default=0.1, help='percentage of dataset to train')
@@ -63,10 +58,7 @@ if __name__ == '__main__':
     parser.add_argument('--project_name', type=str, default='fed_digit_5', help='name of wandb project')
 
     parser.add_argument('--cuda_num', type=int, default=0, help='cuda num')
-    parser.add_argument('--model_arch', type=str, default='digitnet', help='trainining model architecture digitnet|convnet|resnet')
-    # parser.add_argument('--attack_mode', action='store_true', help='whether to make a log')
-    # parser.add_argument('--attack_batch', type=int, default=500, help='attack batch size')
-    # parser.add_argument('--weighted_loss', action='store_true', help='whether to compute loss weighted')
+    parser.add_argument('--model_arch', type=str, default='digitnet', help='trainining model architecture digitnet|convnet|resnet|alexnet')
 
     parser.add_argument('--train_mode', type=str, default= None , help='original | synthesized')
     parser.add_argument('--uda_type', default='cdan')
@@ -180,8 +172,8 @@ if __name__ == '__main__':
 
 
     # server_model = ImageClassifier(args.model_arch,31, 512).to(device)
-    # server_model = DigitModel().to(device)
-    server_model = AlexNet(trainset_num_classes).to(device)
+    server_model = DigitModel(trainset_num_classes).to(device)
+    # server_model = AlexNet(trainset_num_classes).to(device)
     print(server_model)
     loss_fun = nn.CrossEntropyLoss()
 
@@ -216,13 +208,13 @@ if __name__ == '__main__':
     generate_loaders = []
     adapt_test_loaders = []
     for sets in trainsets:
-        train_loaders.append(torch.utils.data.DataLoader(sets, batch_size=args.batch, shuffle=False))
+        train_loaders.append(torch.utils.data.DataLoader(sets, batch_size=args.batch, shuffle=True))
     for sets in testsets:
         test_loaders.append(torch.utils.data.DataLoader(sets, batch_size=args.batch, shuffle=False))
     for sets in virtualsets:
-        virtual_loaders.append(torch.utils.data.DataLoader(sets, batch_size=args.batch, shuffle=False))
+        virtual_loaders.append(torch.utils.data.DataLoader(sets, batch_size=args.batch, shuffle=True))
     for sets in generatsets:
-        generate_loaders.append(torch.utils.data.DataLoader(sets, batch_size=args.batch, shuffle=False))
+        generate_loaders.append(torch.utils.data.DataLoader(sets, batch_size=args.batch, shuffle=True))
     if args.synthesize_test:
         for sets in testsets:
             adapt_test_loaders.append(torch.utils.data.DataLoader(sets, batch_size=args.batch, shuffle=False))
@@ -331,7 +323,7 @@ if __name__ == '__main__':
                     pass
                 elif args.synth_method == 'admm':
                     print('generating data for client', client_idx)
-                    vir_dataset, vir_label, ori_dataset, ori_label = src_img_synth_admm(generate_loader, server_model, args,device, 'train', Synth_SAVE_PATH+'_train_' +datasets[client_idx]+'_'+ str(a_iter) + '.png',a_iter, trainset_num_classes)
+                    vir_dataset, vir_label, ori_dataset, ori_label = src_img_synth_admm(generate_loader, server_model, args,device, 'train', Synth_SAVE_PATH+'_train_' +datasets[client_idx]+'_'+ str(a_iter) + '.png',a_iter, trainset_num_classes, wandb)
                     vir_datasets.append(vir_dataset)
                     vir_labels.append(vir_label)
                     ori_datasets.append(ori_dataset)
