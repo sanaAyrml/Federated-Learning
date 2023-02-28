@@ -218,12 +218,12 @@ def prepare_data(args, datasets, public_dataset, im_size):
     cifar_testset = torchvision.datasets.CIFAR10(root='./data', train=False,
                                                  download=True, transform=transform_cifar)
 
-    min_data_len = min(len(drishti_trainset), len(kaggle_trainset), len(rim_trainset), len(refuge_trainset))
+    min_data_len = min(len(drishti_trainset), len(kaggle_trainset), len(rim_trainset), len(refuge_trainset),len(cifar_trainset))
 
     len_datasets = [len(drishti_trainset), len(kaggle_trainset), len(rim_trainset), len(refuge_trainset), len(cifar_trainset)]
 
     # amazon_valset = torch.utils.data.Subset(amazon_trainset, list(range(len(amazon_trainset)))[-val_len:])
-    shuffled_idxes = [list(range(0, len_datasets[idx])) for idx in range(len(datasets))]
+    shuffled_idxes = [list(range(0, len_datasets[idx])) for idx in range(5)]
     for idx in range(len(shuffled_idxes)):
         random.shuffle(shuffled_idxes[idx])
     drishti_trainset = torch.utils.data.Subset(drishti_trainset, shuffled_idxes[0][:min_data_len])
