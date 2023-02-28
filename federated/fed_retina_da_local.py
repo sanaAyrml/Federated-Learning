@@ -109,7 +109,7 @@ if __name__ == '__main__':
     lr_factor = 0.3  # Learning rate decrease factor
     lr_patience = 5
     lr_threshold = 0.0001
-    trainset_num_classes = 64
+    trainset_num_classes = 2
 
     print('Device:', device)
 
@@ -172,8 +172,9 @@ if __name__ == '__main__':
 
 
     # server_model = ImageClassifier(args.model_arch,31, 512).to(device)
-    server_model = DigitModel(trainset_num_classes).to(device)
-    # server_model = AlexNet(trainset_num_classes).to(device)
+    # server_model = DigitModel2(trainset_num_classes).to(device)
+    # server_model = DigitModel(trainset_num_classes).to(device)
+    server_model = AlexNet(trainset_num_classes).to(device)
     print(server_model)
     loss_fun = nn.CrossEntropyLoss()
 
@@ -229,14 +230,14 @@ if __name__ == '__main__':
     #         plt.savefig('../images/' + str(datasets[client_idx]) + '_class_'+ str(class_idx) + '_' + str(i))\
 
 
-    for idx in range(len(train_loaders)):
-        num = [0 for j in range(64)]
-        print(datasets[idx])
-        train_iter = iter(train_loaders[idx])
-        for i in range(len(train_loaders[idx])):
-            x, y = next(train_iter)
-            print(y.numpy())
-            print(np.argmax(y.numpy(), -1))
+    # for idx in range(len(train_loaders)):
+    #     num = [0 for j in range(64)]
+    #     print(datasets[idx])
+    #     train_iter = iter(train_loaders[idx])
+    #     for i in range(len(train_loaders[idx])):
+    #         x, y = next(train_iter)
+    #         print(y.numpy())
+    #         print(np.argmax(y.numpy(), -1))
     
     # fig, axes = plt.subplots(4,len(datasets),figsize=(40,32))
 
