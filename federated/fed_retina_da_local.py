@@ -202,11 +202,6 @@ if __name__ == '__main__':
     trainsets, virtualsets, testsets, generatsets =  prepare_data(args,datasets,public_dataset, (256, 256))
     print(len(trainsets),len(virtualsets),len(testsets),len(generatsets))
 
-    for idx in range(len(trainsets)):
-        train_iter = iter(trainsets[idx])
-        for i in range(len(train_iter)):
-            x, y = next(train_iter)
-            print(np.argmax(y.numpy(), -1))
                                    
     train_loaders = []
     test_loaders = []
@@ -233,8 +228,12 @@ if __name__ == '__main__':
     #         plt.imshow(np.moveaxis(x[i].numpy(), 0, -1))
     #         plt.savefig('../images/' + str(datasets[client_idx]) + '_class_'+ str(class_idx) + '_' + str(i))
     
-    
 
+    for idx in range(len(train_loaders)):
+        train_iter = iter(train_loaders[idx])
+        for i in range(len(train_loaders)):
+            x, y = next(train_iter)
+            print(np.argmax(y.numpy(), -1))
     
     # fig, axes = plt.subplots(4,len(datasets),figsize=(40,32))
 
