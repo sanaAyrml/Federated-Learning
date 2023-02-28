@@ -203,7 +203,7 @@ if __name__ == '__main__':
     print(len(trainsets),len(virtualsets),len(testsets),len(generatsets))
 
     print('labels')
-    print(np.bincount((trainsets[0].labels).astype(int), minlength=64))
+    print(np.bincount(np.argmax((trainsets[0].targets).numpy(),-1), minlength=64))
                                    
     train_loaders = []
     test_loaders = []
