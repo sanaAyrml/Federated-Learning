@@ -233,7 +233,7 @@ if __name__ == '__main__':
         num = [0 for j in range(64)]
         print(datasets[idx])
         train_iter = iter(train_loaders[idx])
-        for i in range(len(train_loaders)):
+        for i in range(len(train_loaders[idx])):
             x, y = next(train_iter)
             print(y.numpy())
             print(np.argmax(y.numpy(), -1))
