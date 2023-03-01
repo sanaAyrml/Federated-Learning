@@ -121,3 +121,27 @@ class DomainNetDataset(Dataset):
             image = self.transform(image)
 
         return image, label
+
+
+class CustomDataset(Dataset):
+    def __init__(self, dataset, transform=None):
+        images, labels = dataset[:]
+        self.labels = labels
+        self.images = images
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.labels)
+
+    def __getitem__(self, idx):
+
+        label = self.labels[idx]
+        image = self.images[idx]
+
+        if len(image.split()) != 3:
+            image = transforms.Grayscale(num_output_channels=3)(image)
+
+        if self.transform is not None:
+            image = self.transform(image)
+
+        return image, label
