@@ -368,6 +368,10 @@ if __name__ == '__main__':
                 print(virtualsets[client_idx].labels)
                 virtualsets[client_idx].synthesized = True
                 virtual_loaders[client_idx] = torch.utils.data.DataLoader(virtualsets[client_idx], batch_size=args.batch, shuffle=True)
+                vir_iter = iter(virtual_loaders[client_idx])
+                for i in range(len(vir_iter)):
+                    x,y = next(vir_iter)
+                    print(y)
 
 #             if (a_iter - 1) % args.save_every == 0:
 #                 print('making second row plots')
