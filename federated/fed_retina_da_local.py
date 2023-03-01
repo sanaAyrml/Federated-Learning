@@ -363,13 +363,21 @@ if __name__ == '__main__':
             #     plt.savefig(FIG_SAVE_PATH+ '_' + str(a_iter) + '.png')
 
             for client_idx in range(len(generate_loaders)):
+                for i in range(len(vir_iter)):
+                    if i >2:
+                        break
+                    x,y = next(vir_iter)
+                    print(y)
                 virtualsets[client_idx].images = vir_datasets[client_idx].detach().cpu().numpy()
                 virtualsets[client_idx].labels = vir_labels[client_idx].detach().cpu().numpy()
                 print(virtualsets[client_idx].labels)
                 virtualsets[client_idx].synthesized = True
                 virtual_loaders[client_idx] = torch.utils.data.DataLoader(virtualsets[client_idx], batch_size=args.batch, shuffle=True)
                 vir_iter = iter(virtual_loaders[client_idx])
+                print('synthsynth')
                 for i in range(len(vir_iter)):
+                    if i >2:
+                        break
                     x,y = next(vir_iter)
                     print(y)
 
