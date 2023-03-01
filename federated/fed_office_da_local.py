@@ -97,6 +97,7 @@ if __name__ == '__main__':
     parser.add_argument('--save_every', default= 10 , type=int)
 
     parser.add_argument('--client_num', default= 2 , type=int)
+    parser.add_argument('--add_bn_normalization', action='store_true', help='batch norm loss')
     parser.add_argument('--public_dataset', default= 0 , type=int)
     parser.add_argument('--runid', default= None , type=str)
     parser.add_argument('--merge', action='store_true', help='merge training for local from servers')
@@ -326,7 +327,7 @@ if __name__ == '__main__':
                         param.requires_grad = False
                     models[client_idx].eval()
                     # vir_dataset, vir_label, ori_dataset, ori_label = src_img_synth_admm(generate_loader, server_model, args,device, 'train', Synth_SAVE_PATH+'_train_' +datasets[client_idx]+'_'+ str(a_iter) + '.png',a_iter)
-                    vir_dataset, vir_label, ori_dataset, ori_label = src_img_synth_admm(generate_loader, models[client_idx], args,device, 'train', Synth_SAVE_PATH+'_train_' +datasets[client_idx]+'_'+ str(a_iter) + '.png',a_iter)
+                    vir_dataset, vir_label, ori_dataset, ori_label = src_img_synth_admm(generate_loader, models[client_idx], args,device, 'train', Synth_SAVE_PATH+'_train_' +datasets[client_idx]+'_'+ str(a_iter) + '.png',a_iter, trainset_num_classes, wandb)
                     for param in models[client_idx].parameters():
                         param.requires_grad = True
                     models[client_idx].eval()
