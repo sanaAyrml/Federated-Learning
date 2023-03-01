@@ -90,6 +90,7 @@ if __name__ == '__main__':
     parser.add_argument('--save_every', default= 10 , type=int)
 
     parser.add_argument('--client_num', default= 2 , type=int)
+    parser.add_argument('--log', action='store_true', help='whether to make a log')
     parser.add_argument('--public_dataset', default= 0 , type=int)
     parser.add_argument('--runid', default= None , type=str)
     parser.add_argument('--merge', action='store_true', help='merge training for local from servers')
