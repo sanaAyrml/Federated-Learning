@@ -15,6 +15,7 @@ import numpy as np
 import torchvision
 import torchvision.transforms as transforms
 from torchvision.datasets import ImageFolder, DatasetFolder
+from utils.data_utils import CustomDataset
 
 # import fedbn_data_utils as data_utils
 # from utils import get_network, get_time, TensorDataset, epoch
@@ -211,12 +212,12 @@ def prepare_data(args, datasets, public_dataset, im_size):
     # refuge_testset = RefugeDataset(data_base_path, transform=transform_refuge)
     # refuge_concated = torch.utils.data.ConcatDataset([refuge_trainset,refuge_valset,refuge_testset])
 
-    cifar_trainset = torchvision.datasets.CIFAR10(root='./data', train=True,
-                                                  download=True, transform=transform_cifar)
-    cifar_virtualset = torchvision.datasets.CIFAR10(root='./data', train=True,
-                                                    download=True, transform=transform_cifar)
-    cifar_testset = torchvision.datasets.CIFAR10(root='./data', train=False,
-                                                 download=True, transform=transform_cifar)
+    cifar_trainset = CustomDataset(torchvision.datasets.CIFAR10(root='./data', train=True,
+                                                  download=True, transform=transform_cifar), transform=transform_cifar)
+    cifar_virtualset = CustomDataset(torchvision.datasets.CIFAR10(root='./data', train=True,
+                                                    download=True, transform=transform_cifar), transform=transform_cifar)
+    cifar_testset = CustomDataset(torchvision.datasets.CIFAR10(root='./data', train=False,
+                                                 download=True, transform=transform_cifar), transform=transform_cifar)
 
     min_data_len = min(len(drishti_trainset), len(kaggle_trainset), len(rim_trainset), len(refuge_trainset),len(cifar_trainset))
 
