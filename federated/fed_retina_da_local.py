@@ -365,6 +365,7 @@ if __name__ == '__main__':
             for client_idx in range(len(generate_loaders)):
                 virtualsets[client_idx].images = vir_datasets[client_idx].detach().cpu().numpy()
                 virtualsets[client_idx].labels = vir_labels[client_idx].detach().cpu().numpy()
+                print(vir_labels[client_idx].detach().cpu().numpy())
                 virtualsets[client_idx].synthesized = True
                 virtual_loaders[client_idx] = torch.utils.data.DataLoader(virtualsets[client_idx], batch_size=args.batch, shuffle=True)
 
