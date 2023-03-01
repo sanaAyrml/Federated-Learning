@@ -363,6 +363,7 @@ if __name__ == '__main__':
             #     plt.savefig(FIG_SAVE_PATH+ '_' + str(a_iter) + '.png')
 
             for client_idx in range(len(generate_loaders)):
+                vir_iter = iter(virtual_loaders[client_idx])
                 for i in range(len(vir_iter)):
                     if i >2:
                         break
