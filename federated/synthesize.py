@@ -193,6 +193,7 @@ def src_img_synth_admm(gen_loader, src_model, args , device, mode, save_dir,a_it
                 print(loss)
 
                 # images_s.clamp(0.0, 1.0)
+                gc.collect()
 
 
             # update src imgs
