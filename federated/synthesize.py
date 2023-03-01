@@ -2,6 +2,7 @@ import sys, os
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(base_path)
 
+import gc
 import torch
 from typing import Tuple, Optional, List, Dict
 from torch import nn, optim
@@ -147,6 +148,8 @@ def src_img_synth_admm(gen_loader, src_model, args , device, mode, save_dir,a_it
             # if batch_idx == 10:
             #     break
 
+            gc.collect()
+
     #        images_s = images_s.to(device)
     #        labels_s = labels_s.to(device)
             images_s = gen_dataset[batch_idx*args.batch:(batch_idx+1)*args.batch].clone().detach().to(device)
@@ -216,6 +219,8 @@ def src_img_synth_admm(gen_loader, src_model, args , device, mode, save_dir,a_it
 
         new_matrix = grad_matrix / len(gen_dataset) + args.param_gamma * src_model.head.weight.data
         LAMB += new_matrix * args.param_admm_rho
+
+        gc.collect()
         
     if args.add_bn_normalization:
         for hook in loss_r_feature_layers:
