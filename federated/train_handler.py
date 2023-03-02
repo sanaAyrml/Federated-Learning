@@ -328,7 +328,7 @@ def train_multi_datasets(args, wandb,model, train_loaders, optimizer, loss_fun, 
                     x_temp, y_temp = next(train_iter)
                     x = torch.cat((x, x_temp))
                     y = torch.cat((y, y_temp))
-            print(y)
+            # print(y)
             num_data += y.size(0)
             x = x.to(device).float()
             y = y.to(device).long()
