@@ -126,8 +126,8 @@ class DomainNetDataset(Dataset):
 class CustomDataset(Dataset):
     def __init__(self, dataset, transform=None):
         images, labels = next(iter(torch.utils.data.DataLoader(dataset, batch_size=160)))
-        print(images)
-        print(labels)
+        # print(images)
+        # print(labels)
         # images, labels = [], []
         # for i in range(len(dataset)):
         #     image, label = dataset[i]
@@ -145,8 +145,8 @@ class CustomDataset(Dataset):
         label = self.labels[idx]
         image = self.images[idx]
 
-        if len(image.split()) != 3:
-            image = transforms.Grayscale(num_output_channels=3)(image)
+        # if len(image.split()) != 3:
+        #     image = transforms.Grayscale(num_output_channels=3)(image)
 
         if self.transform is not None:
             image = self.transform(image)
