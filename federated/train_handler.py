@@ -325,7 +325,11 @@ def train_multi_datasets(args, wandb,model, train_loaders, optimizer, loss_fun, 
                 if x is None:
                     x, y = next(train_iter)
                 else:
-                    x_temp, y_temp = next(train_iter)
+                    try:
+                        x_temp, y_temp = next(train_iter)
+                    except:
+                        train_iters[1] = iter(train_loaders[1])
+                        x_temp, y_temp = next(train_iters[1])
                     x = torch.cat((x, x_temp))
                     y = torch.cat((y, y_temp))
             # print(y)
