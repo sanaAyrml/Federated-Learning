@@ -211,7 +211,8 @@ def prepare_data(args, datasets, public_dataset, im_size):
     # refuge_valset = RefugeDataset(data_base_path, transform=transform_refuge, test=False)
     # refuge_testset = RefugeDataset(data_base_path, transform=transform_refuge)
     # refuge_concated = torch.utils.data.ConcatDataset([refuge_trainset,refuge_valset,refuge_testset])
-
+    print(torchvision.datasets.CIFAR10(root='./data', train=True,
+                                                  download=True, transform=transform_cifar)[:])
     cifar_trainset = CustomDataset(torchvision.datasets.CIFAR10(root='./data', train=True,
                                                   download=True, transform=transform_cifar), transform=transform_cifar)
     cifar_virtualset = CustomDataset(torchvision.datasets.CIFAR10(root='./data', train=True,
