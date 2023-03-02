@@ -369,8 +369,8 @@ if __name__ == '__main__':
                         break
                     x,y = next(vir_iter)
                     print(y)
-                virtualsets[client_idx].images = vir_datasets[client_idx].detach().cpu().numpy()
-                virtualsets[client_idx].labels = vir_labels[client_idx].detach().cpu().numpy()
+                virtualsets[client_idx].images = vir_datasets[client_idx].detach().cpu()
+                virtualsets[client_idx].labels = vir_labels[client_idx].detach().cpu()
                 print(virtualsets[client_idx].labels)
                 virtualsets[client_idx].synthesized = True
                 virtual_loaders[client_idx] = torch.utils.data.DataLoader(virtualsets[client_idx], batch_size=args.batch, shuffle=True)
