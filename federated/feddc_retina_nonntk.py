@@ -214,11 +214,11 @@ def prepare_data(args, datasets, public_dataset, im_size):
     # print(torchvision.datasets.CIFAR10(root='./data', train=True,
     #                                               download=True, transform=transform_cifar)[0][0].shape)
     cifar_trainset = CustomDataset(torchvision.datasets.CIFAR10(root='./data', train=True,
-                                                  download=True, transform=transform_cifar), transform=transform_cifar)
+                                                  download=True), transform=transform_cifar)
     cifar_virtualset = CustomDataset(torchvision.datasets.CIFAR10(root='./data', train=True,
-                                                    download=True, transform=transform_cifar), transform=transform_cifar)
+                                                    download=True), transform=transform_cifar)
     cifar_testset = CustomDataset(torchvision.datasets.CIFAR10(root='./data', train=False,
-                                                 download=True, transform=transform_cifar), transform=transform_cifar)
+                                                 download=True), transform=transform_cifar)
 
     min_data_len = min(len(drishti_trainset), len(kaggle_trainset), len(rim_trainset), len(refuge_trainset),len(cifar_trainset))
 
