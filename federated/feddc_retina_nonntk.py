@@ -144,7 +144,7 @@ def prepare_data(args, datasets, public_dataset, im_size):
 
     transform_cifar = transforms.Compose(
         [transforms.Resize(im_size),
-         # transforms.ToTensor(),
+         transforms.ToTensor(),
          transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
     # drishti_trainset = DrishtiDataset(dataset_path=data_base_path,transform=transform_drishti)
     # drishti_testset = DrishtiDataset(dataset_path=data_base_path,transform=transform_drishti, train=False)

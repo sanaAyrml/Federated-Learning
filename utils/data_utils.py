@@ -133,8 +133,8 @@ class CustomDataset(Dataset):
         #     image, label = dataset[i]
         #     images.append(image)
         #     labels.append(label)
-        self.labels = labels
-        self.images = images
+        self.labels = labels.numpy()
+        self.images = images.numpy()
         self.transform = transform
 
     def __len__(self):
