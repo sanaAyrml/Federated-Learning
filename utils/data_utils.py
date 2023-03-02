@@ -125,7 +125,11 @@ class DomainNetDataset(Dataset):
 
 class CustomDataset(Dataset):
     def __init__(self, dataset, transform=None):
-        images, labels = dataset[:]
+        images, labels = [], []
+        for i in range(len(dataset)):
+            image, label = dataset[i]
+            images.append(image)
+            labels.append(label)
         self.labels = labels
         self.images = images
         self.transform = transform
