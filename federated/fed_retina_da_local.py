@@ -435,7 +435,7 @@ if __name__ == '__main__':
 
             if args.log:
                 metrics = {"Test_ACC_Local_" + str(client_idx): test_acc}
-                wandb.log(metrics, step=a_iter)
+                wandb.log(metrics)
 
         # if (a_iter-1) % args.save_every == 0:
         #     print('making third row plots')
@@ -498,13 +498,13 @@ if __name__ == '__main__':
                     #                                                             train_acc))
                 metrics = {"Train_ACC_" + str(client_idx): train_acc,
                            "Train_Loss_" + str(client_idx): train_loss}
-                wandb.log(metrics, step=a_iter)
+                wandb.log(metrics)
             
         if max_train_acc < avg_train / client_num:
             max_train_acc = avg_train / client_num
         if args.log:
             metrics = {"Train_AVG": avg_train / client_num}
-            wandb.log(metrics, step=a_iter)
+            wandb.log(metrics)
 
         # start testing
         avg_test = 0
@@ -521,7 +521,7 @@ if __name__ == '__main__':
                 #                                                                           test_acc))
                 metrics = {"Test_ACC_" + str(test_idx): test_acc,
                            "Test_Loss_" + str(test_idx): test_loss}
-                wandb.log(metrics, step=a_iter)
+                wandb.log(metrics)
 
         if max_test_acc < avg_test / client_num:
             max_test_acc = avg_test / client_num
@@ -533,7 +533,7 @@ if __name__ == '__main__':
 
         if args.log:
             metrics = {"Test_AVG": avg_test / client_num}
-            wandb.log(metrics, step=a_iter)
+            wandb.log(metrics)
         print('Maximum train accuracy average is:', max_train_acc)
         print('Maximum test accuracy average is:', max_test_acc)
 
