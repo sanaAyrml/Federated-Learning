@@ -69,7 +69,7 @@ if __name__ == '__main__':
     
     
     parser.add_argument('--synthesize_mode', type=str, default= None , help='local | global')
-    parser.add_argument('--synthesize_label', type=str, default= 'pred' , help='real | pred')
+    parser.add_argument('--synthesize_label', type=str, default= 'cond' , help='real | pred | cond')
     parser.add_argument('--synth_method', type=str, default='admm', help='admm | ce')
     parser.add_argument('-b', '--batch-size', default=32, type=int,
                         metavar='N', help='mini-batch size (default: 32)')
@@ -230,7 +230,7 @@ if __name__ == '__main__':
     #         plt.imshow(np.moveaxis(x[i].numpy(), 0, -1))
     #         plt.savefig('../images/' + str(datasets[client_idx]) + '_class_'+ str(class_idx) + '_' + str(i))\
 
-
+    class_count = [0, 0]
     for idx in range(len(train_loaders)):
         num = [0, 0]
         print(datasets[idx])
@@ -242,6 +242,9 @@ if __name__ == '__main__':
             # print(y.numpy())
             # print(np.argmax(y.numpy(), -1))
         print(num)
+        class_count[0] += num[0]
+        class_count[1] += num[1]
+
     
     # fig, axes = plt.subplots(4,len(datasets),figsize=(40,32))
 
@@ -337,7 +340,7 @@ if __name__ == '__main__':
                     pass
                 elif args.synth_method == 'admm':
                     print('generating data for client', client_idx)
-                    vir_dataset, vir_label, ori_dataset, ori_label = src_img_synth_admm(generate_loader, server_model, args,device, 'train', Synth_SAVE_PATH+'_train_' +datasets[client_idx]+'_'+ str(a_iter) + '.png',a_iter, trainset_num_classes, wandb)
+                    vir_dataset, vir_label, ori_dataset, ori_label = src_img_synth_admm(generate_loader, server_model, args,device, 'train', Synth_SAVE_PATH+'_train_' +datasets[client_idx]+'_'+ str(a_iter) + '.png',a_iter, trainset_num_classes, wandb, class_count)
                     vir_datasets.append(vir_dataset)
                     vir_labels.append(vir_label)
                     ori_datasets.append(ori_dataset)

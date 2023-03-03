@@ -23,6 +23,7 @@ import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
 from PIL import Image
 import gc
+import numpy as np
 
 
 class DeepInversionFeatureHook():
@@ -94,7 +95,7 @@ def labels_to_one_hot(labels, num_class, device):
     labels_one_hot.scatter_(1, labels.unsqueeze(1), 1)
     return labels_one_hot
 
-def src_img_synth_admm(gen_loader, src_model, args , device, mode, save_dir,a_iter, class_num, wandb):
+def src_img_synth_admm(gen_loader, src_model, args , device, mode, save_dir,a_iter, class_num, wandb, class_count):
 
     src_model.eval()
     LAMB = torch.zeros_like(src_model.head.weight.data).to(device)
@@ -122,7 +123,9 @@ def src_img_synth_admm(gen_loader, src_model, args , device, mode, save_dir,a_it
         labels_s = y_s.argmax(dim=1)
         if gen_dataset == None:
             gen_dataset = images_s
-            if args.synthesize_label == 'pred' or mode == 'test':
+            if args.synthesize_label == 'cond':
+                gen_labels = torch.tensor(np.random.choice(2, len(labels_real), p=class_count/sum(class_count)))
+            elif args.synthesize_label == 'pred' or mode == 'test':
                 gen_labels = labels_s
             else:
                 print('hereee')
@@ -131,7 +134,10 @@ def src_img_synth_admm(gen_loader, src_model, args , device, mode, save_dir,a_it
             original_labels = labels_real
         else:
             gen_dataset = torch.cat((gen_dataset, images_s), 0)
-            if args.synthesize_label == 'pred' or mode == 'test':
+            if args.synthesize_label == 'cond':
+                lab = torch.tensor(np.random.choice(2, len(labels_real), p=class_count / sum(class_count)))
+                gen_labels = torch.cat((gen_labels, lab), 0)
+            elif args.synthesize_label == 'pred' or mode == 'test':
                 gen_labels = torch.cat((gen_labels, labels_s), 0)
             else:
                 gen_labels = torch.cat((gen_labels, labels_real), 0)
