@@ -304,8 +304,8 @@ if __name__ == '__main__':
     #     elif args.uda_type == 'cdan':
     #         domain_discri.append(DomainDiscriminator(features_dim * trainset_num_classes, hidden_size=1024).to(device))
     #         domain_adv.append(ConditionalDomainAdversarialLoss(domain_discri[client_idx], entropy_conditioning=False,
-                                                               num_classes=trainset_num_classes,
-                                                               features_dim=features_dim, randomized=False).to(device))
+    #                                                            num_classes=trainset_num_classes,
+    #                                                            features_dim=features_dim, randomized=False).to(device))
     for a_iter in range(resume_iter, args.iters):
         # optimizers = [optim.SGD(params=models[idx].parameters(), lr=args.lr) for idx in range(client_num)]
         # if a_iter > 0:
