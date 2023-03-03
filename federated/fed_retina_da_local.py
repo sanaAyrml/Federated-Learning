@@ -296,13 +296,14 @@ if __name__ == '__main__':
         #       len(trainsets[client_idx].images),
         #       len(virtualsets[client_idx].images),
         #       len(testsets[client_idx].images))
-    for client_idx in range(client_num):
-        if args.uda_type == 'dann':
-            domain_discri.append(DomainDiscriminator(in_feature=features_dim, hidden_size=1024).to(device))
-            domain_adv.append((domain_discri[client_idx]).to(device))
-        elif args.uda_type == 'cdan':
-            domain_discri.append(DomainDiscriminator(features_dim * trainset_num_classes, hidden_size=1024).to(device))
-            domain_adv.append(ConditionalDomainAdversarialLoss(domain_discri[client_idx], entropy_conditioning=False,
+
+    # for client_idx in range(client_num):
+    #     if args.uda_type == 'dann':
+    #         domain_discri.append(DomainDiscriminator(in_feature=features_dim, hidden_size=1024).to(device))
+    #         domain_adv.append((domain_discri[client_idx]).to(device))
+    #     elif args.uda_type == 'cdan':
+    #         domain_discri.append(DomainDiscriminator(features_dim * trainset_num_classes, hidden_size=1024).to(device))
+    #         domain_adv.append(ConditionalDomainAdversarialLoss(domain_discri[client_idx], entropy_conditioning=False,
                                                                num_classes=trainset_num_classes,
                                                                features_dim=features_dim, randomized=False).to(device))
     for a_iter in range(resume_iter, args.iters):
@@ -373,7 +374,7 @@ if __name__ == '__main__':
                 virtualsets[client_idx].labels = vir_labels[client_idx].detach().cpu()
                 # print(virtualsets[client_idx].labels)
                 virtualsets[client_idx].synthesized = True
-                virtual_loaders[client_idx] = torch.utils.data.DataLoader(virtualsets[client_idx], batch_size=args.batch, shuffle=True)
+                virtual_loaders[client_idx] = torch.utils.data.DataLoader(virtualsets[client_idx], batch_size=args.batch//2, shuffle=True)
                 # vir_iter = iter(virtual_loaders[client_idx])
                 # print('synthsynth')
                 # for i in range(len(vir_iter)):
@@ -421,10 +422,6 @@ if __name__ == '__main__':
                         #           device=device,wandb=wandb,client_idx=client_idx)
                 else:
                     train(args, wandb,model, train_loader, optimizer, loss_fun, client_num, device,client_idx,args.wk_iters)
-            # elif args.mode.lower() == 'fedbn':
-            #     if a_iter > args.pre_iter:
-            #         train_multi_datasets(args, wandb, model, [train_loader, virtual_loaders[0]], optimizer, loss_fun,
-            #                              client_num, device, client_idx, args.wk_iters)
             else:
                 train(args, wandb,model, train_loader, optimizer, loss_fun, client_num, device,client_idx,args.wk_iters)
 
