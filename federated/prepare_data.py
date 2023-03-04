@@ -353,19 +353,19 @@ def prepare_office(args, datasets, public_dataset):
     # val_len = int(min_data_len * 0.4)
     min_data_len = int(min_data_len * 0.5)
 
-    # amazon_valset = torch.utils.data.Subset(amazon_trainset, list(range(len(amazon_trainset)))[-val_len:])
-    amazon_trainset = torch.utils.data.Subset(amazon_trainset, list(range(min_data_len)))
-
-    # caltech_valset = torch.utils.data.Subset(caltech_trainset, list(range(len(caltech_trainset)))[-val_len:])
-    caltech_trainset = torch.utils.data.Subset(caltech_trainset, list(range(min_data_len)))
-
-    # dslr_valset = torch.utils.data.Subset(dslr_trainset, list(range(len(dslr_trainset)))[-val_len:])
-    dslr_trainset = torch.utils.data.Subset(dslr_trainset, list(range(min_data_len)))
-
-    # webcam_valset = torch.utils.data.Subset(webcam_trainset, list(range(len(webcam_trainset)))[-val_len:])
-    webcam_trainset = torch.utils.data.Subset(webcam_trainset, list(range(min_data_len)))
-
-    cifar_trainset = torch.utils.data.Subset(cifar_trainset, list(range(min_data_len)))
+    # # amazon_valset = torch.utils.data.Subset(amazon_trainset, list(range(len(amazon_trainset)))[-val_len:])
+    # amazon_trainset = torch.utils.data.Subset(amazon_trainset, list(range(min_data_len)))
+    #
+    # # caltech_valset = torch.utils.data.Subset(caltech_trainset, list(range(len(caltech_trainset)))[-val_len:])
+    # caltech_trainset = torch.utils.data.Subset(caltech_trainset, list(range(min_data_len)))
+    #
+    # # dslr_valset = torch.utils.data.Subset(dslr_trainset, list(range(len(dslr_trainset)))[-val_len:])
+    # dslr_trainset = torch.utils.data.Subset(dslr_trainset, list(range(min_data_len)))
+    #
+    # # webcam_valset = torch.utils.data.Subset(webcam_trainset, list(range(len(webcam_trainset)))[-val_len:])
+    # webcam_trainset = torch.utils.data.Subset(webcam_trainset, list(range(min_data_len)))
+    #
+    # cifar_trainset = torch.utils.data.Subset(cifar_trainset, list(range(min_data_len)))
 
 
     trainsets = []

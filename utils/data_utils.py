@@ -125,7 +125,7 @@ class DomainNetDataset(Dataset):
 
 class CustomDataset(Dataset):
     def __init__(self, dataset, transform=None):
-        images, labels = next(iter(torch.utils.data.DataLoader(dataset, batch_size=len(dataset))))
+        images, labels = next(iter(torch.utils.data.DataLoader(dataset, batch_size=160)))
         # print(images)
         # print(labels)
         # images, labels = [], []
