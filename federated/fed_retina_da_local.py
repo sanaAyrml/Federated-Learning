@@ -177,8 +177,8 @@ if __name__ == '__main__':
 
     # server_model = ImageClassifier(args.model_arch,31, 512).to(device)
     # server_model = DigitModel2(trainset_num_classes).to(device)
-    # server_model = DigitModel(trainset_num_classes).to(device)
-    server_model = AlexNet(trainset_num_classes).to(device)
+    server_model = DigitModel(trainset_num_classes).to(device)
+    # server_model = AlexNet(trainset_num_classes).to(device)
     print(server_model)
     loss_fun = nn.CrossEntropyLoss()
 
