@@ -244,7 +244,7 @@ def prepare_data(args, datasets, public_dataset, im_size):
     # webcam_valset = torch.utils.data.Subset(webcam_trainset, list(range(len(webcam_trainset)))[-val_len:])
     refuge_trainset = torch.utils.data.Subset(refuge_trainset, shuffled_idxes[3][:min_data_len])
 
-    cifar_trainset = torch.utils.data.Subset(cifar_trainset, shuffled_idxes[4][:min_data_len])
+    # cifar_trainset = torch.utils.data.Subset(cifar_trainset, shuffled_idxes[4][:min_data_len])
 
 
     # dataset_length = len(drishti_concated)
