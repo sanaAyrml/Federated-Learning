@@ -105,7 +105,7 @@ if __name__ == '__main__':
                                    
 
     device = torch.device('cuda:' + str(args.cuda_num) if torch.cuda.is_available() else 'cpu')
-    seed = 1
+    seed = 2
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
@@ -184,7 +184,7 @@ if __name__ == '__main__':
 
 
     # name of each client dataset
-    datasets = ['drishti', 'kaggle', 'rim', 'refuge', 'cifar']
+    datasets = ['drishti', 'kaggle', 'rim', 'refuge', 'cifar', 'self']
     public_dataset = None
     if args.public_dataset > 0 and args.synthesize_mode == 'global':
         public_dataset = datasets[args.public_dataset - 1]

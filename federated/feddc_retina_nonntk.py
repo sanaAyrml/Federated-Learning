@@ -244,6 +244,9 @@ def prepare_data(args, datasets, public_dataset, im_size):
     # webcam_valset = torch.utils.data.Subset(webcam_trainset, list(range(len(webcam_trainset)))[-val_len:])
     refuge_trainset = torch.utils.data.Subset(refuge_trainset, shuffled_idxes[3][:min_data_len])
 
+    self_trainset = torch.utils.data.ConcatDataset([torch.utils.data.Subset(drishti_trainset, shuffled_idxes[0][min_data_len:min_data_len+args.data_size//4]), torch.utils.data.Subset(kaggle_trainset, shuffled_idxes[1][min_data_len:min_data_len+args.data_size//4]), torch.utils.data.Subset(rim_trainset, shuffled_idxes[2][min_data_len:min_data_len+args.data_size//4]), torch.utils.data.Subset(refuge_trainset, shuffled_idxes[3][min_data_len:min_data_len+args.data_size//4])])
+    self_virtualset = torch.utils.data.ConcatDataset([torch.utils.data.Subset(drishti_trainset, shuffled_idxes[0][min_data_len:min_data_len+args.data_size//4]), torch.utils.data.Subset(kaggle_trainset, shuffled_idxes[1][min_data_len:min_data_len+args.data_size//4]), torch.utils.data.Subset(rim_trainset, shuffled_idxes[2][min_data_len:min_data_len+args.data_size//4]), torch.utils.data.Subset(refuge_trainset, shuffled_idxes[3][min_data_len:min_data_len+args.data_size//4])])
+
     # cifar_trainset = torch.utils.data.Subset(cifar_trainset, shuffled_idxes[4][:min_data_len])
 
 
@@ -339,6 +342,12 @@ def prepare_data(args, datasets, public_dataset, im_size):
                 generatsets.append(cifar_trainset)
                 virtualsets.append(cifar_virtualset)
 
+        elif dataset == 'self':
+            trainsets.append(self_trainset)
+            if public_dataset == None:
+                generatsets.append(self_trainset)
+                virtualsets.append(self_virtualset)
+
     if public_dataset != None:
         if public_dataset == 'drishti':
             generatsets.append(drishti_trainset)
@@ -359,6 +368,10 @@ def prepare_data(args, datasets, public_dataset, im_size):
         elif public_dataset == 'cifar':
             generatsets.append(cifar_trainset)
             virtualsets.append(cifar_virtualset)
+
+        elif public_dataset == 'self':
+            generatsets.append(self_trainset)
+            virtualsets.append(self_virtualset)
     
     
     # unnormalized_train_datasets = [unnormalized_drishti_trainset, unnormalized_kaggle_trainset, unnormalized_rim_trainset, unnormalized_refuge_trainset]
