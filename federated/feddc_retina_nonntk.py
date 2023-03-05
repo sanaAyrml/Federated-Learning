@@ -229,22 +229,22 @@ def prepare_data(args, datasets, public_dataset, im_size):
 
     len_datasets = [len(drishti_trainset), len(kaggle_trainset), len(rim_trainset), len(refuge_trainset), len(cifar_trainset)]
 
-    # # amazon_valset = torch.utils.data.Subset(amazon_trainset, list(range(len(amazon_trainset)))[-val_len:])
-    # shuffled_idxes = [list(range(0, len_datasets[idx])) for idx in range(5)]
-    # for idx in range(len(shuffled_idxes)):
-    #     random.shuffle(shuffled_idxes[idx])
-    # drishti_trainset = torch.utils.data.Subset(drishti_trainset, shuffled_idxes[0][:min_data_len])
-    #
-    # # caltech_valset = torch.utils.data.Subset(caltech_trainset, list(range(len(caltech_trainset)))[-val_len:])
-    # kaggle_trainset = torch.utils.data.Subset(kaggle_trainset, shuffled_idxes[1][:min_data_len])
-    #
-    # # dslr_valset = torch.utils.data.Subset(dslr_trainset, list(range(len(dslr_trainset)))[-val_len:])
-    # rim_trainset = torch.utils.data.Subset(rim_trainset, shuffled_idxes[2][:min_data_len])
-    #
-    # # webcam_valset = torch.utils.data.Subset(webcam_trainset, list(range(len(webcam_trainset)))[-val_len:])
-    # refuge_trainset = torch.utils.data.Subset(refuge_trainset, shuffled_idxes[3][:min_data_len])
-    #
-    # cifar_trainset = torch.utils.data.Subset(cifar_trainset, shuffled_idxes[4][:min_data_len])
+    # amazon_valset = torch.utils.data.Subset(amazon_trainset, list(range(len(amazon_trainset)))[-val_len:])
+    shuffled_idxes = [list(range(0, len_datasets[idx])) for idx in range(5)]
+    for idx in range(len(shuffled_idxes)):
+        random.shuffle(shuffled_idxes[idx])
+    drishti_trainset = torch.utils.data.Subset(drishti_trainset, shuffled_idxes[0][:min_data_len])
+
+    # caltech_valset = torch.utils.data.Subset(caltech_trainset, list(range(len(caltech_trainset)))[-val_len:])
+    kaggle_trainset = torch.utils.data.Subset(kaggle_trainset, shuffled_idxes[1][:min_data_len])
+
+    # dslr_valset = torch.utils.data.Subset(dslr_trainset, list(range(len(dslr_trainset)))[-val_len:])
+    rim_trainset = torch.utils.data.Subset(rim_trainset, shuffled_idxes[2][:min_data_len])
+
+    # webcam_valset = torch.utils.data.Subset(webcam_trainset, list(range(len(webcam_trainset)))[-val_len:])
+    refuge_trainset = torch.utils.data.Subset(refuge_trainset, shuffled_idxes[3][:min_data_len])
+
+    cifar_trainset = torch.utils.data.Subset(cifar_trainset, shuffled_idxes[4][:min_data_len])
 
 
     # dataset_length = len(drishti_concated)
