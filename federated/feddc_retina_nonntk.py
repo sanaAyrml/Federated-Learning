@@ -128,6 +128,7 @@ def prepare_data(args, datasets, public_dataset, im_size):
     # ])
 
     transform_tensor = transforms.Compose([
+            transforms.Resize(im_size),
             transforms.ToTensor()
     ])
 
@@ -148,7 +149,7 @@ def prepare_data(args, datasets, public_dataset, im_size):
     ])
 
     transform_drishti2 = transforms.Compose([
-        transforms.Resize(im_size),
+        # transforms.Resize(im_size),
         # transforms.RandomHorizontalFlip(),
         # transforms.RandomRotation((-30,30)),
         # transforms.ToTensor(),
@@ -156,7 +157,8 @@ def prepare_data(args, datasets, public_dataset, im_size):
     ])
 
     transform_cifar = transforms.Compose(
-        [transforms.Resize(im_size),
+        [
+            # transforms.Resize(im_size),
          # transforms.ToTensor(),
          transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
     # drishti_trainset = DrishtiDataset(dataset_path=data_base_path,transform=transform_drishti)
@@ -178,7 +180,7 @@ def prepare_data(args, datasets, public_dataset, im_size):
             transforms.Normalize(MEANS[1], STDS[1])
     ])
     transform_kaggle2 = transforms.Compose([
-        transforms.Resize(im_size),
+        # transforms.Resize(im_size),
         # transforms.RandomHorizontalFlip(),
         # transforms.RandomRotation((-30,30)),
         # transforms.ToTensor(),
@@ -202,7 +204,7 @@ def prepare_data(args, datasets, public_dataset, im_size):
             transforms.Normalize(MEANS[2], STDS[2])
     ])
     transform_rim2 = transforms.Compose([
-        transforms.Resize(im_size),
+        # transforms.Resize(im_size),
         # transforms.RandomHorizontalFlip(),
         # transforms.RandomRotation((-30,30)),
         # transforms.ToTensor(),
@@ -229,7 +231,7 @@ def prepare_data(args, datasets, public_dataset, im_size):
             transforms.Normalize(MEANS[3], STDS[3])
     ])
     transform_refuge2 = transforms.Compose([
-        transforms.Resize(im_size),
+        # transforms.Resize(im_size),
         # transforms.RandomHorizontalFlip(),
         # transforms.RandomRotation((-30,30)),
         # transforms.ToTensor(),
