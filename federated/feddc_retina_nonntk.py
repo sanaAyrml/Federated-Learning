@@ -147,6 +147,14 @@ def prepare_data(args, datasets, public_dataset, im_size):
             transforms.Normalize(MEANS[0], STDS[0])
     ])
 
+    transform_drishti2 = transforms.Compose([
+        transforms.Resize(im_size),
+        # transforms.RandomHorizontalFlip(),
+        # transforms.RandomRotation((-30,30)),
+        # transforms.ToTensor(),
+        transforms.Normalize(MEANS[0], STDS[0])
+    ])
+
     transform_cifar = transforms.Compose(
         [transforms.Resize(im_size),
          # transforms.ToTensor(),
@@ -169,6 +177,13 @@ def prepare_data(args, datasets, public_dataset, im_size):
             transforms.ToTensor(),
             transforms.Normalize(MEANS[1], STDS[1])
     ])
+    transform_kaggle2 = transforms.Compose([
+        transforms.Resize(im_size),
+        # transforms.RandomHorizontalFlip(),
+        # transforms.RandomRotation((-30,30)),
+        # transforms.ToTensor(),
+        transforms.Normalize(MEANS[1], STDS[1])
+    ])
     kaggle_train_path = os.path.join(data_base_path, 'kaggle_arima', 'Training')
     kaggle_test_path = os.path.join(data_base_path, 'kaggle_arima', 'Testing')
     # unnormalized_kaggle_trainset = ImageFolder(kaggle_train_path, transform=transform_unnormalized)
@@ -185,6 +200,13 @@ def prepare_data(args, datasets, public_dataset, im_size):
             # transforms.RandomRotation((-30,30)),
             transforms.ToTensor(),
             transforms.Normalize(MEANS[2], STDS[2])
+    ])
+    transform_rim2 = transforms.Compose([
+        transforms.Resize(im_size),
+        # transforms.RandomHorizontalFlip(),
+        # transforms.RandomRotation((-30,30)),
+        # transforms.ToTensor(),
+        transforms.Normalize(MEANS[2], STDS[2])
     ])
     # rim_train_path = os.path.join(data_base_path, 'RIM-ONE_DL_images', 'partitioned_by_hospital', 'training_set')
     # rim_test_path = os.path.join(data_base_path, 'RIM-ONE_DL_images', 'partitioned_by_hospital', 'test_set')
@@ -205,6 +227,13 @@ def prepare_data(args, datasets, public_dataset, im_size):
             # transforms.RandomRotation((-30,30)),
             transforms.ToTensor(),
             transforms.Normalize(MEANS[3], STDS[3])
+    ])
+    transform_refuge2 = transforms.Compose([
+        transforms.Resize(im_size),
+        # transforms.RandomHorizontalFlip(),
+        # transforms.RandomRotation((-30,30)),
+        # transforms.ToTensor(),
+        transforms.Normalize(MEANS[3], STDS[3])
     ])
     refuge_train_path = os.path.join(data_base_path, 'REFUGE', 'Training')
     refuge_test_path = os.path.join(data_base_path, 'REFUGE', 'Testing')
@@ -350,20 +379,20 @@ def prepare_data(args, datasets, public_dataset, im_size):
 
     if public_dataset != None:
         if public_dataset == 'drishti':
-            generatsets.append(CustomDataset(ImageFolder(drishti_train_path), args.data_size, transform=transform_drishti))
-            virtualsets.append(CustomDataset(ImageFolder(drishti_train_path), args.data_size, transform=transform_drishti))
+            generatsets.append(CustomDataset(ImageFolder(drishti_train_path, transform=transform_tensor), args.data_size, transform=transform_drishti2))
+            virtualsets.append(CustomDataset(ImageFolder(drishti_train_path, transform=transform_tensor), args.data_size, transform=transform_drishti2))
 
         elif public_dataset == 'kaggle':
-            generatsets.append(CustomDataset(ImageFolder(kaggle_train_path), args.data_size, transform=transform_kaggle))
-            virtualsets.append(CustomDataset(ImageFolder(kaggle_train_path), args.data_size, transform=transform_kaggle))
+            generatsets.append(CustomDataset(ImageFolder(kaggle_train_path, transform=transform_tensor), args.data_size, transform=transform_kaggle2))
+            virtualsets.append(CustomDataset(ImageFolder(kaggle_train_path, transform=transform_tensor), args.data_size, transform=transform_kaggle2))
 
         elif public_dataset == 'rim':
-            generatsets.append(CustomDataset(ImageFolder(rim_train_path), args.data_size, transform=transform_rim))
-            virtualsets.append(CustomDataset(ImageFolder(rim_train_path), args.data_size, transform=transform_rim))
+            generatsets.append(CustomDataset(ImageFolder(rim_train_path, transform=transform_tensor), args.data_size, transform=transform_rim2))
+            virtualsets.append(CustomDataset(ImageFolder(rim_train_path, transform=transform_tensor), args.data_size, transform=transform_rim2))
 
         elif public_dataset == 'refuge':
-            generatsets.append(CustomDataset(ImageFolder(refuge_train_path), args.data_size, transform=transform_refuge))
-            virtualsets.append(CustomDataset(ImageFolder(refuge_train_path), args.data_size, transform=transform_refuge))
+            generatsets.append(CustomDataset(ImageFolder(refuge_train_path, transform=transform_tensor), args.data_size, transform=transform_refuge2))
+            virtualsets.append(CustomDataset(ImageFolder(refuge_train_path, transform=transform_tensor), args.data_size, transform=transform_refuge2))
 
         elif public_dataset == 'cifar':
             generatsets.append(cifar_trainset)
