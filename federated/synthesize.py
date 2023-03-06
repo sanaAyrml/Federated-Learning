@@ -95,6 +95,52 @@ def labels_to_one_hot(labels, num_class, device):
     labels_one_hot.scatter_(1, labels.unsqueeze(1), 1)
     return labels_one_hot
 
+
+def src_img_synth_ce(gen_loader, src_model, args , device, mode, save_dir,a_iter, class_num, wandb, class_count):
+    src_model.eval()
+
+    gen_dataset = None
+    gen_labels = None
+    original_dataset = None
+    original_labels = None
+
+    for batch_idx, (images_t, labels_t) in enumerate(gen_loader):
+
+        if original_labels is None:
+            original_dataset = images_t
+            original_labels = labels_t
+        else:
+            original_dataset = torch.cat((original_dataset, labels_t))
+            original_labels = torch.cat((original_labels, labels_t))
+
+        images_t = images_t.to(device)
+        # get pseudo labels
+        y_t, _ = src_model(images_t)
+        plabel_t = y_t.argmax(dim=1)
+
+        # init src img
+        images_s = images_t.clone()
+        images_s.requires_grad_()
+        optimizer_s = SGD([images_s], args.lr_img, momentum=args.momentum_img)
+
+        for iter_i in range(args.iters_img):
+            y_s, _ = src_model(images_s)
+            loss = func.cross_entropy(y_s, plabel_t)
+
+            optimizer_s.zero_grad()
+            loss.backward()
+            optimizer_s.step()
+
+        # save src imgs
+        if gen_dataset is None:
+            gen_dataset = images_s.detach_().cpu()
+            gen_labels = plabel_t
+        else:
+            gen_dataset = torch.cat((gen_dataset, images_s.detach_().cpu()))
+            gen_labels = torch.cat((gen_labels, plabel_t))
+
+    return gen_dataset, gen_labels, original_dataset ,original_labels
+
 def src_img_synth_admm(gen_loader, src_model, args , device, mode, save_dir,a_iter, class_num, wandb, class_count):
 
     src_model.eval()

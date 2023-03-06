@@ -33,7 +33,7 @@ from dalib.modules.domain_discriminator import DomainDiscriminator
 from dalib.adaptation.dann import DomainAdversarialLoss
 from dalib.adaptation.cdan import ConditionalDomainAdversarialLoss
 from train_handler import train_uda, train, train_fedprox, test, communication, visualize, visualize_all,fit_umap, train_multi_datasets
-from synthesize import src_img_synth_admm
+from synthesize import src_img_synth_admm, src_img_synth_ce
 from digit_net import ImageClassifier
 from prepare_data import prepare_office
 
@@ -321,7 +321,26 @@ if __name__ == '__main__':
             ori_labels = []
             for client_idx,generate_loader in enumerate(generate_loaders):
                 if args.synth_method == 'ce':
-                    pass
+                    print('generating data for client', client_idx)
+                    for param in models[client_idx].parameters():
+                        param.requires_grad = False
+                    models[client_idx].eval()
+                    # vir_dataset, vir_label, ori_dataset, ori_label = src_img_synth_admm(generate_loader, server_model, args,device, 'train', Synth_SAVE_PATH+'_train_' +datasets[client_idx]+'_'+ str(a_iter) + '.png',a_iter)
+                    vir_dataset, vir_label, ori_dataset, ori_label = src_img_synth_ce(generate_loader,
+                                                                                        models[client_idx], args,
+                                                                                        device, 'train',
+                                                                                        Synth_SAVE_PATH + '_train_' +
+                                                                                        datasets[
+                                                                                            client_idx] + '_' + str(
+                                                                                            a_iter) + '.png', a_iter,
+                                                                                        trainset_num_classes, wandb)
+                    for param in models[client_idx].parameters():
+                        param.requires_grad = True
+                    models[client_idx].eval()
+                    vir_datasets.append(vir_dataset)
+                    vir_labels.append(vir_label)
+                    ori_datasets.append(ori_dataset)
+                    ori_labels.append(ori_label)
                 elif args.synth_method == 'admm':
                     print('generating data for client', client_idx)
                     for param in models[client_idx].parameters():
