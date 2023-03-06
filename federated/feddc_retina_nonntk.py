@@ -251,8 +251,8 @@ def prepare_data(args, datasets, public_dataset, im_size):
     #                                               download=True, transform=transform_cifar)[0][0].shape)
     cifar_trainset = CustomDataset(torchvision.datasets.CIFAR10(root='./data', train=True,
                                                   download=True, transform=transform_tensor), args.data_size, transform=transform_cifar)
-    # cifar_virtualset = CustomDataset(torchvision.datasets.CIFAR10(root='./data', train=True,
-    #                                                 download=True, transform=transform_tensor), args.data_size, transform=transform_cifar)
+    cifar_virtualset = CustomDataset(torchvision.datasets.CIFAR10(root='./data', train=True,
+                                                    download=True, transform=transform_tensor), args.data_size, transform=transform_cifar)
     cifar_testset = CustomDataset(torchvision.datasets.CIFAR10(root='./data', train=False,
                                                  download=True, transform=transform_tensor), args.data_size, transform=transform_cifar)
 
@@ -276,7 +276,7 @@ def prepare_data(args, datasets, public_dataset, im_size):
     refuge_trainset = torch.utils.data.Subset(refuge_trainset, shuffled_idxes[3][:min_data_len])
 
     self_trainset = torch.utils.data.ConcatDataset([torch.utils.data.Subset(drishti_trainset, shuffled_idxes[0][min_data_len:min_data_len+args.data_size//4]), torch.utils.data.Subset(kaggle_trainset, shuffled_idxes[1][min_data_len:min_data_len+args.data_size//4]), torch.utils.data.Subset(rim_trainset, shuffled_idxes[2][min_data_len:min_data_len+args.data_size//4]), torch.utils.data.Subset(refuge_trainset, shuffled_idxes[3][min_data_len:min_data_len+args.data_size//4])])
-    # self_virtualset = torch.utils.data.ConcatDataset([torch.utils.data.Subset(drishti_trainset, shuffled_idxes[0][min_data_len:min_data_len+args.data_size//4]), torch.utils.data.Subset(kaggle_trainset, shuffled_idxes[1][min_data_len:min_data_len+args.data_size//4]), torch.utils.data.Subset(rim_trainset, shuffled_idxes[2][min_data_len:min_data_len+args.data_size//4]), torch.utils.data.Subset(refuge_trainset, shuffled_idxes[3][min_data_len:min_data_len+args.data_size//4])])
+    self_virtualset = torch.utils.data.ConcatDataset([torch.utils.data.Subset(drishti_trainset, shuffled_idxes[0][min_data_len:min_data_len+args.data_size//4]), torch.utils.data.Subset(kaggle_trainset, shuffled_idxes[1][min_data_len:min_data_len+args.data_size//4]), torch.utils.data.Subset(rim_trainset, shuffled_idxes[2][min_data_len:min_data_len+args.data_size//4]), torch.utils.data.Subset(refuge_trainset, shuffled_idxes[3][min_data_len:min_data_len+args.data_size//4])])
 
     # cifar_trainset = torch.utils.data.Subset(cifar_trainset, shuffled_idxes[4][:min_data_len])
 
