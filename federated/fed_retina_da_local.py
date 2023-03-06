@@ -91,6 +91,7 @@ if __name__ == '__main__':
     parser.add_argument('--save_every', default= 10 , type=int)
 
     parser.add_argument('--client_num', default= 2 , type=int)
+    parser.add_argument('--seed', default=2, type=int)
     parser.add_argument('--add_bn_normalization', action='store_true', help='batch norm loss')
     parser.add_argument('--public_dataset', default= 0 , type=int)
     parser.add_argument('--data_size', default=160, type=int)
@@ -105,11 +106,11 @@ if __name__ == '__main__':
                                    
 
     device = torch.device('cuda:' + str(args.cuda_num) if torch.cuda.is_available() else 'cpu')
-    seed = 2
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
+    # seed = 2
+    random.seed(args.seed)
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
+    torch.cuda.manual_seed_all(args.seed)
     lr_factor = 0.3  # Learning rate decrease factor
     lr_patience = 5
     lr_threshold = 0.0001
