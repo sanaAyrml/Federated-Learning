@@ -131,6 +131,8 @@ def src_img_synth_ce(gen_loader, src_model, args , device, mode, save_dir,a_iter
             loss.backward()
             optimizer_s.step()
 
+            print(loss)
+
         # save src imgs
         if gen_dataset is None:
             gen_dataset = images_s.detach_().cpu()
@@ -139,6 +141,7 @@ def src_img_synth_ce(gen_loader, src_model, args , device, mode, save_dir,a_iter
             gen_dataset = torch.cat((gen_dataset, images_s.detach_().cpu()))
             gen_labels = torch.cat((gen_labels, plabel_t))
 
+        print(gen_dataset)
     return gen_dataset, gen_labels, original_dataset ,original_labels
 
 def src_img_synth_admm(gen_loader, src_model, args , device, mode, save_dir,a_iter, class_num, wandb, class_count):
