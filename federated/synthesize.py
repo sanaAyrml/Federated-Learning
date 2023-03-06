@@ -110,7 +110,7 @@ def src_img_synth_ce(gen_loader, src_model, args , device, mode, save_dir,a_iter
             original_dataset = images_t
             original_labels = labels_t
         else:
-            original_dataset = torch.cat((original_dataset, labels_t))
+            original_dataset = torch.cat((original_dataset, images_t))
             original_labels = torch.cat((original_labels, labels_t))
 
         images_t = images_t.to(device)
@@ -141,7 +141,6 @@ def src_img_synth_ce(gen_loader, src_model, args , device, mode, save_dir,a_iter
             gen_dataset = torch.cat((gen_dataset, images_s.detach_().cpu()))
             gen_labels = torch.cat((gen_labels, plabel_t))
 
-        print(gen_dataset)
     return gen_dataset, gen_labels, original_dataset ,original_labels
 
 def src_img_synth_admm(gen_loader, src_model, args , device, mode, save_dir,a_iter, class_num, wandb, class_count):
