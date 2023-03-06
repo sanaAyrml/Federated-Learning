@@ -351,7 +351,7 @@ def train_multi_datasets(args, wandb,model, train_loaders, optimizer, loss_fun, 
     return loss_all / iter_num, correct / num_data
 
 
-def train_fedprox(args, wandb, model, train_loader, optimizer, loss_fun, client_num, device,client_idx, epoch = 1):
+def train_fedprox(args, wandb, server_model, model, train_loader, optimizer, loss_fun, client_num, device,client_idx, epoch = 1):
     model.train()
     num_data = 0
     correct = 0

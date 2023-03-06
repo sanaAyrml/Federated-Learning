@@ -419,7 +419,7 @@ if __name__ == '__main__':
             model, train_loader, optimizer = models[client_idx], train_loaders[client_idx], optimizers[client_idx]
             if args.mode.lower() == 'fedprox':
                 if a_iter > 0:
-                    train_fedprox(args, wandb, model, train_loader, optimizer, loss_fun, client_num, device,client_idx,args.wk_iters)
+                    train_fedprox(args, wandb, server_model, model, train_loader, optimizer, loss_fun, client_num, device,client_idx,args.wk_iters)
                 else:
                     train(args, wandb,model, train_loader, optimizer, loss_fun, client_num, device,client_idx,args.wk_iters)
             elif args.mode.lower() == 'fedda':
