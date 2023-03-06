@@ -157,7 +157,7 @@ def prepare_data(args, datasets, public_dataset, im_size):
     drishti_test_path = os.path.join(data_base_path, 'Drishti', 'Testing')
     # unnormalized_drishti_trainset = ImageFolder(drishti_train_path, transform=transform_unnormalized)
     drishti_trainset = ImageFolder(drishti_train_path, transform=transform_drishti)
-    drishti_virtualset = ImageFolder(drishti_train_path, transform=transform_drishti)
+    # drishti_virtualset = ImageFolder(drishti_train_path, transform=transform_drishti)
     drishti_testset = ImageFolder(drishti_test_path, transform=transform_drishti)
     # drishti_concated = torch.utils.data.ConcatDataset([drishti_trainset, drishti_testset])
     
@@ -173,7 +173,7 @@ def prepare_data(args, datasets, public_dataset, im_size):
     kaggle_test_path = os.path.join(data_base_path, 'kaggle_arima', 'Testing')
     # unnormalized_kaggle_trainset = ImageFolder(kaggle_train_path, transform=transform_unnormalized)
     kaggle_trainset = ImageFolder(kaggle_train_path, transform=transform_kaggle)
-    kaggle_virtualset = ImageFolder(kaggle_train_path, transform=transform_kaggle)
+    # kaggle_virtualset = ImageFolder(kaggle_train_path, transform=transform_kaggle)
     kaggle_testset = ImageFolder(kaggle_test_path, transform=transform_kaggle)
     # kaggle_concated = ImageFolder(kaggle_train_path, transform=transform_kaggle, target_transform=torch.tensor)
     # print(kaggle_concated.class_to_idx)
@@ -192,7 +192,7 @@ def prepare_data(args, datasets, public_dataset, im_size):
     rim_test_path = os.path.join(data_base_path, 'RIM', 'Testing')
     # unnormalized_rim_trainset = ImageFolder(rim_train_path, transform=transform_unnormalized)
     rim_trainset = ImageFolder(rim_train_path, transform=transform_rim)
-    rim_virtualset = ImageFolder(rim_train_path, transform=transform_rim)
+    # rim_virtualset = ImageFolder(rim_train_path, transform=transform_rim)
     rim_testset = ImageFolder(rim_test_path, transform=transform_rim)
     # rim_concated = torch.utils.data.ConcatDataset([rim_trainset,rim_testset])
     # print(rim_trainset.class_to_idx)
@@ -210,7 +210,7 @@ def prepare_data(args, datasets, public_dataset, im_size):
     refuge_test_path = os.path.join(data_base_path, 'REFUGE', 'Testing')
     # unnormalized_refuge_trainset = ImageFolder(refuge_train_path, transform=transform_unnormalized)
     refuge_trainset = ImageFolder(refuge_train_path, transform=transform_refuge)
-    refuge_virtualset = ImageFolder(refuge_train_path, transform=transform_refuge)
+    # refuge_virtualset = ImageFolder(refuge_train_path, transform=transform_refuge)
     refuge_testset = ImageFolder(refuge_test_path, transform=transform_refuge)
     # print(refuge_trainset.class_to_idx)
     # refuge_valset = RefugeDataset(data_base_path, transform=transform_refuge, test=False)
@@ -220,8 +220,8 @@ def prepare_data(args, datasets, public_dataset, im_size):
     #                                               download=True, transform=transform_cifar)[0][0].shape)
     cifar_trainset = CustomDataset(torchvision.datasets.CIFAR10(root='./data', train=True,
                                                   download=True, transform=transform_tensor), args.data_size, transform=transform_cifar)
-    cifar_virtualset = CustomDataset(torchvision.datasets.CIFAR10(root='./data', train=True,
-                                                    download=True, transform=transform_tensor), args.data_size, transform=transform_cifar)
+    # cifar_virtualset = CustomDataset(torchvision.datasets.CIFAR10(root='./data', train=True,
+    #                                                 download=True, transform=transform_tensor), args.data_size, transform=transform_cifar)
     cifar_testset = CustomDataset(torchvision.datasets.CIFAR10(root='./data', train=False,
                                                  download=True, transform=transform_tensor), args.data_size, transform=transform_cifar)
 
@@ -245,7 +245,7 @@ def prepare_data(args, datasets, public_dataset, im_size):
     refuge_trainset = torch.utils.data.Subset(refuge_trainset, shuffled_idxes[3][:min_data_len])
 
     self_trainset = torch.utils.data.ConcatDataset([torch.utils.data.Subset(drishti_trainset, shuffled_idxes[0][min_data_len:min_data_len+args.data_size//4]), torch.utils.data.Subset(kaggle_trainset, shuffled_idxes[1][min_data_len:min_data_len+args.data_size//4]), torch.utils.data.Subset(rim_trainset, shuffled_idxes[2][min_data_len:min_data_len+args.data_size//4]), torch.utils.data.Subset(refuge_trainset, shuffled_idxes[3][min_data_len:min_data_len+args.data_size//4])])
-    self_virtualset = torch.utils.data.ConcatDataset([torch.utils.data.Subset(drishti_trainset, shuffled_idxes[0][min_data_len:min_data_len+args.data_size//4]), torch.utils.data.Subset(kaggle_trainset, shuffled_idxes[1][min_data_len:min_data_len+args.data_size//4]), torch.utils.data.Subset(rim_trainset, shuffled_idxes[2][min_data_len:min_data_len+args.data_size//4]), torch.utils.data.Subset(refuge_trainset, shuffled_idxes[3][min_data_len:min_data_len+args.data_size//4])])
+    # self_virtualset = torch.utils.data.ConcatDataset([torch.utils.data.Subset(drishti_trainset, shuffled_idxes[0][min_data_len:min_data_len+args.data_size//4]), torch.utils.data.Subset(kaggle_trainset, shuffled_idxes[1][min_data_len:min_data_len+args.data_size//4]), torch.utils.data.Subset(rim_trainset, shuffled_idxes[2][min_data_len:min_data_len+args.data_size//4]), torch.utils.data.Subset(refuge_trainset, shuffled_idxes[3][min_data_len:min_data_len+args.data_size//4])])
 
     # cifar_trainset = torch.utils.data.Subset(cifar_trainset, shuffled_idxes[4][:min_data_len])
 
@@ -310,60 +310,60 @@ def prepare_data(args, datasets, public_dataset, im_size):
         if dataset == 'drishti':
             trainsets.append(drishti_trainset)
             testsets.append(drishti_testset)
-            if public_dataset == None:
-                generatsets.append(drishti_trainset)
-                virtualsets.append(drishti_virtualset)
+            # if public_dataset == None:
+            #     generatsets.append(drishti_trainset)
+            #     virtualsets.append(drishti_virtualset)
 
         elif dataset == 'kaggle':
             trainsets.append(kaggle_trainset)
             testsets.append(kaggle_testset)
-            if public_dataset == None:
-                generatsets.append(kaggle_trainset)
-                virtualsets.append(kaggle_virtualset)
+            # if public_dataset == None:
+            #     generatsets.append(kaggle_trainset)
+            #     virtualsets.append(kaggle_virtualset)
 
         elif dataset == 'rim':
             trainsets.append(rim_trainset)
             testsets.append(rim_testset)
-            if public_dataset == None:
-                generatsets.append(rim_trainset)
-                virtualsets.append(rim_virtualset)
+            # if public_dataset == None:
+            #     generatsets.append(rim_trainset)
+            #     virtualsets.append(rim_virtualset)
 
         elif dataset == 'refuge':
             trainsets.append(refuge_trainset)
             testsets.append(refuge_testset)
-            if public_dataset == None:
-                generatsets.append(refuge_trainset)
-                virtualsets.append(refuge_virtualset)
+            # if public_dataset == None:
+            #     generatsets.append(refuge_trainset)
+            #     virtualsets.append(refuge_virtualset)
 
         elif dataset == 'cifar':
             trainsets.append(cifar_trainset)
             testsets.append(cifar_testset)
-            if public_dataset == None:
-                generatsets.append(cifar_trainset)
-                virtualsets.append(cifar_virtualset)
+            # if public_dataset == None:
+            #     generatsets.append(cifar_trainset)
+            #     virtualsets.append(cifar_virtualset)
 
         elif dataset == 'self':
             trainsets.append(self_trainset)
-            if public_dataset == None:
-                generatsets.append(self_trainset)
-                virtualsets.append(self_virtualset)
+            # if public_dataset == None:
+            #     generatsets.append(self_trainset)
+            #     virtualsets.append(self_virtualset)
 
     if public_dataset != None:
         if public_dataset == 'drishti':
-            generatsets.append(drishti_trainset)
-            virtualsets.append(drishti_virtualset)
+            generatsets.append(CustomDataset(ImageFolder(drishti_train_path), args.data_size, transform=transform_drishti))
+            virtualsets.append(CustomDataset(ImageFolder(drishti_train_path), args.data_size, transform=transform_drishti))
 
         elif public_dataset == 'kaggle':
-            generatsets.append(kaggle_trainset)
-            virtualsets.append(kaggle_virtualset)
+            generatsets.append(CustomDataset(ImageFolder(kaggle_train_path), args.data_size, transform=transform_kaggle))
+            virtualsets.append(CustomDataset(ImageFolder(kaggle_train_path), args.data_size, transform=transform_kaggle))
 
         elif public_dataset == 'rim':
-            generatsets.append(rim_trainset)
-            virtualsets.append(rim_virtualset)
+            generatsets.append(CustomDataset(ImageFolder(rim_train_path), args.data_size, transform=transform_rim))
+            virtualsets.append(CustomDataset(ImageFolder(rim_train_path), args.data_size, transform=transform_rim))
 
         elif public_dataset == 'refuge':
-            generatsets.append(refuge_trainset)
-            virtualsets.append(refuge_virtualset)
+            generatsets.append(CustomDataset(ImageFolder(refuge_train_path), args.data_size, transform=transform_refuge))
+            virtualsets.append(CustomDataset(ImageFolder(refuge_train_path), args.data_size, transform=transform_refuge))
 
         elif public_dataset == 'cifar':
             generatsets.append(cifar_trainset)
