@@ -448,7 +448,7 @@ def communication(args, server_model, models, client_weights,client_num,iteratio
     return server_model, models
 
 
-def pgd_attack(model, data, labels, loss_fun, device, eps=0.05, alpha=0.025, iters=5):
+def pgd_attack(model, data, labels, loss_fun, device, maxim, eps=0.05, alpha=0.025, iters=5):
     data = data.to(device)
     # print(data)
     labels = labels.to(device)
@@ -467,7 +467,10 @@ def pgd_attack(model, data, labels, loss_fun, device, eps=0.05, alpha=0.025, ite
         cost = loss_fun(outputs, labels).to(device)
         cost.backward()
 
-        adv_data = data + alpha * data.grad.sign()
+        if maxim:
+            adv_data = data + alpha * data.grad.sign()
+        else:
+            adv_data = data - alpha * data.grad.sign()
         eta = torch.clamp(adv_data - ori_data, min=-eps, max=eps)
         #       data = torch.clamp(ori_data + eta, min=0, max=1).detach_()
         data = ori_data + eta
@@ -493,8 +496,8 @@ def train_fedvss(args, wandb, server_model, model, train_loader, optimizer, loss
         for step in range(len(train_iter)):
             iter_num += 1
             x, y = next(train_iter)
-            x_adv_local = pgd_attack(model, x, y, loss_fun, device)
-            x_adv_global = pgd_attack(server_model, x, y, -loss_fun, device)
+            x_adv_local = pgd_attack(model, x, y, loss_fun, device, True)
+            x_adv_global = pgd_attack(server_model, x, y, loss_fun, device, False)
             x = torch.cat((x, x_adv_local, x_adv_global))
             y = torch.cat((y, y, y))
             optimizer.zero_grad()
