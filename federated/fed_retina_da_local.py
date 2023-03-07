@@ -329,6 +329,7 @@ if __name__ == '__main__':
                 param.requires_grad = False
             server_model.eval()
         elif args.mode.lower() == 'fedvss':
+            optimizers = [optim.SGD(params=models[idx].parameters(), lr=args.lr) for idx in range(client_num)]
             for param in server_model.parameters():
                 param.requires_grad = False
             server_model.eval()
