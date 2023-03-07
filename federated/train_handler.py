@@ -450,6 +450,7 @@ def communication(args, server_model, models, client_weights,client_num,iteratio
 
 def pgd_attack(model, data, labels, loss_fun, device, eps=0.05, alpha=0.025, iters=5):
     data = data.to(device)
+    print(data)
     labels = labels.to(device)
 
     ori_data = data.data
@@ -459,9 +460,11 @@ def pgd_attack(model, data, labels, loss_fun, device, eps=0.05, alpha=0.025, ite
     for i in range(iters):
         data.requires_grad = True
         outputs = model(data)
+        print(outputs)
+        print(labels)
 
         model.zero_grad()
-        cost = loss_fun(outputs, labels.squeeze()).to(device)
+        cost = loss_fun(outputs, labels).to(device)
         cost.backward()
 
         adv_data = data + alpha * data.grad.sign()
