@@ -33,7 +33,7 @@ import random
 from dalib.modules.domain_discriminator import DomainDiscriminator
 from dalib.adaptation.dann import DomainAdversarialLoss
 from dalib.adaptation.cdan import ConditionalDomainAdversarialLoss
-from train_handler import train_uda, train, train_fedprox, test, communication, visualize, visualize_all,fit_umap, train_multi_datasets
+from train_handler import train_uda, train, train_fedprox, test, communication, visualize, visualize_all,fit_umap, train_multi_datasets, train_fedvss
 from synthesize import src_img_synth_admm, src_img_synth_ce
 from digit_net import ImageClassifier
 from prepare_data import prepare_office
@@ -52,7 +52,7 @@ if __name__ == '__main__':
     parser.add_argument('--iters', type=int, default=100, help='iterations for communication')
     parser.add_argument('--wk_iters', type=int, default=1,
                         help='optimization iters in local worker between communication')
-    parser.add_argument('--mode', type=str, default='fedbn', help='fedavg | fedprox | fedbn | fedda')
+    parser.add_argument('--mode', type=str, default='fedbn', help='fedavg | fedprox | fedbn | fedda | fedvss')
     parser.add_argument('--mu', type=float, default=1e-2, help='The hyper parameter for fedprox')
     parser.add_argument('--save_path', type=str, default='checkpoint2/digits', help='path to save the checkpoint')
     parser.add_argument('--resume', action='store_true', help='resume training from the save path checkpoint')
@@ -205,7 +205,7 @@ if __name__ == '__main__':
     
     # prepare the data
     # trainsets, virtualsets, testsets, train_loaders, virtual_loaders, test_loaders = prepare_data(args,datasets,public_dataset)
-    trainsets, virtualsets, testsets, generatsets =  prepare_data(args,datasets,public_dataset, (256, 256))
+    trainsets, virtualsets, testsets, generatsets = prepare_data(args,datasets,public_dataset, (256, 256))
     print(len(trainsets),len(virtualsets),len(testsets),len(generatsets))
 
                                    
@@ -328,6 +328,10 @@ if __name__ == '__main__':
             for param in server_model.parameters():
                 param.requires_grad = False
             server_model.eval()
+        elif args.mode.lower() == 'fedvss':
+            for param in server_model.parameters():
+                param.requires_grad = False
+            server_model.eval()
         else:
             optimizers = [optim.SGD(params=models[idx].parameters(), lr=args.lr) for idx in range(client_num)]
 
@@ -441,6 +445,9 @@ if __name__ == '__main__':
                         #           device=device,wandb=wandb,client_idx=client_idx)
                 else:
                     train(args, wandb,model, train_loader, optimizer, loss_fun, client_num, device,client_idx,args.wk_iters)
+            elif args.mode.lower() == 'fedvss':
+                train_fedvss(args, wandb, server_model, model, train_loader, optimizer, loss_fun, client_num, device, client_idx,
+                      args.wk_iters)
             else:
                 train(args, wandb,model, train_loader, optimizer, loss_fun, client_num, device,client_idx,args.wk_iters)
 

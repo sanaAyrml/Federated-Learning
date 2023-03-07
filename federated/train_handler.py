@@ -446,3 +446,64 @@ def communication(args, server_model, models, client_weights,client_num,iteratio
                         for client_idx in range(len(client_weights)):
                             models[client_idx].state_dict()[key].data.copy_(server_model.state_dict()[key])
     return server_model, models
+
+
+def pgd_attack(model, data, labels, loss_fun, device, eps=0.05, alpha=0.025, iters=5):
+    data = data.to(device)
+    labels = labels.to(device)
+
+    ori_data = data.data
+
+    for i in range(iters):
+        data.requires_grad = True
+        outputs = model(data)
+
+        model.zero_grad()
+        cost = loss_fun(outputs, labels.squeeze()).to(device)
+        cost.backward()
+
+        adv_data = data + alpha * data.grad.sign()
+        eta = torch.clamp(adv_data - ori_data, min=-eps, max=eps)
+        #       data = torch.clamp(ori_data + eta, min=0, max=1).detach_()
+        data = ori_data + eta
+        data = data.detach_()
+
+    # return data.to(torch.device("cpu"))
+    return data.to(torch.device("cpu"))
+
+
+def train_fedvss(args, wandb, server_model, model, train_loader, optimizer, loss_fun, client_num, device,client_idx,epoch = 1):
+    model.train()
+    num_data = 0
+    correct = 0
+    loss_all = 0
+    preds = []
+    targets = []
+    first_run = True
+    iter_num = 0
+    for e in range(epoch):
+        train_iter = iter(train_loader)
+        for step in range(len(train_iter)):
+            iter_num += 1
+            x, y = next(train_iter)
+            x_adv_local = pgd_attack(model, x, y, loss_fun, device)
+            x_adv_global = pgd_attack(server_model, x, y, -loss_fun, device)
+            x = torch.cat((x, x_adv_local, x_adv_global))
+            y = torch.cat((y, y, y))
+            optimizer.zero_grad()
+            num_data += y.size(0)
+            x = x.to(device).float()
+            y = y.to(device).long()
+            output,_ = model(x)
+
+            loss = loss_fun(output, y)
+            loss.backward()
+            loss_all += loss.item()
+            optimizer.step()
+
+            pred = output.data.max(1)[1]
+            correct += pred.eq(y.view(-1)).sum().item()
+            if step%20 ==0 and args.log:
+                metrics = {"CE_loss" + str(client_idx): loss}
+                wandb.log(metrics)
+    return loss_all / iter_num, correct / num_data
