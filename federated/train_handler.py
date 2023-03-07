@@ -455,7 +455,7 @@ def pgd_attack(model, data, labels, loss_fun, device, maxim, eps=0.05, alpha=0.0
 
     ori_data = data.data
 
-    print('attack')
+    # print('attack')
 
     for i in range(iters):
         data.requires_grad = True
@@ -476,7 +476,7 @@ def pgd_attack(model, data, labels, loss_fun, device, maxim, eps=0.05, alpha=0.0
         data = ori_data + eta
         data = data.detach_()
 
-        print(cost)
+        # print(cost)?
 
     # return data.to(torch.device("cpu"))
     return data.to(torch.device("cpu"))
@@ -498,15 +498,19 @@ def train_fedvss(args, wandb, server_model, model, train_loader, optimizer, loss
             x, y = next(train_iter)
             x_adv_local = pgd_attack(model, x, y, loss_fun, device, True)
             x_adv_global = pgd_attack(server_model, x, y, loss_fun, device, False)
-            x = torch.cat((x, x_adv_local, x_adv_global))
-            y = torch.cat((y, y, y))
+            # x = torch.cat((x, x_adv_local, x_adv_global))
+            # y = torch.cat((y, y, y))
             optimizer.zero_grad()
             num_data += y.size(0)
             x = x.to(device).float()
+            x_adv_local = x_adv_local.to(device).float()
+            x_adv_global = x_adv_global.to(device).float()
             y = y.to(device).long()
-            output,_ = model(x)
+            output, _ = model(x)
+            output_local, _ = model(x_adv_local)
+            output_global, _ = model(x_adv_global)
 
-            loss = loss_fun(output, y)
+            loss = loss_fun(output, y) + 0.1 * loss_fun(output_local, y) + loss_fun(output_global, y)
             loss.backward()
             loss_all += loss.item()
             optimizer.step()
