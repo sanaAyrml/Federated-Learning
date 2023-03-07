@@ -454,6 +454,8 @@ def pgd_attack(model, data, labels, loss_fun, device, eps=0.05, alpha=0.025, ite
 
     ori_data = data.data
 
+    print('attack')
+
     for i in range(iters):
         data.requires_grad = True
         outputs = model(data)
@@ -467,6 +469,8 @@ def pgd_attack(model, data, labels, loss_fun, device, eps=0.05, alpha=0.025, ite
         #       data = torch.clamp(ori_data + eta, min=0, max=1).detach_()
         data = ori_data + eta
         data = data.detach_()
+
+        print(cost)
 
     # return data.to(torch.device("cpu"))
     return data.to(torch.device("cpu"))
