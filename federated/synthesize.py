@@ -193,7 +193,7 @@ def src_img_synth_admm(gen_loader, src_model, args , device, mode, save_dir,a_it
             original_dataset = torch.cat((original_dataset, images_s), 0)
             original_labels = torch.cat((original_labels, labels_real), 0)
 
-    if args.public_dataset == 7:
+    if args.noise_init:
         print('here we are rand')
         gen_dataset = torch.from_numpy(np.random.normal(0, 1
                                                         , (args.data_size, 3, 256, 256))).type(torch.FloatTensor)
