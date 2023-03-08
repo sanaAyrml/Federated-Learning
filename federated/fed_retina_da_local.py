@@ -187,7 +187,7 @@ if __name__ == '__main__':
     # name of each client dataset
     datasets = ['drishti', 'kaggle', 'rim', 'refuge', 'cifar', 'self']
     public_dataset = None
-    if args.public_dataset != 'rand' and args.public_dataset > 0 and args.synthesize_mode == 'global':
+    if args.public_dataset != 7 and args.public_dataset > 0 and args.synthesize_mode == 'global':
         public_dataset = datasets[args.public_dataset - 1]
         datasets.pop(args.public_dataset - 1)
         print('public_dataset', public_dataset)
