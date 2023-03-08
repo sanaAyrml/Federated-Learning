@@ -332,7 +332,10 @@ def train_multi_datasets(args, wandb,model, train_loaders, optimizer, loss_fun, 
                         x_temp, y_temp = next(train_iters[1])
                     x = torch.cat((x, x_temp))
                     y = torch.cat((y, y_temp))
-            # print(y)
+                    if step==0:
+                        plt.imshow(np.moveaxis(x_temp[0].numpy(), 0, -1))
+                        plt.savefig('../images/hiii.png')
+                            # print(y)
             num_data += y.size(0)
             x = x.to(device).float()
             y = y.to(device).long()
