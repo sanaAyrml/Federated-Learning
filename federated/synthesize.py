@@ -97,6 +97,7 @@ def labels_to_one_hot(labels, num_class, device):
 
 
 def src_img_synth_ce(gen_loader, src_model, args , device, mode, save_dir,a_iter, class_num, wandb, class_count):
+
     src_model.eval()
 
     gen_dataset = None
@@ -191,6 +192,15 @@ def src_img_synth_admm(gen_loader, src_model, args , device, mode, save_dir,a_it
                 gen_labels = torch.cat((gen_labels, labels_real), 0)
             original_dataset = torch.cat((original_dataset, images_s), 0)
             original_labels = torch.cat((original_labels, labels_real), 0)
+
+    if args.public_dataset == "rand":
+        print('here we are rand')
+        gen_dataset = torch.from_numpy(np.random.normal(0, 1
+                                                        , (args.data_size, 3, 256, 256))).type(torch.FloatTensor)
+        gen_labels = torch.randint(low=0, high=2, size=(args.data_size,))
+        # print(gen_labels[0:20])
+        original_labels = gen_labels.clone()
+        original_dataset = gen_dataset.clone()
 
     for i in range(args.iters_admm):
         
