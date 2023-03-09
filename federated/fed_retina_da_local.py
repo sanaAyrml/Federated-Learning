@@ -186,7 +186,7 @@ if __name__ == '__main__':
 
 
     # name of each client dataset
-    datasets = ['drishti', 'kaggle', 'rim', 'refuge', 'cifar', 'self']
+    datasets = ['drishti', 'kaggle', 'rim', 'refuge', 'cifar', 'self','VHL']
     public_dataset = None
     if args.public_dataset > 0 and args.synthesize_mode == 'global':
         public_dataset = datasets[args.public_dataset - 1]
