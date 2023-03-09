@@ -396,7 +396,7 @@ def prepare_data(args, datasets, public_dataset, im_size):
             virtualsets.append(CustomDataset(ImageFolder(rim_train_path, transform=transform_tensor), args.data_size, transform=transform_rim2))
 
         elif public_dataset == 'refuge':
-            generatsets.append(CustomDataset(ImageFolder(refug e_train_path, transform=transform_tensor), args.data_size, transform=transform_refuge2))
+            generatsets.append(CustomDataset(ImageFolder(refuge_train_path, transform=transform_tensor), args.data_size, transform=transform_refuge2))
             virtualsets.append(CustomDataset(ImageFolder(refuge_train_path, transform=transform_tensor), args.data_size, transform=transform_refuge2))
 
         elif public_dataset == 'cifar':
