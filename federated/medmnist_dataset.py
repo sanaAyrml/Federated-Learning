@@ -69,7 +69,7 @@ class Modified_medmnist(Dataset):
         
     def __getitem__(self, index):
 
-        img, target = self.images[index], self.labels[index].astype(int)
+        img, target = self.images[index], self.labels[index]
 
         if not self.synthesized:
             img = Image.fromarray(img)
