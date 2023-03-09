@@ -61,8 +61,9 @@ class Modified_medmnist(Dataset):
         self.view_classes = [0,1,2,3,4,5,6,7]
 
         self.as_rgb = as_rgb
-        self.transform = self.get_transform(True)
-        self.transform_synthesized = self.get_synthesized_transform(True)
+        if split != 'VHL':
+            self.transform = self.get_transform(True)
+            self.transform_synthesized = self.get_synthesized_transform(True)
         self.transform_synthesized = None
         self.target_transform = target_transform
 
