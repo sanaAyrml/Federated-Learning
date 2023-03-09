@@ -257,6 +257,11 @@ def prepare_data(args, datasets, public_dataset, im_size):
     cifar_testset = CustomDataset(torchvision.datasets.CIFAR10(root='./data', train=False,
                                                  download=True, transform=transform_tensor), args.data_size, transform=transform_cifar)
 
+    cifar_generatset = Modified_medmnist(data_path="/home/atrinarya/fed/Federated-Learning/data/VHL/", split='cifar10', chunk='1', mean=(0.5, 0.5, 0.5),
+                                     std=(0.5, 0.5, 0.5))
+    cifar_virtualset = Modified_medmnist(data_path="/home/atrinarya/fed/Federated-Learning/data/VHL/", split='cifar10', chunk='1', mean=(0.5, 0.5, 0.5),
+                                     std=(0.5, 0.5, 0.5))
+
     min_data_len = min(len(drishti_trainset), len(kaggle_trainset), len(rim_trainset), len(refuge_trainset))
 
     len_datasets = [len(drishti_trainset), len(kaggle_trainset), len(rim_trainset), len(refuge_trainset), len(cifar_trainset)]
@@ -400,7 +405,9 @@ def prepare_data(args, datasets, public_dataset, im_size):
             virtualsets.append(CustomDataset(ImageFolder(refuge_train_path, transform=transform_tensor), args.data_size, transform=transform_refuge2))
 
         elif public_dataset == 'cifar':
-            generatsets.append(cifar_trainset)
+            # generatsets.append(cifar_trainset)
+            # virtualsets.append(cifar_virtualset)
+            generatsets.append(cifar_generateset)
             virtualsets.append(cifar_virtualset)
 
         elif public_dataset == 'self':
