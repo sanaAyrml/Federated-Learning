@@ -312,6 +312,7 @@ def train_multi_datasets(args, wandb,model, train_loaders, optimizer, loss_fun, 
     targets = []
     first_run = True
     iter_num = 0
+    oop = 0
     for e in range(epoch):
         train_iters = []
         for train_loader in train_loaders:
@@ -333,9 +334,10 @@ def train_multi_datasets(args, wandb,model, train_loaders, optimizer, loss_fun, 
                     x = torch.cat((x, x_temp))
                     y = torch.cat((y, y_temp))
                     # if step==0:
-                    #     print(x_temp[0])
-                    #     plt.imshow(np.moveaxis(x_temp[0].numpy(), 0, -1))
-                    #     plt.savefig('../images/hiii.png')
+                    # print(x_temp[0])
+                    plt.imshow(np.moveaxis(x_temp[0].numpy(), 0, -1))
+                    plt.savefig('../images/hiii' + str(oop))
+                    oop+=1
                             # print(y)
             num_data += y.size(0)
             x = x.to(device).float()
