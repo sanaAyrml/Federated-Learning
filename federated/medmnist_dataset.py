@@ -61,8 +61,8 @@ class Modified_medmnist(Dataset):
         self.view_classes = [0,1,2,3,4,5,6,7]
 
         self.as_rgb = as_rgb
-        # self.transform = self.get_transform(True)
-        # self.transform_synthesized = self.get_synthesized_transform(True)
+        self.transform = self.get_transform(True)
+        self.transform_synthesized = self.get_synthesized_transform(True)
         self.transform_synthesized = None
         self.target_transform = target_transform
 
@@ -144,15 +144,15 @@ class Modified_medmnist(Dataset):
     def get_transform(self,mean):
         if mean:
             return transforms.Compose(
-                [transforms.Pad(4),
-                 transforms.CenterCrop(32),
+                [
+                 transforms.CenterCrop(256),
                  transforms.ToTensor(),
                  transforms.Normalize(self.mean, self.std)
                 ])
         else:
             return transforms.Compose(
-                [transforms.Pad(4),
-                 transforms.CenterCrop(32),
+                [
+                 transforms.CenterCrop(256),
                  transforms.ToTensor()
                 ])
     def get_synthesized_transform(self,mean):
