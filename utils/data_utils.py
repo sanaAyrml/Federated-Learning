@@ -144,6 +144,7 @@ class CustomDataset(Dataset):
 
         label = self.labels[idx]
         image = self.images[idx]
+        print(image)
 
         # if len(image.split()) != 3:
         #     image = transforms.Grayscale(num_output_channels=3)(image)
