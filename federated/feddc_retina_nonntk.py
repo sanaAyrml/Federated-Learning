@@ -257,7 +257,7 @@ def prepare_data(args, datasets, public_dataset, im_size):
     cifar_testset = CustomDataset(torchvision.datasets.CIFAR10(root='./data', train=False,
                                                  download=True, transform=transform_tensor), args.data_size, transform=transform_cifar)
 
-    cifar_generatset = Modified_medmnist(data_path="/home/atrinarya/fed/Federated-Learning/data/VHL/", split='cifar10', chunk='1', mean=(0.5, 0.5, 0.5),
+    cifar_generateset = Modified_medmnist(data_path="/home/atrinarya/fed/Federated-Learning/data/VHL/", split='cifar10', chunk='1', mean=(0.5, 0.5, 0.5),
                                      std=(0.5, 0.5, 0.5))
     cifar_virtualset = Modified_medmnist(data_path="/home/atrinarya/fed/Federated-Learning/data/VHL/", split='cifar10', chunk='1', mean=(0.5, 0.5, 0.5),
                                      std=(0.5, 0.5, 0.5))
