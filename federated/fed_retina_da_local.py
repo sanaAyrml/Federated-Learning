@@ -399,7 +399,7 @@ if __name__ == '__main__':
                 virtualsets[client_idx].labels = vir_labels[client_idx].detach().cpu()
                 # print(virtualsets[client_idx].labels)
                 virtualsets[client_idx].synthesized = True
-                virtual_loaders[client_idx] = torch.utils.data.DataLoader(virtualsets[client_idx], batch_size=args.batch*2, shuffle=True)
+                virtual_loaders[client_idx] = torch.utils.data.DataLoader(virtualsets[client_idx], batch_size=args.batch*10, shuffle=True)
                 # vir_iter = iter(virtual_loaders[client_idx])
                 # print('synthsynth')
                 # for i in range(len(vir_iter)):
