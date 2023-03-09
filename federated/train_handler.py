@@ -19,6 +19,8 @@ import torch.nn.functional as F
 from sklearn.metrics import confusion_matrix
 import copy
 
+from loss import DistillationLoss,contrastive_loss, get_features_anchor, Distance_loss
+
 from dalib.adaptation.sfda import mut_info_loss
 
 
@@ -313,6 +315,8 @@ def train_multi_datasets(args, wandb,model, train_loaders, optimizer, loss_fun, 
     first_run = True
     iter_num = 0
     oop = 0
+    len_batch = [0 for i in range(len(train_loaders))]
+    distance_loss = Distance_loss(device=device)
     for e in range(epoch):
         train_iters = []
         for train_loader in train_loaders:
@@ -322,15 +326,19 @@ def train_multi_datasets(args, wandb,model, train_loaders, optimizer, loss_fun, 
             optimizer.zero_grad()
             x = None
             y = None
+            count = 0
             for train_iter in train_iters:
                 if x is None:
                     x, y = next(train_iter)
+                    len_batch[count] = len(y)
                 else:
                     try:
                         x_temp, y_temp = next(train_iter)
+
                     except:
                         train_iters[1] = iter(train_loaders[1])
                         x_temp, y_temp = next(train_iters[1])
+                    len_batch[count] = len_batch[count - 1] + len(y_temp)
                     x = torch.cat((x, x_temp))
                     y = torch.cat((y, y_temp))
                     # if step==0:
@@ -339,12 +347,18 @@ def train_multi_datasets(args, wandb,model, train_loaders, optimizer, loss_fun, 
                     # plt.savefig('../images/hiii' + str(oop))
                     # oop+=1
                             # print(y)
+                count += 1
             num_data += y.size(0)
             x = x.to(device).float()
             y = y.to(device).long()
-            output,_ = model(x)
+            output,f = model(x)
 
             loss = loss_fun(output, y)
+
+            if args.public_dataset == 7:
+                align_loss = distance_loss(f[len_batch[0]:len_batch[1]], f[0:len_batch[0]],
+                                           y[len_batch[0]:len_batch[1]], y[0:len_batch[0]])
+                loss += align_loss
             loss.backward()
             loss_all += loss.item()
             optimizer.step()
