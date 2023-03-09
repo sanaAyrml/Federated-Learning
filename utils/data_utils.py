@@ -133,6 +133,7 @@ class CustomDataset(Dataset):
         #     image, label = dataset[i]
         #     images.append(image)
         #     labels.append(label)
+        self.synthesized = False
         self.labels = labels
         self.images = images
         self.transform = transform
@@ -144,12 +145,13 @@ class CustomDataset(Dataset):
 
         label = self.labels[idx]
         image = self.images[idx]
-        print(image)
 
         # if len(image.split()) != 3:
         #     image = transforms.Grayscale(num_output_channels=3)(image)
 
-        if self.transform is not None:
+        if self.transform is not None and not self.synthesized:
             image = self.transform(image)
+        else:
+            image = torch.tensor(image)
 
         return image, label

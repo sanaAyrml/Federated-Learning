@@ -335,9 +335,9 @@ def train_multi_datasets(args, wandb,model, train_loaders, optimizer, loss_fun, 
                     y = torch.cat((y, y_temp))
                     # if step==0:
                     # print(x_temp[0])
-                    plt.imshow(np.moveaxis(x_temp[0].numpy(), 0, -1))
-                    plt.savefig('../images/hiii' + str(oop))
-                    oop+=1
+                    # plt.imshow(np.moveaxis(x_temp[0].numpy(), 0, -1))
+                    # plt.savefig('../images/hiii' + str(oop))
+                    # oop+=1
                             # print(y)
             num_data += y.size(0)
             x = x.to(device).float()
