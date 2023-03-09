@@ -198,11 +198,11 @@ def src_img_synth_admm(gen_loader, src_model, args , device, mode, save_dir,a_it
         gen_dataset = torch.from_numpy(np.random.normal(0, 1
                                                         , (args.data_size, 3, 256, 256))).type(torch.FloatTensor)
         gen_labels = torch.randint(low=0, high=2, size=(args.data_size,))
-        print(gen_dataset[0])
-        gen_dataset = torch.from_numpy(np.random.normal(0, 1
-                                                        , (args.data_size, 3, 256, 256))).type(torch.FloatTensor)
-        gen_labels = torch.randint(low=0, high=2, size=(args.data_size,))
-        print(gen_dataset[0])
+        # print(gen_dataset[0])
+        # gen_dataset = torch.from_numpy(np.random.normal(0, 1
+        #                                                 , (args.data_size, 3, 256, 256))).type(torch.FloatTensor)
+        # gen_labels = torch.randint(low=0, high=2, size=(args.data_size,))
+        # print(gen_dataset[0])
         # print(gen_labels[0:20])
         original_labels = gen_labels.clone()
         original_dataset = gen_dataset.clone()
