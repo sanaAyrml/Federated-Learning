@@ -185,16 +185,16 @@ if __name__ == '__main__':
     print(server_model)
     loss_fun = nn.CrossEntropyLoss()
 
-    seaborn.set()
-    loss_list = list(np.load('medical_loss_5.npy'))
-    # loss_list.append(avg_loss)
-    print(loss_list)
-    plt.plot(range(len(loss_list)), loss_list)
-    # plt.legend('', loc='upper right')
-    plt.ylabel('Cross-entropy Loss')
-    plt.xlabel('Communication Round')
-    plt.savefig('loss_curve')
-    exit()
+    # seaborn.set()
+    # loss_list = list(np.load('medical_loss_5.npy'))
+    # # loss_list.append(avg_loss)
+    # print(loss_list)
+    # plt.plot(range(len(loss_list)), loss_list)
+    # # plt.legend('', loc='upper right')
+    # plt.ylabel('Cross-entropy Loss')
+    # plt.xlabel('Communication Round')
+    # plt.savefig('loss_curve')
+    # exit()
     # np.save('medical_loss_' + str(args.wk_iters), np.array(loss_list))
 
 
@@ -327,6 +327,7 @@ if __name__ == '__main__':
     #         domain_adv.append(ConditionalDomainAdversarialLoss(domain_discri[client_idx], entropy_conditioning=False,
     #                                                            num_classes=trainset_num_classes,
     #                                                            features_dim=features_dim, randomized=False).to(device))
+    loss_list = []
     for a_iter in range(resume_iter, args.iters):
         # optimizers = [optim.SGD(params=models[idx].parameters(), lr=args.lr) for idx in range(client_num)]
         # if a_iter > 0:
@@ -434,7 +435,7 @@ if __name__ == '__main__':
 #                 visualize_all(models, testloader_vis, testset_vis, axes[1, 0], axes[1, 1], device, client_num+len(generate_loaders), trans)
 #                 plt.savefig(FIG_SAVE_PATH+ '_' + str(a_iter) + '.png')
 
-        loss_list = []
+
         for client_idx in range(client_num):
             model, train_loader, optimizer = models[client_idx], train_loaders[client_idx], optimizers[client_idx]
             if args.mode.lower() == 'fedprox':
