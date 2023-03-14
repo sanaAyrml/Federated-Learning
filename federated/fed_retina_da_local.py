@@ -218,7 +218,7 @@ if __name__ == '__main__':
     for sets in trainsets:
         train_loaders.append(torch.utils.data.DataLoader(sets, batch_size=args.batch, shuffle=True))
     for sets in testsets:
-        test_loaders.append(torch.utils.data.DataLoader(sets, batch_size=args.batch, shuffle=True))
+        test_loaders.append(torch.utils.data.DataLoader(sets, batch_size=args.batch, shuffle=False))
     for sets in virtualsets:
         virtual_loaders.append(torch.utils.data.DataLoader(sets, batch_size=args.batch, shuffle=True))
     for sets in generatsets:
@@ -227,13 +227,13 @@ if __name__ == '__main__':
         for sets in testsets:
             adapt_test_loaders.append(torch.utils.data.DataLoader(sets, batch_size=args.batch, shuffle=False))
 
-    for client_idx, train_loader in enumerate(train_loaders):
-        iter_img = iter(train_loader)
-        x, y = next(iter_img)
-        for i in range(10):
-            class_idx = np.argmax(y.numpy())
-            plt.imshow(np.moveaxis(x[i].numpy(), 0, -1))
-            plt.savefig('../images/' + str(datasets[client_idx]) + '_class_'+ str(y[i]) + '_' + str(i))\
+    # for client_idx, train_loader in enumerate(train_loaders):
+    #     iter_img = iter(train_loader)
+    #     x, y = next(iter_img)
+    #     for i in range(10):
+    #         class_idx = np.argmax(y.numpy())
+    #         plt.imshow(np.moveaxis(x[i].numpy(), 0, -1))
+    #         plt.savefig('../images/' + str(datasets[client_idx]) + '_class_'+ str(y[i]) + '_' + str(i))\
 
     class_count = [0, 0]
     for idx in range(len(train_loaders)):
@@ -508,6 +508,7 @@ if __name__ == '__main__':
 
         # report after aggregation
         avg_train = 0
+        avg_loss = 0
         for client_idx in range(client_num):
             model, train_loader, optimizer = models[client_idx], train_loaders[client_idx], optimizers[client_idx]
             if args.synthesize_test:
@@ -515,6 +516,7 @@ if __name__ == '__main__':
             else:
                 train_loss, train_acc = test(model, train_loader, loss_fun, device)
             avg_train += train_acc
+            avg_loss += train_loss
             print(
                 ' {:<11s}| Train Loss: {:.4f} | Train Acc: {:.4f}'.format(datasets[client_idx], train_loss, train_acc))
             if args.log:
@@ -529,6 +531,8 @@ if __name__ == '__main__':
             max_train_acc = avg_train / client_num
         if args.log:
             metrics = {"Train_AVG": avg_train / client_num}
+            wandb.log(metrics)
+            metrics = {"train_loss_avg": avg_loss / client_num}
             wandb.log(metrics)
 
         # start testing
