@@ -146,7 +146,7 @@ def prepare_data(args, datasets, public_dataset, im_size):
             # transforms.RandomHorizontalFlip(),
             # transforms.RandomRotation((-30,30)),
             transforms.ToTensor(),
-            transforms.Normalize(MEANS[0], STDS[0])
+            # transforms.Normalize(MEANS[0], STDS[0])
     ])
 
     transform_drishti2 = transforms.Compose([
@@ -178,7 +178,7 @@ def prepare_data(args, datasets, public_dataset, im_size):
             # transforms.RandomHorizontalFlip(),
             # transforms.RandomRotation((-30,30)),
             transforms.ToTensor(),
-            transforms.Normalize(MEANS[1], STDS[1])
+            # transforms.Normalize(MEANS[1], STDS[1])
     ])
     transform_kaggle2 = transforms.Compose([
         # transforms.Resize(im_size),
@@ -202,7 +202,7 @@ def prepare_data(args, datasets, public_dataset, im_size):
             # transforms.RandomHorizontalFlip(),
             # transforms.RandomRotation((-30,30)),
             transforms.ToTensor(),
-            transforms.Normalize(MEANS[2], STDS[2])
+            # transforms.Normalize(MEANS[2], STDS[2])
     ])
     transform_rim2 = transforms.Compose([
         # transforms.Resize(im_size),
@@ -229,7 +229,7 @@ def prepare_data(args, datasets, public_dataset, im_size):
             # transforms.RandomHorizontalFlip(),
             # transforms.RandomRotation((-30,30)),
             transforms.ToTensor(),
-            transforms.Normalize(MEANS[3], STDS[3])
+            # transforms.Normalize(MEANS[3], STDS[3])
     ])
     transform_refuge2 = transforms.Compose([
         # transforms.Resize(im_size),
@@ -389,20 +389,20 @@ def prepare_data(args, datasets, public_dataset, im_size):
 
     if public_dataset != None:
         if public_dataset == 'drishti':
-            generatsets.append(CustomDataset(ImageFolder(drishti_train_path, transform=transform_tensor), args.data_size))
-            virtualsets.append(CustomDataset(ImageFolder(drishti_train_path, transform=transform_tensor), args.data_size))
+            generatsets.append(CustomDataset(ImageFolder(drishti_train_path, transform=transform_tensor), args.data_size, transform=transform_drishti2))
+            virtualsets.append(CustomDataset(ImageFolder(drishti_train_path, transform=transform_tensor), args.data_size, transform=transform_drishti2))
 
         elif public_dataset == 'kaggle':
-            generatsets.append(CustomDataset(ImageFolder(kaggle_train_path, transform=transform_tensor), args.data_size))
-            virtualsets.append(CustomDataset(ImageFolder(kaggle_train_path, transform=transform_tensor), args.data_size))
+            generatsets.append(CustomDataset(ImageFolder(kaggle_train_path, transform=transform_tensor), args.data_size, transform=transform_kaggle2))
+            virtualsets.append(CustomDataset(ImageFolder(kaggle_train_path, transform=transform_tensor), args.data_size, transform=transform_kaggle2))
 
         elif public_dataset == 'rim':
-            generatsets.append(CustomDataset(ImageFolder(rim_train_path, transform=transform_tensor), args.data_size))
-            virtualsets.append(CustomDataset(ImageFolder(rim_train_path, transform=transform_tensor), args.data_size))
+            generatsets.append(CustomDataset(ImageFolder(rim_train_path, transform=transform_tensor), args.data_size, transform=transform_rim2))
+            virtualsets.append(CustomDataset(ImageFolder(rim_train_path, transform=transform_tensor), args.data_size, transform=transform_rim2))
 
         elif public_dataset == 'refuge':
-            generatsets.append(CustomDataset(ImageFolder(refuge_train_path, transform=transform_tensor), args.data_size))
-            virtualsets.append(CustomDataset(ImageFolder(refuge_train_path, transform=transform_tensor), args.data_size))
+            generatsets.append(CustomDataset(ImageFolder(refuge_train_path, transform=transform_tensor), args.data_size, transform=transform_refuge2))
+            virtualsets.append(CustomDataset(ImageFolder(refuge_train_path, transform=transform_tensor), args.data_size, transform=transform_refuge2))
 
         elif public_dataset == 'cifar':
             # generatsets.append(cifar_trainset)
