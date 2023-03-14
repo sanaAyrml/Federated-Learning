@@ -233,7 +233,7 @@ if __name__ == '__main__':
         for i in range(10):
             class_idx = np.argmax(y.numpy())
             plt.imshow(np.moveaxis(x[i].numpy(), 0, -1))
-            plt.savefig('../images/' + str(datasets[client_idx]) + '_class_'+ str(class_idx) + '_' + str(i))\
+            plt.savefig('../images/' + str(datasets[client_idx]) + '_class_'+ str(y[i]) + '_' + str(i))\
 
     class_count = [0, 0]
     for idx in range(len(train_loaders)):
