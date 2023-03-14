@@ -185,6 +185,18 @@ if __name__ == '__main__':
     print(server_model)
     loss_fun = nn.CrossEntropyLoss()
 
+    seaborn.set()
+    loss_list = list(np.load('medical_loss_5.npy'))
+    # loss_list.append(avg_loss)
+    print(loss_list)
+    plt.plot(range(len(loss_list)), loss_list)
+    # plt.legend('', loc='upper right')
+    plt.ylabel('Cross-entropy Loss')
+    plt.xlabel('Communication Round')
+    plt.savefig('loss_curve')
+    exit()
+    # np.save('medical_loss_' + str(args.wk_iters), np.array(loss_list))
+
 
     # name of each client dataset
     datasets = ['drishti', 'kaggle', 'rim', 'refuge', 'cifar', 'self','VHL']
