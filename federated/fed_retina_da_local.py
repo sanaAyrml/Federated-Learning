@@ -548,7 +548,7 @@ if __name__ == '__main__':
         # plt.legend('', loc='upper right')
         plt.ylabel('Cross-entropy Loss')
         plt.xlabel('Communication Round')
-        plt.savefig('loss_curve')
+        plt.savefig('loss_curve_' + str(args.wk_iters))
         np.save('medical_loss_'+str(args.wk_iters), np.array(loss_list))
 
 
