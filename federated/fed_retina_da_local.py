@@ -227,7 +227,7 @@ if __name__ == '__main__':
         for sets in testsets:
             adapt_test_loaders.append(torch.utils.data.DataLoader(sets, batch_size=args.batch, shuffle=False))
 
-    for client_idx, train_loader in enumerate(generate_loaders):
+    for client_idx, train_loader in enumerate(train_loaders):
         iter_img = iter(train_loader)
         x, y = next(iter_img)
         for i in range(10):
