@@ -27,6 +27,7 @@ import numpy as np
 import torch
 from matplotlib import cm
 import random
+import seaborn
 
 
 ### Domain adaptation modules import
@@ -421,6 +422,7 @@ if __name__ == '__main__':
 #                 visualize_all(models, testloader_vis, testset_vis, axes[1, 0], axes[1, 1], device, client_num+len(generate_loaders), trans)
 #                 plt.savefig(FIG_SAVE_PATH+ '_' + str(a_iter) + '.png')
 
+        loss_list = []
         for client_idx in range(client_num):
             model, train_loader, optimizer = models[client_idx], train_loaders[client_idx], optimizers[client_idx]
             if args.mode.lower() == 'fedprox':
@@ -526,7 +528,16 @@ if __name__ == '__main__':
                 metrics = {"Train_ACC_" + str(client_idx): train_acc,
                            "Train_Loss_" + str(client_idx): train_loss}
                 wandb.log(metrics)
-            
+
+        seaborn.set()
+        loss_list.append(avg_loss)
+        plt.plot(range(len(loss_list)), loss_list)
+        # plt.legend('', loc='upper right')
+        plt.ylabel('Cross-entropy Loss')
+        plt.xlabel('Communication Round')
+        np.save('medical_loss_'+str(args.wk_iters), np.array(loss_list))
+
+
         if max_train_acc < avg_train / client_num:
             max_train_acc = avg_train / client_num
         if args.log:
