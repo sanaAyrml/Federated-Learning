@@ -218,7 +218,7 @@ if __name__ == '__main__':
     for sets in trainsets:
         train_loaders.append(torch.utils.data.DataLoader(sets, batch_size=args.batch, shuffle=True))
     for sets in testsets:
-        test_loaders.append(torch.utils.data.DataLoader(sets, batch_size=args.batch, shuffle=False))
+        test_loaders.append(torch.utils.data.DataLoader(sets, batch_size=args.batch, shuffle=True))
     for sets in virtualsets:
         virtual_loaders.append(torch.utils.data.DataLoader(sets, batch_size=args.batch, shuffle=True))
     for sets in generatsets:
