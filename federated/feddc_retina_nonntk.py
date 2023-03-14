@@ -389,20 +389,20 @@ def prepare_data(args, datasets, public_dataset, im_size):
 
     if public_dataset != None:
         if public_dataset == 'drishti':
-            generatsets.append(CustomDataset(ImageFolder(drishti_train_path, transform=transform_tensor), args.data_size, transform=transform_drishti2))
-            virtualsets.append(CustomDataset(ImageFolder(drishti_train_path, transform=transform_tensor), args.data_size, transform=transform_drishti2))
+            generatsets.append(CustomDataset(ImageFolder(drishti_train_path, transform=transform_tensor), args.data_size))
+            virtualsets.append(CustomDataset(ImageFolder(drishti_train_path, transform=transform_tensor), args.data_size))
 
         elif public_dataset == 'kaggle':
-            generatsets.append(CustomDataset(ImageFolder(kaggle_train_path, transform=transform_tensor), args.data_size, transform=transform_kaggle2))
-            virtualsets.append(CustomDataset(ImageFolder(kaggle_train_path, transform=transform_tensor), args.data_size, transform=transform_kaggle2))
+            generatsets.append(CustomDataset(ImageFolder(kaggle_train_path, transform=transform_tensor), args.data_size))
+            virtualsets.append(CustomDataset(ImageFolder(kaggle_train_path, transform=transform_tensor), args.data_size))
 
         elif public_dataset == 'rim':
-            generatsets.append(CustomDataset(ImageFolder(rim_train_path, transform=transform_tensor), args.data_size, transform=transform_rim2))
-            virtualsets.append(CustomDataset(ImageFolder(rim_train_path, transform=transform_tensor), args.data_size, transform=transform_rim2))
+            generatsets.append(CustomDataset(ImageFolder(rim_train_path, transform=transform_tensor), args.data_size))
+            virtualsets.append(CustomDataset(ImageFolder(rim_train_path, transform=transform_tensor), args.data_size))
 
         elif public_dataset == 'refuge':
-            generatsets.append(CustomDataset(ImageFolder(refuge_train_path, transform=transform_tensor), args.data_size, transform=transform_refuge2))
-            virtualsets.append(CustomDataset(ImageFolder(refuge_train_path, transform=transform_tensor), args.data_size, transform=transform_refuge2))
+            generatsets.append(CustomDataset(ImageFolder(refuge_train_path, transform=transform_tensor), args.data_size))
+            virtualsets.append(CustomDataset(ImageFolder(refuge_train_path, transform=transform_tensor), args.data_size))
 
         elif public_dataset == 'cifar':
             # generatsets.append(cifar_trainset)
