@@ -192,7 +192,7 @@ if __name__ == '__main__':
     # print(loss_list)
     plt.plot(range(1, len(loss_list_5)+1), loss_list_5, label='5 Local Epochs')
     plt.plot(range(1, len(loss_list_10) + 1), loss_list_10, label='10 Local Epochs')
-    plt.legend('', loc='upper right')
+    plt.legend(loc='upper right')
     plt.ylabel('Cross-entropy Loss')
     plt.xlabel('Communication Round')
     plt.savefig('loss_curve')
