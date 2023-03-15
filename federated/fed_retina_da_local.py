@@ -186,6 +186,7 @@ if __name__ == '__main__':
     loss_fun = nn.CrossEntropyLoss()
 
     seaborn.set()
+    seaborn.set_style("whitegrid")
     loss_list_5 = list(np.load('medical_loss_5.npy'))
     loss_list_10 = list(np.load('medical_loss_10.npy'))
     # loss_list.append(avg_loss)
