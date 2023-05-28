@@ -234,7 +234,7 @@ if __name__ == '__main__':
     adapt_test_loaders = []
     for sets in trainsets:
         train_loaders.append(torch.utils.data.DataLoader(sets, batch_size=args.batch, shuffle=True))
-        print('size)
+        print('size))
         print(len(sets))
     for sets in testsets:
         test_loaders.append(torch.utils.data.DataLoader(sets, batch_size=args.batch, shuffle=False))
