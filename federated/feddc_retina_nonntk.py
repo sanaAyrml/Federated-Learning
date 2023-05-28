@@ -344,39 +344,39 @@ def prepare_data(args, datasets, public_dataset, im_size):
     print('d')
     print(len(drishti_trainset))
 
-    drishti_trainset2 = torch.utils.data.Subset(drishti_trainset, range(len(refuge_trainset)))
-    drishti_trainset2.dataset.transform = transforms.Compose([
-            transforms.Resize(im_size),            
-            transforms.RandomHorizontalFlip(),
-            transforms.RandomRotation((-30,30)),
-            transforms.ToTensor(),
-            transforms.Normalize(MEANS[0], STDS[0])
-    ])
-    drishti_trainset = torch.utils.data.ConcatDataset([drishti_trainset, drishti_trainset2])
+    #drishti_trainset2 = torch.utils.data.Subset(drishti_trainset, range(len(refuge_trainset)))
+    #drishti_trainset2.dataset.transform = transforms.Compose([
+    #        transforms.Resize(im_size),            
+    #        transforms.RandomHorizontalFlip(),
+    #        transforms.RandomRotation((-30,30)),
+    #        transforms.ToTensor(),
+    #        transforms.Normalize(MEANS[0], STDS[0])
+    #])
+    #drishti_trainset = torch.utils.data.ConcatDataset([drishti_trainset, drishti_trainset2])
 
     print(len(kaggle_trainset))
 
-    kaggle_trainset2 = torch.utils.data.Subset(kaggle_trainset, range(len(refuge_trainset)))
-    kaggle_trainset2.dataset.transform = transforms.Compose([
-            transforms.Resize(im_size),            
-            transforms.RandomHorizontalFlip(),
-            transforms.RandomRotation((-30,30)),
-            transforms.ToTensor(),
-            transforms.Normalize(MEANS[1], STDS[1])
-    ])
-    kaggle_trainset = torch.utils.data.ConcatDataset([kaggle_trainset, kaggle_trainset2])
+    #kaggle_trainset2 = torch.utils.data.Subset(kaggle_trainset, range(len(refuge_trainset)))
+    #kaggle_trainset2.dataset.transform = transforms.Compose([
+    #        transforms.Resize(im_size),            
+    #        transforms.RandomHorizontalFlip(),
+    #        transforms.RandomRotation((-30,30)),
+    #        transforms.ToTensor(),
+    #        transforms.Normalize(MEANS[1], STDS[1])
+    #])
+    #kaggle_trainset = torch.utils.data.ConcatDataset([kaggle_trainset, kaggle_trainset2])
 
     print(len(rim_trainset))
 
-    rim_trainset2 = torch.utils.data.Subset(rim_trainset, range(len(refuge_trainset)))
-    rim_trainset2.dataset.transform = transforms.Compose([
-            transforms.Resize(im_size),            
-            transforms.RandomHorizontalFlip(),
-            transforms.RandomRotation((-30,30)),
-            transforms.ToTensor(),
-            transforms.Normalize(MEANS[2], STDS[2])
-    ])
-    rim_trainset = torch.utils.data.ConcatDataset([rim_trainset, rim_trainset2])
+    #rim_trainset2 = torch.utils.data.Subset(rim_trainset, range(len(refuge_trainset)))
+    #rim_trainset2.dataset.transform = transforms.Compose([
+    #        transforms.Resize(im_size),            
+    #        transforms.RandomHorizontalFlip(),
+    #        transforms.RandomRotation((-30,30)),
+    #        transforms.ToTensor(),
+    #        transforms.Normalize(MEANS[2], STDS[2])
+    #])
+    #rim_trainset = torch.utils.data.ConcatDataset([rim_trainset, rim_trainset2])
     
 
 
