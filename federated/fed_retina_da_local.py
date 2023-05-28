@@ -27,7 +27,7 @@ import numpy as np
 import torch
 from matplotlib import cm
 import random
-import seaborn
+#import seaborn
 
 
 ### Domain adaptation modules import
@@ -185,21 +185,21 @@ if __name__ == '__main__':
     print(server_model)
     loss_fun = nn.CrossEntropyLoss()
 
-    seaborn.set()
-    seaborn.set_style("white")
-    loss_list_5 = list(np.load('medical_loss_5.npy'))
-    loss_list_10 = list(np.load('medical_loss_10.npy'))
-    # loss_list.append(avg_loss)
-    # print(loss_list)
-    plt.plot(range(1, len(loss_list_5)+1), loss_list_5, label='5 Local Epochs')
-    plt.plot(range(1, len(loss_list_10) + 1), loss_list_10, label='10 Local Epochs')
-    plt.legend(loc='upper right')
-    plt.ylabel('Cross-entropy Loss')
-    plt.xlabel('Communication Round')
-    plt.savefig('loss_curve')
-    exit()
-    # np.save('medical_loss_' + str(args.wk_iters), np.array(loss_list))
-    # exit()
+    #seaborn.set()
+    #seaborn.set_style("white")
+    #loss_list_5 = list(np.load('medical_loss_5.npy'))
+    #loss_list_10 = list(np.load('medical_loss_10.npy'))
+    ## loss_list.append(avg_loss)
+    ## print(loss_list)
+    #plt.plot(range(1, len(loss_list_5)+1), loss_list_5, label='5 Local Epochs')
+    #plt.plot(range(1, len(loss_list_10) + 1), loss_list_10, label='10 Local Epochs')
+    #plt.legend(loc='upper right')
+    #plt.ylabel('Cross-entropy Loss')
+    #plt.xlabel('Communication Round')
+    #plt.savefig('loss_curve')
+    #exit()
+    ## np.save('medical_loss_' + str(args.wk_iters), np.array(loss_list))
+    ## exit()
 
 
     # name of each client dataset
@@ -548,14 +548,14 @@ if __name__ == '__main__':
                            "Train_Loss_" + str(client_idx): train_loss}
                 wandb.log(metrics)
 
-        seaborn.set()
-        loss_list.append(avg_loss)
-        plt.plot(range(len(loss_list)), loss_list)
-        # plt.legend('', loc='upper right')
-        plt.ylabel('Cross-entropy Loss')
-        plt.xlabel('Communication Round')
-        plt.savefig('loss_curve_' + str(args.wk_iters))
-        np.save('medical_loss_'+str(args.wk_iters), np.array(loss_list))
+        #seaborn.set()
+        #loss_list.append(avg_loss)
+        #plt.plot(range(len(loss_list)), loss_list)
+        ## plt.legend('', loc='upper right')
+        #plt.ylabel('Cross-entropy Loss')
+        #plt.xlabel('Communication Round')
+        #plt.savefig('loss_curve_' + str(args.wk_iters))
+        #np.save('medical_loss_'+str(args.wk_iters), np.array(loss_list))
 
 
         if max_train_acc < avg_train / client_num:
