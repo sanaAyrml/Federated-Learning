@@ -341,6 +341,38 @@ def prepare_data(args, datasets, public_dataset, im_size):
     # train_loaders = [Drishti_train_loader, kaggle_train_loader, rim_train_loader, refuge_train_loader]
     # test_loaders = [Drishti_test_loader, kaggle_test_loader, rim_test_loader, refuge_test_loader]
 
+    drishti_trainset2 = torch.utils.data.Subset(drishti_trainset, range(len(refuge_trainset)))
+    drishti_trainset2.dataset.transform = transforms.Compose([
+            transforms.Resize(im_size),            
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomRotation((-30,30)),
+            transforms.ToTensor(),
+            transforms.Normalize(MEANS[0], STDS[0])
+    ])
+    drishti_trainset = torch.utils.data.ConcatDataset([drishti_trainset, drishti_trainset2])
+
+    kaggle_trainset2 = torch.utils.data.Subset(kaggle_trainset, range(len(refuge_trainset)))
+    kaggle_trainset2.dataset.transform = transforms.Compose([
+            transforms.Resize(im_size),            
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomRotation((-30,30)),
+            transforms.ToTensor(),
+            transforms.Normalize(MEANS[1], STDS[1])
+    ])
+    kaggle_trainset = torch.utils.data.ConcatDataset([kaggle_trainset, kaggle_trainset2])
+
+    rim_trainset2 = torch.utils.data.Subset(rim_trainset, range(len(refuge_trainset)))
+    rim_trainset2.dataset.transform = transforms.Compose([
+            transforms.Resize(im_size),            
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomRotation((-30,30)),
+            transforms.ToTensor(),
+            transforms.Normalize(MEANS[2], STDS[2])
+    ])
+    rim_trainset = torch.utils.data.ConcatDataset([rim_trainset, rim_trainset2])
+    
+
+
     trainsets = []
     virtualsets = []
     testsets = []
