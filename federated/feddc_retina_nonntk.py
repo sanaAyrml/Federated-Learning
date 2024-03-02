@@ -257,10 +257,15 @@ def prepare_data(args, datasets, public_dataset, im_size):
     cifar_testset = CustomDataset(torchvision.datasets.CIFAR10(root='./data', train=False,
                                                  download=True, transform=transform_tensor), args.data_size, transform=transform_cifar)
 
-    cifar_generateset = Modified_medmnist(data_path="/home/atrinarya/fed/Federated-Learning/data/VHL/", split='cifar10', chunk='1', mean=(0.5, 0.5, 0.5),
-                                     std=(0.5, 0.5, 0.5))
-    cifar_virtualset = Modified_medmnist(data_path="/home/atrinarya/fed/Federated-Learning/data/VHL/", split='cifar10', chunk='1', mean=(0.5, 0.5, 0.5),
-                                     std=(0.5, 0.5, 0.5))
+   # cifar_generateset = Modified_medmnist(data_path="/home/atrinarya/fed/Federated-Learning/data/VHL/", split='cifar10', chunk='1', mean=(0.5, 0.5, 0.5),
+   #                                  std=(0.5, 0.5, 0.5))
+   # cifar_virtualset = Modified_medmnist(data_path="/home/atrinarya/fed/Federated-Learning/data/VHL/", split='cifar10', chunk='1', mean=(0.5, 0.5, 0.5),
+   #                                  std=(0.5, 0.5, 0.5))
+    cifar_generateset = CustomDataset(torchvision.datasets.CIFAR10(root='./data', train=True,
+                                                  download=True, transform=transform_tensor), data_size, transform=transform_cifar)
+    cifar_virtualset = CustomDataset(torchvision.datasets.CIFAR10(root='./data', train=True,
+                                                  download=True, transform=transform_tensor), data_size, transform=transform_cifar)
+
 
     min_data_len = min(len(drishti_trainset), len(kaggle_trainset), len(rim_trainset), len(refuge_trainset))
 
