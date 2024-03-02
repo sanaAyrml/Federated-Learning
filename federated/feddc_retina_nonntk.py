@@ -289,8 +289,8 @@ def prepare_data(args, datasets, public_dataset, im_size):
     self_trainset = torch.utils.data.ConcatDataset([torch.utils.data.Subset(drishti_trainset, shuffled_idxes[0][min_data_len:min_data_len+args.data_size//4]), torch.utils.data.Subset(kaggle_trainset, shuffled_idxes[1][min_data_len:min_data_len+args.data_size//4]), torch.utils.data.Subset(rim_trainset, shuffled_idxes[2][min_data_len:min_data_len+args.data_size//4]), torch.utils.data.Subset(refuge_trainset, shuffled_idxes[3][min_data_len:min_data_len+args.data_size//4])])
     self_virtualset = torch.utils.data.ConcatDataset([torch.utils.data.Subset(drishti_trainset, shuffled_idxes[0][min_data_len:min_data_len+args.data_size//4]), torch.utils.data.Subset(kaggle_trainset, shuffled_idxes[1][min_data_len:min_data_len+args.data_size//4]), torch.utils.data.Subset(rim_trainset, shuffled_idxes[2][min_data_len:min_data_len+args.data_size//4]), torch.utils.data.Subset(refuge_trainset, shuffled_idxes[3][min_data_len:min_data_len+args.data_size//4])])
 
-    VHL_virtualset = Modified_medmnist(data_path="/home/atrinarya/fed/Federated-Learning/data/", split='VHL', chunk='0')
-    VHL_generateset = Modified_medmnist(data_path="/home/atrinarya/fed/Federated-Learning/data/", split='VHL', chunk='0')
+    VHL_virtualset = Modified_medmnist(data_path="/home/atrin/Federated-Learning/data/VHL", split='VHL', chunk='0')
+    VHL_generateset = Modified_medmnist(data_path="/home/atrin/Federated-Learning/data/VHL", split='VHL', chunk='0')
     # cifar_trainset = torch.utils.data.Subset(cifar_trainset, shuffled_idxes[4][:min_data_len])
 
 
